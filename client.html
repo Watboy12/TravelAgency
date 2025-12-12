@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
+    <title>Client Area - ExploreWorld</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body class="dashboard">
+    <nav>
+        <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
+        <div class="nav-container">
+            <ul class="nav-links"></ul>
+            <div class="hamburger" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="client-area">
+        <h1 data-i18n="welcomeMessage">Welcome, <span id="user-name">User</span></h1>      
+        <div class="profile-section">
+        <p><strong>Email:</strong> <span id="user-email">Not set</span></p>
+        <p><strong>Phone:</strong> <span id="user-phone">Not set</span></p>
+        <p><strong>Address:</strong> <span id="user-address">Not set</span></p>
+        <p><strong>Verified:</strong> <span id="user-verified">Not set</span></p>
+        <p><strong>Verification Method:</strong> <span id="user-verification-method">Not set</span></p>
+    </div>
+        <div class="account-balance-container">
+            <div class="account-balance-card">
+                <div class="balance-header">
+                    <h2 data-i18n="accountBalance">
+                    <h2>Account Balance</h2>
+                    <a href="deposit.html" class="btn btn-primary">Deposit Funds</a>
+                </div>
+                <div class="balance-details">
+                    <div class="balance-main">
+                        <span class="balance-label">Available Balance:</span>
+                        <span id="user-balance" class="balance-amount">$0.00</span>
+                    </div>
+                    <div class="balance-sub">
+                        <p><span class="sub-label">Bonus:</span> $<span id="user-bonus">0.00</span></p>
+                        <p><span class="sub-label">Total Deposits:</span> $<span id="user-deposits">0.00</span></p>
+                        <p><span class="sub-label">Pending Deposits:</span> $<span id="pending-deposits">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-grid">
+            <!-- Other collapsible cards here -->
+        </div>
+    </section>
+            <div class="dashboard-card collapsible" data-section="pending-vacations">
+                <h2 class="collapsible-header">Pending Vacations</h2>
+                <ul id="pending-vacations" class="vacation-list collapsible-content"></ul>
+            </div>
+            <div class="dashboard-card collapsible" data-section="upcoming-vacations">
+                <h2 class="collapsible-header">Upcoming Vacations</h2>
+                <ul id="upcoming-vacations" class="vacation-list collapsible-content"></ul>
+            </div>
+            <div class="dashboard-card collapsible" data-section="transaction-history">
+                <h2 class="collapsible-header">Transaction History</h2>
+                <ul id="transaction-history" class="vacation-list collapsible-content"></ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="hot-destinations" class="hot-destinations">
+        <h2>Hot Destinations</h2>
+        <p class="hot-destinations-subtitle">Exclusive Travel Packages Currently in High Demand</p>
+        <div class="hot-destinations-slideshow"></div>
+    </section>
+
+    <section class="past-vacations collapsible" data-section="past-vacations">
+        <div class="past-vacations-header collapsible-header">
+            <h2>Relive Your Epic Journeys</h2>
+            <button id="rate-trip-btn" class="btn btn-primary">Rate Your Trip</button>
+        </div>
+        <div class="destination-grid collapsible-content" id="past-vacations-grid"></div>
+    </section>
+
+    <div id="verification-modal" class="deposit-success-modal hidden">
+        <div class="modal-content">
+            <span id="verification-modal-close" class="modal-close">×</span>
+            <h2>Verification Status</h2>
+            <p id="verification-message"></p>
+            <button id="verification-modal-ok" class="btn btn-success">OK</button>
+        </div>
+    </div>
+
+    <div id="destination-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="modal-close" class="modal-close">×</span>
+            <div class="modal-inner">
+                <div class="modal-info">
+                    <h2 id="modal-title"></h2>
+                    <p id="modal-description"></p>
+                    <div id="modal-package"></div>
+                </div>
+                <div class="modal-action">
+                    <button id="modal-action-btn" class="btn btn-success"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notifications"></div>
+    <script src="script.js"></script>
+</body>
+</html>

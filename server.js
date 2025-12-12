@@ -1,0 +1,739 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
+const session = require('express-session');
+require('dotenv').config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+
+const USERS_FILE = path.join(__dirname, 'users.json');
+
+// Load users from users.json
+function loadUsers() {
+  try {
+    const data = fs.readFileSync(USERS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Error loading users:', err);
+    return [];
+  }
+}
+
+// Save users to users.json
+function saveUsers(users) {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  } catch (err) {
+    console.error('Error saving users:', err);
+  }
+}
+
+// Token verification middleware
+function verifyToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'No token provided' });
+  }
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ success: false, message: 'Invalid token' });
+    }
+    req.user = user;
+    next();
+  });
+}
+
+// Session Setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'NewTravelu11J4vlJYKQFXZNf',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production', maxAge: 24 * 60 * 60 * 1000 } // 1 day
+}));
+
+// Middleware
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy",
+    "default-src 'self'; " +
+    "media-src 'self' data:; " +
+    "style-src 'self' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com data:; " +
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; " +
+    "img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org; " +
+    "connect-src 'self' https://jsonplaceholder.typicode.com"
+  );
+  next();
+});
+
+app.use(express.json());
+app.use(express.static(path.join(__dirname)));
+app.use('/fonts', express.static(path.join(__dirname, 'fonts')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Rate Limiting
+const createAccountLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: { success: false, message: 'Too many account creation attempts. Please try again later.' }
+});
+app.use('/api/create-account', createAccountLimiter);
+
+// Multer for File Uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'images/'),
+  filename: (req, file, cb) => {
+    const fieldName = file.fieldname;
+    cb(null, `${fieldName}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+const upload = multer({ storage });
+
+// Routes
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get('/destinations', (req, res) => res.sendFile(path.join(__dirname, 'destinations.html')));
+app.get('/client', (req, res) => res.sendFile(path.join(__dirname, 'client.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
+app.get('/create-account.html', (req, res) => res.sendFile(path.join(__dirname, 'create-account.html')));
+app.get('/deposit.html', (req, res) => res.sendFile(path.join(__dirname, 'deposit.html')));
+app.get('/partners.html', (req, res) => res.sendFile(path.join(__dirname, 'partners.html')));
+app.get('/terms.html', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
+app.get('/about.html', (req, res) => res.sendFile(path.join(__dirname, 'about.html')));
+
+// Create Account
+app.post('/api/create-account', createAccountLimiter, async (req, res) => {
+  const { name, username, email, phone, password } = req.body;
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+  if (!name || !username || !email || !password) {
+    return res.status(400).json({ success: false, message: 'All required fields must be provided' });
+  }
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ success: false, message: 'Invalid email format' });
+  }
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one number' });
+  }
+
+  try {
+    const users = loadUsers();
+    const existingUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Username or email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = {
+      name,
+      username: username.toLowerCase(),
+      email: email.toLowerCase(),
+      phone: phone || '',
+      password: hashedPassword,
+      balance: 0,
+      deposits: 0,
+      bonus: 0,
+      verified: false,
+      verificationMethod: '',
+      pendingVacations: [],
+      upcomingVacations: [],
+      completedVacations: [],
+      transactions: [],
+      usageHistory: [],
+      profilePic: 'images/default-pic.jpg',
+      pendingDeposits: [],
+      lastDepositAccepted: {},
+      personalInfo: { email: email.toLowerCase(), phone: phone || 'Not set', address: 'Not set' },
+      role: 'user'
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    const token = jwt.sign({ username: newUser.username, role: newUser.role }, JWT_SECRET, { expiresIn: '1h' });
+    req.session.user = { username: newUser.username, role: newUser.role };
+    res.json({ success: true, message: 'Account created', token });
+  } catch (err) {
+    console.error('Error creating account:', err);
+    res.status(500).json({ success: false, message: 'Error creating account' });
+  }
+});
+
+// Login
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const users = loadUsers();
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      const token = jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+      res.status(200).json({
+        success: true,
+        token,
+        user: { ...user, password: undefined }
+      });
+    } else {
+      res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+  } catch (err) {
+    console.error('Error during login:', err);
+    res.status(500).json({ success: false, message: 'Server error during login' });
+  }
+});
+
+// Get User
+app.get('/api/user/:username', verifyToken, (req, res) => {
+  const { username } = req.params;
+  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const users = loadUsers();
+  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+  if (user) {
+    res.json({ ...user, password: undefined });
+  } else {
+    res.status(404).json({ success: false, message: 'User not found' });
+  }
+});
+
+// Update User
+app.post('/api/user/:username/update', verifyToken, (req, res) => {
+  const { username } = req.params;
+  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { deposit, vacation, bonus } = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const user = users[userIndex];
+
+  if (deposit) {
+    user.balance += deposit;
+    user.deposits += deposit;
+    user.transactions.push({
+      date: new Date().toISOString().split('T')[0],
+      type: 'Deposit',
+      amount: deposit
+    });
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Deposited $${deposit}`,
+      cost: 0
+    });
+  }
+
+  if (vacation) {
+    if (user.balance < vacation.cost) {
+      return res.status(400).json({ success: false, message: 'Insufficient balance' });
+    }
+    user.balance -= vacation.cost;
+    user.pendingVacations.push({
+      name: vacation.name,
+      cost: vacation.cost,
+      date: new Date().toISOString().split('T')[0]
+    });
+    user.transactions.push({
+      date: new Date().toISOString().split('T')[0],
+      type: 'Booking',
+      amount: vacation.cost
+    });
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Requested ${vacation.name}`,
+      cost: vacation.cost
+    });
+    user.bonus = (user.bonus || 0) + (bonus || 500);
+  }
+
+  saveUsers(users);
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Admin Login
+app.post('/api/admin/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const users = loadUsers();
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.role === 'admin');
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      const token = jwt.sign({ username: user.username, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
+      req.session.user = { username: user.username, role: 'admin' };
+      res.json({ success: true, token });
+    } else {
+      res.json({ success: false, message: 'Invalid admin credentials' });
+    }
+  } catch (err) {
+    console.error('Error during admin login:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Get All Users (Admin)
+app.get('/api/admin/users', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const skip = (page - 1) * limit;
+
+  const users = loadUsers();
+  const paginatedUsers = users.slice(skip, skip + limit).map(user => ({ ...user, password: undefined }));
+  const total = users.length;
+
+  res.json({ users: paginatedUsers, total, page, pages: Math.ceil(total / limit) });
+});
+
+// Verify User (Admin)
+app.post('/api/admin/verify/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+  const { verified } = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  users[userIndex].verified = verified;
+  saveUsers(users);
+  res.json({ success: true, user: { ...users[userIndex], password: undefined } });
+});
+
+// Update User (Admin)
+app.post('/api/admin/update-user/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+  const updatedData = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  Object.assign(users[userIndex], updatedData);
+  saveUsers(users);
+  res.json({ success: true, user: { ...users[userIndex], password: undefined } });
+});
+
+// Clear Vacations (Admin)
+app.post('/api/admin/clear-vacations/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const user = users[userIndex];
+  user.pendingVacations = [];
+  user.upcomingVacations = [];
+  user.completedVacations = [];
+  user.transactions = user.transactions.filter(tx => tx.type !== 'Booking');
+  user.usageHistory = user.usageHistory.filter(h => !h.action.includes('Requested') && !h.action.includes('Approved') && !h.action.includes('Completed'));
+  saveUsers(users);
+
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Clear Transactions (Admin)
+app.post('/api/admin/clear-transactions/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const user = users[userIndex];
+  user.transactions = [];
+  user.usageHistory = [];
+  saveUsers(users);
+
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Accept Vacation (Admin)
+app.post('/api/admin/accept-vacation/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+  const { vacationIndex } = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1 || !users[userIndex].pendingVacations[vacationIndex]) {
+    return res.status(404).json({ success: false, message: 'User or vacation not found' });
+  }
+
+  const user = users[userIndex];
+  const vacation = user.pendingVacations.splice(vacationIndex, 1)[0];
+  user.upcomingVacations.push({ ...vacation });
+  user.usageHistory.push({
+    date: new Date().toISOString().split('T')[0],
+    action: `Approved ${vacation.name}`,
+    cost: vacation.cost
+  });
+  saveUsers(users);
+
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Complete Vacation (Admin)
+app.post('/api/admin/complete-vacation/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+  const { vacationIndex } = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1 || !users[userIndex].upcomingVacations[vacationIndex]) {
+    return res.status(404).json({ success: false, message: 'User or vacation not found' });
+  }
+
+  const user = users[userIndex];
+  const vacation = user.upcomingVacations.splice(vacationIndex, 1)[0];
+  user.completedVacations.push({ ...vacation, completedDate: new Date().toISOString().split('T')[0] });
+  user.usageHistory.push({
+    date: new Date().toISOString().split('T')[0],
+    action: `Completed ${vacation.name}`,
+    cost: vacation.cost
+  });
+  saveUsers(users);
+
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Update Past Vacation (Admin)
+app.post('/api/admin/update-past-vacation/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+  const { index, add, ...updatedVacation } = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const user = users[userIndex];
+
+  if (add) {
+    user.completedVacations.push(add);
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Added past vacation ${add.name}`,
+      cost: add.cost
+    });
+  } else if (index !== undefined && user.completedVacations[index]) {
+    user.completedVacations[index] = { ...user.completedVacations[index], ...updatedVacation };
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Updated past vacation ${updatedVacation.name}`,
+      cost: updatedVacation.cost
+    });
+  } else {
+    return res.status(404).json({ success: false, message: 'Vacation not found' });
+  }
+
+  saveUsers(users);
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Clear Users (Admin)
+app.post('/api/admin/clear-users', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+
+  let users = loadUsers();
+  users = users.filter(u => u.role === 'admin');
+  saveUsers(users);
+
+  res.json({ success: true, message: 'All users cleared' });
+});
+
+// Clear Past Vacations (Admin)
+app.post('/api/admin/clear-past-vacations/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const user = users[userIndex];
+  user.completedVacations = [];
+  user.usageHistory = user.usageHistory.filter(h => !h.action.includes('Completed') && !h.action.includes('Added past vacation') && !h.action.includes('Updated past vacation'));
+  saveUsers(users);
+
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Bank Deposit
+app.post('/api/deposit/bank', verifyToken, (req, res) => {
+  const { username, amount, payerName } = req.body;
+  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1 || users[userIndex].name !== payerName) {
+    return res.json({ success: false, message: 'Payer name does not match or user not found' });
+  }
+
+  const user = users[userIndex];
+  user.pendingDeposits = user.pendingDeposits || [];
+  user.pendingDeposits.push({ amount, method: 'Bank', date: new Date().toISOString().split('T')[0], payerName });
+  user.usageHistory.push({
+    date: new Date().toISOString().split('T')[0],
+    action: `Pending Deposit $${amount} via Bank`,
+    cost: 0
+  });
+  saveUsers(users);
+
+  res.json({ success: true });
+});
+
+// Crypto Deposit
+app.post('/api/deposit/crypto', verifyToken, (req, res) => {
+  const { username, amount } = req.body;
+  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.json({ success: false, message: 'User not found' });
+  }
+
+  const user = users[userIndex];
+  user.pendingDeposits = user.pendingDeposits || [];
+  user.pendingDeposits.push({ amount, method: 'Crypto', date: new Date().toISOString().split('T')[0] });
+  user.usageHistory.push({
+    date: new Date().toISOString().split('T')[0],
+    action: `Pending Deposit $${amount} via Crypto`,
+    cost: 0
+  });
+  saveUsers(users);
+
+  res.json({ success: true });
+});
+
+// Agent Deposit (Added from your old code)
+app.post('/api/deposit/agent', verifyToken, (req, res) => {
+  const { username, amount, transactionId, paymentMethod } = req.body;
+  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1) {
+    return res.json({ success: false, message: 'User not found' });
+  }
+
+  const user = users[userIndex];
+  user.pendingDeposits = user.pendingDeposits || [];
+  user.pendingDeposits.push({ amount, method: 'Agent', date: new Date().toISOString().split('T')[0], transactionId, paymentMethod });
+  user.usageHistory.push({
+    date: new Date().toISOString().split('T')[0],
+    action: `Pending Deposit $${amount} via Agent (${paymentMethod})`,
+    cost: 0
+  });
+  saveUsers(users);
+
+  res.json({ success: true, message: 'Agent deposit submitted successfully' });
+});
+
+// Accept Deposit (Admin)
+app.post('/api/admin/accept-deposit/:username', verifyToken, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { username } = req.params;
+  const { depositIndex } = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1 || !users[userIndex].pendingDeposits[depositIndex]) {
+    return res.status(404).json({ success: false, message: 'User or deposit not found' });
+  }
+
+  const user = users[userIndex];
+  const deposit = user.pendingDeposits.splice(depositIndex, 1)[0];
+  user.balance += deposit.amount;
+  user.deposits += deposit.amount;
+  user.transactions.push({
+    date: new Date().toISOString().split('T')[0],
+    type: 'Deposit',
+    amount: deposit.amount
+  });
+  user.usageHistory.push({
+    date: new Date().toISOString().split('T')[0],
+    action: `Approved Deposit $${deposit.amount} via ${deposit.method}`,
+    cost: 0
+  });
+  user.lastDepositAccepted = { amount: deposit.amount, timestamp: new Date().toISOString() };
+  saveUsers(users);
+
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+// Rate Vacation
+app.post('/api/user/:username/rate-vacation', verifyToken, (req, res) => {
+  const { username } = req.params;
+  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
+    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+  }
+  const { index, rating, comment } = req.body;
+
+  const users = loadUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+  if (userIndex === -1 || !users[userIndex].completedVacations[index]) {
+    return res.status(404).json({ success: false, message: 'User or vacation not found' });
+  }
+
+  const user = users[userIndex];
+  user.completedVacations[index].rating = rating;
+  user.completedVacations[index].comment = comment;
+  user.usageHistory.push({
+    date: new Date().toISOString().split('T')[0],
+    action: `Rated ${user.completedVacations[index].name} (${rating}/5)`,
+    cost: 0
+  });
+  saveUsers(users);
+
+  res.json({ success: true, user: { ...user, password: undefined } });
+});
+
+
+// Define the hot destinations file path
+const HOT_DESTINATIONS_FILE = path.join(__dirname, 'hotDestinations.json');
+
+// Load hot destinations from hotDestinations.json
+function loadHotDestinations() {
+  try {
+    const data = fs.readFileSync(HOT_DESTINATIONS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Error loading hot destinations:', err);
+    return [];
+  }
+}
+
+// Save hot destinations to hotDestinations.json
+function saveHotDestinations(destinations) {
+  try {
+    fs.writeFileSync(HOT_DESTINATIONS_FILE, JSON.stringify(destinations, null, 2));
+  } catch (err) {
+    console.error('Error saving hot destinations:', err);
+  }
+}
+
+// Initialize default hot destinations if the file is empty or doesn't exist
+function initHotDestinations() {
+    let destinations = loadHotDestinations();
+    if (destinations.length === 0) {
+      const defaults = [
+        { name: "Oslo, Norway", packageName: "Nordic Fjord Expedition", image: "images/oslo.jpg", booked: 120, date: "2025-12-15", deadline: "2025-11-30", bonus: "10% off for couples", cost: 28999, fullyBooked: false },
+        { name: "Athens, Greece", packageName: "Hellenic Isles Odyssey", image: "images/athens.jpg", booked: 85, date: "2026-01-20", deadline: "2025-12-20", bonus: "Free upgrade to deluxe package", cost: 27999, fullyBooked: false },
+        { name: "Kyoto, Japan", packageName: "Japanese Zen Journey", image: "images/kyoto.jpg", booked: 200, date: "2025-06-10", deadline: "2025-05-10", bonus: "Complimentary spa day", cost: 27999, fullyBooked: true },
+        { name: "Beijing, China", packageName: "Silk Road & Sea Adventure", image: "images/beijing.jpg", booked: 150, date: "2025-09-05", deadline: "2025-08-05", bonus: "Exclusive cultural tour", cost: 22999, fullyBooked: false }
+      ];
+      saveHotDestinations(defaults);
+    }
+  }
+  
+  // Run initialization on server start
+  initHotDestinations();
+  
+  // Get hot destinations
+  app.get('/api/hot-destinations', (req, res) => {
+    try {
+      const destinations = loadHotDestinations();
+      res.json(destinations);
+    } catch (err) {
+      console.error('Error fetching hot destinations:', err);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+  
+  // Update hot destination (admin only)
+  app.post('/api/admin/update-hot-destination', verifyToken, (req, res) => {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Unauthorized access' });
+    }
+    const { name, fullyBooked } = req.body;
+  
+    let destinations = loadHotDestinations();
+    const destinationIndex = destinations.findIndex(d => d.name === name);
+    if (destinationIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Destination not found' });
+    }
+  
+    destinations[destinationIndex].fullyBooked = fullyBooked;
+    saveHotDestinations(destinations);
+  
+    res.json({ success: true, hotDestinations: destinations });
+  });
+
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Endpoint not found' });
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
+
+module.exports = app;

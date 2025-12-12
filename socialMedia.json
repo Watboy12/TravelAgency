@@ -1,0 +1,5 @@
+{
+  "twitter": { "logo": "images/default-twitter.png", "url": "#" },
+  "facebook": { "logo": "images/default-facebook.png", "url": "#" },
+  "instagram": { "logo": "images/default-instagram.png", "url": "#" }
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
+    <title>Deposit - ExploreWorld</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+</head>
+<body class="dashboard">
+ 
+        <nav>
+            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
+            <div class="nav-container">
+                <ul class="nav-links"></ul>
+                <div class="hamburger" aria-label="Toggle navigation">                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+ 
+
+        <section class="deposit-wrapper">
+            <div class="deposit-container">
+                <h1>Deposit Funds</h1>
+        
+                <!-- Bank Transfer Section (Existing) -->
+                <div class="deposit-section">
+                    <h2 class="deposit-title">Bank Transfer</h2>
+                    <div class="deposit-details-container">
+                        <p><strong>Account Holder:</strong> Explore World Group</p>
+                        <p><strong>Bank Name:</strong> Wells Fargo</p>
+                        <p><strong>Account Number:</strong> 406302537581059997</p>
+                        <p><strong>Account Type:</strong> Checking</p>
+                        <p><strong>Routing Number:</strong> 121000379</p>
+                        <p><strong>Swift Code:</strong> WFBIUS9S</p>
+                        <p><strong>Bank Address:</strong> 580, California Street, CA 94104, USA</p>
+                        <p class="deposit-note"><strong>Note:</strong> Payments must match the verified name on your ExploreWorld account, or funds will not be credited.</p>
+                    </div>
+                    <form id="bank-form" class="deposit-form">
+                        <input type="text" id="payer-name" name="payerName" placeholder="Payer Name (Must Match Account)" required>
+                        <input type="number" id="bank-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
+                        <button type="submit" class="btn btn-primary deposit-btn">Submit Bank Deposit</button>
+                    </form>
+                </div>
+        
+                <!-- Crypto Deposit Section (Updated) -->
+                <div class="deposit-section">
+                    <h2 class="deposit-title">Crypto Deposit (BTC Only)</h2>
+                    <div class="deposit-details-container">
+                        <p><strong>Bitcoin Wallet Address:</strong> <span id="btc-wallet-address">bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6</span></p>
+                        <p><strong>Instructions:</strong> Send Bitcoin (BTC) only to this address. Deposits will be reflected in your account within 10 to 60 minutes upon confirmation.</p>
+                    </div>
+                    <form id="crypto-qr-form" class="deposit-form">
+                        <input type="number" id="crypto-qr-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
+                        <input type="text" id="btc-sender-address" name="senderAddress" placeholder="Your BTC Sender Address" required>
+                        <button type="button" id="generate-qr-btn" class="btn btn-secondary">Generate QR Code</button>
+                        <div id="qrcode" class="qrcode-container hidden"></div>
+                        <button type="submit" class="btn btn-primary deposit-btn">Confirm Crypto Deposit</button>
+                    </form>
+                </div>
+        
+               <!-- New Section: Pay to our verified travel agents -->
+<div class="deposit-section">
+    <h2 class="deposit-title">Pay to our verified travel agents</h2>
+    <div class="deposit-method-selection">
+        <label for="agent-payment-method">Select Payment Method:</label>
+        <select id="agent-payment-method" name="method">
+            <option value="paypal">PayPal</option>
+            <option value="cashapp">Cash App</option>
+            <option value="venmo">Venmo</option>
+            <option value="applepay">Apple Pay</option>
+            <option value="zelle">Zelle</option>
+        </select>
+    </div>
+    <div class="deposit-note">
+        <p><strong>Notes:</strong> You may use a third-party account to make the payment, however, please note that processing may take up to one business day to verify and ensure the legitimacy of the funds. We appreciate your understanding and patience.</p>
+    </div>
+    <div id="agent-payment-details" class="deposit-details-container">
+        <!-- Payment details will be dynamically inserted here -->
+    </div>
+    <form id="agent-payment-form" class="deposit-form">
+        <input type="number" id="agent-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
+        <input type="text" id="transaction-id" name="transactionId" placeholder="Transaction ID" required>
+        <button type="submit" class="btn btn-primary deposit-btn">Submit Agent Payment</button>
+    </form>
+</div>

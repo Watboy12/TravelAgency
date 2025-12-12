@@ -1,0 +1,46 @@
+[
+    {
+        "name": "Oslo, Norway",
+        "packageName": "Nordic Fjord Expedition",
+        "image": "images/oslo.jpg",
+        "booked": 120,
+        "date": "2025-12-15",
+        "deadline": "2025-11-30",
+        "bonus": "10% off for couples",
+        "cost": 28999,
+        "fullyBooked": false
+    },
+    {
+        "name": "Athens, Greece",
+        "packageName": "Hellenic Isles Odyssey",
+        "image": "images/athens.jpg",
+        "booked": 85,
+        "date": "2026-01-20",
+        "deadline": "2025-12-20",
+        "bonus": "Free upgrade to deluxe package",
+        "cost": 27999,
+        "fullyBooked": false
+    },
+    {
+        "name": "Kyoto, Japan",
+        "packageName": "Japanese Zen Journey",
+        "image": "images/kyoto.jpg",
+        "booked": 200,
+        "date": "2025-06-10",
+        "deadline": "2025-05-10",
+        "bonus": "Complimentary spa day",
+        "cost": 27999,
+        "fullyBooked": true
+    },
+    {
+        "name": "Beijing, China",
+        "packageName": "Silk Road & Sea Adventure",
+        "image": "images/beijing.jpg",
+        "booked": 150,
+        "date": "2025-09-05",
+        "deadline": "2025-08-05",
+        "bonus": "Exclusive cultural tour",
+        "cost": 22999,
+        "fullyBooked": false
+    }
+]

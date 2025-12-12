@@ -1,0 +1,4 @@
+{
+    "welcomeMessage": "Bienvenido, {{username}}",
+    "accountBalance": "Saldo de la Cuenta"
+  }

@@ -1,0 +1,29 @@
+{
+  "name": "travelagency",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@vercel/postgres": "^0.10.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "eslint": "^9.23.0"
+  }
+}

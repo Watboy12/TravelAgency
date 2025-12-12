@@ -1,0 +1,483 @@
+[
+    {
+        "name": "Paris, France",
+        "description": "Experience the city of love and lights.",
+        "image": "images/paris.jpg",
+        "longDescription": "Paris offers timeless romance with iconic landmarks, exquisite cuisine, and art. From the Eiffel Tower to hidden bistros, it’s a cultural odyssey.",
+        "package": "Exclusive Paris Getaway: 5 nights in a luxury hotel, Louvre tour, Seine cruise, Michelin-starred dinner. $2,999 per person.",
+        "deluxePackage": {
+            "name": "Parisian Odyssey Extravaganza",
+            "price": 10000,
+            "details": "<h3>Parisian Odyssey Extravaganza - $10,000 per person</h3><p>A 10-night journey of romance and discovery:</p><ul><li>Stay: 5-star chateau in Paris (3 nights), Provence villa (2 nights)</li><li>Sea Cruise: 3-night Mediterranean cruise (France to Italy)</li><li>Hot Air Balloon: Sunrise over Loire Valley castles</li><li>Adventure: Truffle hunting in Périgord, lavender field ATV tour</li><li>Dinner: 10-course tasting at a 3-Michelin-star restaurant</li><li>Culture: Private Versailles tour, wine-making in Bordeaux</li><li>Spa: Champagne-soaked thermal baths</li><li>Nightlife: Moulin Rouge VIP show</li><li>Flights: Included</li><li>Extras: Personal photographer, custom French leather journal</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "New York, USA",
+        "description": "Explore the city that never sleeps.",
+        "image": "images/newyork.jpg",
+        "longDescription": "New York blends urban energy with natural escapes, from Manhattan’s skyline to upstate wilderness.",
+        "package": "Ultimate NYC Experience: 5 nights in a 4-star hotel, Broadway tickets, Statue of Liberty tour. $1,899 per person.",
+        "deluxePackage": {
+            "name": "American Epic Adventure",
+            "price": 10150,
+            "details": "<h3>American Epic Adventure - $10,150 per person</h3><p>A 10-night cross-country thrill:</p><ul><li>Stay: NYC penthouse (5 nights), Adirondacks lodge (5 nights), Maine coast (10 nights)</li><li>Sea Cruise: 5-night Caribbean cruise from NYC</li><li>Helicopter: Niagara Falls aerial tour</li><li>Adventure: White-water rafting in the Catskills, whale watching in Maine</li><li>Dinner: 8-course rooftop meal in NYC</li><li>Culture: Broadway season pass, Ellis Island private tour</li><li>Spa: Hot springs retreat in Saratoga</li><li>Nightlife: Times Square VIP New Year’s experience</li><li>Flights: Included</li><li>Extras: Personal photographer, custom NYC skyline art</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Tokyo, Japan",
+        "description": "Discover a blend of tradition and modernity.",
+        "image": "images/tokyo.jpg",
+        "longDescription": "Tokyo fuses ancient temples with futuristic tech, extending to Japan’s stunning islands and mountains.",
+        "package": "Tokyo Discovery: 6 nights, Asakusa tour, sushi class, Mount Fuji trip. $3,499 per person.",
+        "deluxePackage": {
+            "name": "Japanese Archipelago Quest",
+            "price": 10300,
+            "details": "<h3>Japanese Archipelago Quest - $10,300 per person</h3><p>A 5-night cultural odyssey:</p><ul><li>Stay: Tokyo ryokan (5 nights), Kyoto geisha house (5 nights), Okinawa beach villa (5 nights)</li><li>Sea Cruise: 5-night Seto Inland Sea cruise</li><li>Hot Air Balloon: Hokkaido flower fields at dawn</li><li>Adventure: Samurai sword-making, scuba diving in Okinawa</li><li>Dinner: Kaiseki banquet with geisha performance</li><li>Culture: Zen meditation in Kyoto, Ainu village visit</li><li>Spa: Onsen retreat in Hakone</li><li>Nightlife: Tokyo robot cabaret</li><li>Flights: Included</li><li>Extras: Personal photographer, silk kimono keepsake</li></ul><p>All-inclusive: flights, bullet train, meals, adventures.</p>"
+        }
+    },
+    {
+       "name": "Bath, England",
+        "description": "Step into England’s elegant past.",
+        "image": "images/bath.jpg",
+        "longDescription": "Bath offers Roman history and Georgian architecture in a charming setting.",
+        "package": "Bath Escape: 1 day, Roman Baths, Jane Austen tour. $249 per person.",
+        "deluxePackage": {
+            "name": "Georgian Getaway",
+            "price": 5500,
+            "details": "<h3>Georgian Getaway - $1800 per person</h3><p>A 2-day Bath journey:</p><ul><li>Stay: Boutique hotel in Bath (1 night)</li><li>Sightseeing: Roman Baths, Bath Abbey</li><li>Dining: Traditional English cream tea</li><li>Culture: Pulteney Bridge photo tour</li><li>Relaxation: Thermae Bath Spa visit</li><li>Transport: Round-trip train from London</li></ul><p>Includes accommodation, meals, and activities.</p>"
+        }
+    },
+    {
+        "name": "Cape Town, South Africa",
+        "description": "Marvel at the meeting of mountains and oceans.",
+        "image": "images/capetown.jpg",
+        "longDescription": "Cape Town combines dramatic landscapes with rich history and wildlife.",
+        "package": "Cape Escape: 5 nights, Table Mountain hike, wine tasting, Cape Point tour. $2,799 per person.",
+        "deluxePackage": {
+            "name": "Southern Africa Safari Spectacular",
+            "price": 10600,
+            "details": "<h3>Southern Africa Safari Spectacular - $10,600 per person</h3><p>A 5-night wild journey:</p><ul><li>Stay: Cape Town loft (10 nights), Kruger safari lodge (10 nights), Namibia desert camp (10 nights)</li><li>Sea Cruise: 7-night Indian Ocean cruise to Madagascar</li><li>Hot Air Balloon: Namib Desert sunrise</li><li>Adventure: Great White shark cage dive, Okavango Delta canoe safari</li><li>Dinner: Bush banquet under the stars</li><li>Culture: Zulu village visit, Apartheid Museum tour</li><li>Spa: Coastal seaweed wrap in Cape Town</li><li>Nightlife: Cape jazz club VIP night</li><li>Flights: Included</li><li>Extras: Personal photographer, tribal beadwork</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Sydney, Australia",
+        "description": "Dive into a coastal city with wild outback charm.",
+        "image": "images/sydney.jpg",
+        "longDescription": "Sydney offers beaches, urban flair, and access to Australia’s vast wilderness.",
+        "package": "Sydney Highlights: 6 nights, Opera House tour, Bondi Beach, Blue Mountains. $3,199 per person.",
+        "deluxePackage": {
+            "name": "Australian Outback Odyssey",
+            "price": 10750,
+            "details": "<h3>Australian Outback Odyssey - $10,750 per person</h3><p>A 6-night adventure Down Under:</p><ul><li>Stay: Sydney harbor suite (10 nights), Uluru desert camp (10 nights), Great Barrier Reef resort (10 nights)</li><li>Sea Cruise: 7-night Coral Sea cruise with reef snorkeling</li><li>Hot Air Balloon: Outback sunrise over Uluru</li><li>Adventure: Surfing Bondi, crocodile spotting in Kakadu</li><li>Dinner: 10-course seafood feast in Sydney</li><li>Culture: Aboriginal rock art tour, Sydney opera performance</li><li>Spa: Rainforest hydrotherapy in Queensland</li><li>Nightlife: Sydney rooftop bar crawl</li><li>Flights: Included</li><li>Extras: Personal photographer, boomerang keepsake</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Rio de Janeiro, Brazil",
+        "description": "Dance to the rhythm of samba and sun.",
+        "image": "images/rio.jpg",
+        "longDescription": "Rio is a vibrant mix of beaches, jungles, and Carnival energy.",
+        "package": "Rio Rhythms: 5 nights, Christ the Redeemer, Copacabana, samba lesson. $2,699 per person.",
+        "deluxePackage": {
+            "name": "Amazon & Atlantic Epic",
+            "price": 10900,
+            "details": "<h3>Amazon & Atlantic Epic - $10,900 per person</h3><p>A 6-night Brazilian odyssey:</p><ul><li>Stay: Rio beachfront (10 nights), Amazon ecolodge (10 nights), Pantanal wetland camp (10 nights)</li><li>Sea Cruise: 7-night Atlantic cruise to Salvador</li><li>Hot Air Balloon: Amazon rainforest canopy sunrise</li><li>Adventure: Piranha fishing, jaguar tracking in Pantanal</li><li>Dinner: 8-course churrasco feast in Rio</li><li>Culture: Carnival costume workshop, Iguazu Falls tour</li><li>Spa: Amazon herbal steam bath</li><li>Nightlife: Rio samba club VIP</li><li>Flights: Included</li><li>Extras: Personal photographer, hand-painted maraca</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Reykjavik, Iceland",
+        "description": "Chase the Northern Lights in a land of fire and ice.",
+        "image": "images/reykjavik.jpg",
+        "longDescription": "Iceland’s stark beauty offers glaciers, geysers, and ethereal skies.",
+        "package": "Iceland Glow: 5 nights, Blue Lagoon, Golden Circle, Northern Lights hunt. $3,299 per person.",
+        "deluxePackage": {
+            "name": "Nordic Wilderness Saga",
+            "price": 11050,
+            "details": "<h3>Nordic Wilderness Saga - $11,050 per person</h3><p>A 30-night Arctic adventure:</p><ul><li>Stay: Reykjavik igloo hotel (10 nights), East Fjords cabin (10 nights), Westman Islands lodge (10 nights)</li><li>Sea Cruise: 7-night Greenland Sea cruise with iceberg views</li><li>Hot Air Balloon: Vatnajökull glacier sunrise</li><li>Adventure: Ice cave exploration, whale watching</li><li>Dinner: 9-course geothermal-cooked feast</li><li>Culture: Viking history tour, puffin colony visit</li><li>Spa: Blue Lagoon VIP geothermal soak</li><li>Nightlife: Reykjavik aurora party</li><li>Flights: Included</li><li>Extras: Personal photographer, lava rock souvenir</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Cairo, Egypt",
+        "description": "Unravel the mysteries of ancient pyramids.",
+        "image": "images/cairo.jpg",
+        "longDescription": "Cairo is a gateway to Egypt’s pharaohs, deserts, and the mighty Nile.",
+        "package": "Pharaoh’s Journey: 6 nights, Pyramids, Sphinx, Nile felucca ride. $2,899 per person.",
+        "deluxePackage": {
+            "name": "Nile & Sahara Expedition",
+            "price": 11200,
+            "details": "<h3>Nile & Sahara Expedition - $11,200 per person</h3><p>A 30-night ancient odyssey:</p><ul><li>Stay: Cairo Nile-view suite (10 nights), Luxor temple hotel (10 nights), Siwa oasis camp (10 nights)</li><li>Sea Cruise: 7-night Red Sea cruise with coral diving</li><li>Hot Air Balloon: Luxor temple sunrise</li><li>Adventure: Camel trek in Sahara, Nile crocodile spotting</li><li>Dinner: 8-course Bedouin feast in the desert</li><li>Culture: Private Giza pyramid tour, Abu Simbel visit</li><li>Spa: Cleopatra-style milk bath</li><li>Nightlife: Cairo rooftop shisha lounge</li><li>Flights: Included</li><li>Extras: Personal photographer, papyrus scroll</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+      "name": "London, England",
+        "description": "Discover the vibrant heart of England.",
+        "image": "images/london.jpg",
+        "longDescription": "London blends historic landmarks with modern culture and iconic sights.",
+        "package": "London Highlights: 1 day, Tower of London, Thames River cruise. $299 per person.",
+        "deluxePackage": {
+            "name": "Capital Adventure",
+            "price": 7500,
+            "details": "<h3>Capital Adventure - $1500 per person</h3><p>A 2-day London experience:</p><ul><li>Stay: 4-star hotel near Big Ben (1 night)</li><li>Sightseeing: Buckingham Palace, London Eye</li><li>Dining: Afternoon tea at The Ritz</li><li>Culture: West End theatre show</li><li>Transport: Private car transfers</li><li>Extras: Guided walking tour</li></ul><p>Includes accommodation, meals, and activities.</p>"
+        }
+    },
+    
+    {
+        "name": "Santorini, Greece",
+        "description": "Bask in whitewashed cliffs and blue seas.",
+        "image": "images/santorini.jpg",
+        "longDescription": "Santorini’s volcanic beauty and Greek charm captivate all who visit.",
+        "package": "Greek Getaway: 5 nights, Oia sunset, caldera boat trip, wine tasting. $3,099 per person.",
+        "deluxePackage": {
+            "name": "Mediterranean Mythic Journey",
+            "price": 11500,
+            "details": "<h3>Mediterranean Mythic Journey - $11,500 per person</h3><p>A 30-night Grecian odyssey:</p><ul><li>Stay: Santorini cliff villa (10 nights), Crete palace (10 nights), Athens acropolis hotel (10 nights)</li><li>Sea Cruise: 7-night Aegean Sea cruise to Mykonos</li><li>Hot Air Balloon: Crete sunrise over Knossos</li><li>Adventure: Volcano hike, sea kayaking to hidden coves</li><li>Dinner: 9-course seafood feast in Oia</li><li>Culture: Private Parthenon tour, Delphi oracle visit</li><li>Spa: Santorini thermal spring soak</li><li>Nightlife: Athens rooftop bouzouki night</li><li>Flights: Included</li><li>Extras: Personal photographer, olive wood carving</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Marrakech, Morocco",
+        "description": "Wander through souks and desert dunes.",
+        "image": "images/marrakech.jpg",
+        "longDescription": "Marrakech is a sensory explosion of spices, colors, and Saharan mystique.",
+        "package": "Moroccan Magic: 6 nights, Medina tour, Atlas Mountains, camel ride. $2,799 per person.",
+        "deluxePackage": {
+            "name": "Sahara & Atlas Grand Trek",
+            "price": 11650,
+            "details": "<h3>Sahara & Atlas Grand Trek - $11,650 per person</h3><p>A 30-night desert odyssey:</p><ul><li>Stay: Marrakech riad (10 nights), Atlas Mountain lodge (10 nights), Sahara tent camp (10 nights)</li><li>Sea Cruise: 7-night Mediterranean cruise to Gibraltar</li><li>Hot Air Balloon: Sahara sunrise over dunes</li><li>Adventure: 4x4 desert rally, rock climbing in Todra Gorge</li><li>Dinner: 8-course tagine feast in a kasbah</li><li>Culture: Berber village stay, Fez medina tour</li><li>Spa: Hammam and argan oil massage</li><li>Nightlife: Marrakech Jemaa el-Fnaa drum circle</li><li>Flights: Included</li><li>Extras: Personal photographer, Moroccan lantern</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Vancouver, Canada",
+        "description": "Embrace mountains, forests, and coastal vibes.",
+        "image": "images/vancouver.jpg",
+        "longDescription": "Vancouver offers urban sophistication amid stunning natural wonders.",
+        "package": "Canadian Coastal: 5 nights, Stanley Park, Granville Island, whale watching. $2,999 per person.",
+        "deluxePackage": {
+            "name": "Pacific Northwest Wilderness",
+            "price": 11800,
+            "details": "<h3>Pacific Northwest Wilderness - $11,800 per person</h3><p>A 30-night rugged adventure:</p><ul><li>Stay: Vancouver harbor loft (10 nights), Whistler chalet (10 nights), Vancouver Island cabin (10 nights)</li><li>Sea Cruise: 7-night Inside Passage cruise to Alaska</li><li>Hot Air Balloon: Whistler sunrise over peaks</li><li>Adventure: Bear watching, sea kayaking with orcas</li><li>Dinner: 9-course salmon feast in Vancouver</li><li>Culture: First Nations totem tour, Gastown history walk</li><li>Spa: Hot springs soak in Banff</li><li>Nightlife: Vancouver craft beer fest</li><li>Flights: Included</li><li>Extras: Personal photographer, cedar wood carving</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Lima, Peru",
+        "description": "Savor Andean culture and coastal cuisine.",
+        "image": "images/lima.jpg",
+        "longDescription": "Lima is a culinary capital with access to Machu Picchu and Amazon wonders.",
+        "package": "Peruvian Taste: 6 nights, ceviche tour, Miraflores, Huaca Pucllana. $2,699 per person.",
+        "deluxePackage": {
+            "name": "Andes & Amazon Expedition",
+            "price": 11950,
+            "details": "<h3>Andes & Amazon Expedition - $11,950 per person</h3><p>A 30-night South American epic:</p><ul><li>Stay: Lima oceanfront (10 nights), Cusco inca hotel (10 nights), Amazon jungle lodge (10 nights)</li><li>Sea Cruise: 7-night Galapagos cruise from Ecuador</li><li>Hot Air Balloon: Nazca Lines sunrise</li><li>Adventure: Inca Trail trek, piranha fishing in Amazon</li><li>Dinner: 10-course Andean fusion in Lima</li><li>Culture: Machu Picchu private tour, Quechua weaving class</li><li>Spa: Andean herbal sauna</li><li>Nightlife: Cusco salsa night</li><li>Flights: Included</li><li>Extras: Personal photographer, alpaca wool blanket</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Queenstown, New Zealand",
+        "description": "Thrill in the adventure capital of the world.",
+        "image": "images/queenstown.jpg",
+        "longDescription": "Queenstown is a playground of mountains, lakes, and adrenaline.",
+        "package": "Kiwi Adventure: 5 nights, bungee jump, Milford Sound, wine tour. $3,399 per person.",
+        "deluxePackage": {
+            "name": "New Zealand Extreme Escape",
+            "price": 12100,
+            "details": "<h3>New Zealand Extreme Escape - $12,100 per person</h3><p>A 30-night adrenaline rush:</p><ul><li>Stay: Queenstown lake villa (10 nights), Fiordland lodge (10 nights), Auckland harbor suite (10 nights)</li><li>Sea Cruise: 7-night Tasman Sea cruise to Tasmania</li><li>Hot Air Balloon: Canterbury Plains sunrise</li><li>Adventure: Skydiving over Wanaka, jet boating in Shotover</li><li>Dinner: 9-course Maori hangi feast</li><li>Culture: Hobbiton film set tour, Maori tattoo workshop</li><li>Spa: Rotorua geothermal mud bath</li><li>Nightlife: Auckland rooftop party</li><li>Flights: Included</li><li>Extras: Personal photographer, jade pendant</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Dubai, UAE",
+        "description": "Experience luxury in a desert metropolis.",
+        "image": "images/dubai.jpg",
+        "longDescription": "Dubai blends futuristic skyscrapers with ancient deserts and coastal opulence.",
+        "package": "Dubai Luxury Escape: 5 nights, Burj Khalifa tour, desert safari. $3,499 per person.",
+        "deluxePackage": {
+            "name": "Arabian Nights Extravaganza",
+            "price": 12250,
+            "details": "<h3>Arabian Nights Extravaganza - $12,250 per person</h3><p>A 30-night desert and sea adventure:</p><ul><li>Stay: Dubai penthouse (10 nights), Abu Dhabi palace (10 nights), Oman coast villa (10 nights)</li><li>Sea Cruise: 7-night Persian Gulf cruise</li><li>Hot Air Balloon: Desert sunrise over dunes</li><li>Adventure: Dune bashing, falconry in Oman</li><li>Dinner: 10-course meal atop Burj Al Arab</li><li>Culture: Sheikh Zayed Mosque private tour, Bedouin camp stay</li><li>Spa: Gold-infused desert spa retreat</li><li>Nightlife: Dubai rooftop VIP party</li><li>Flights: Included</li><li>Extras: Personal photographer, camel leather souvenir</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Venice, Italy",
+        "description": "Float through canals of timeless beauty.",
+        "image": "images/venice.jpg",
+        "longDescription": "Venice is a labyrinth of waterways, art, and Renaissance charm.",
+        "package": "Venetian Romance: 5 nights, gondola ride, St. Mark’s tour. $3,199 per person.",
+        "deluxePackage": {
+            "name": "Italian Waterways Odyssey",
+            "price": 12400,
+            "details": "<h3>Italian Waterways Odyssey - $12,400 per person</h3><p>A 30-night journey through Italy:</p><ul><li>Stay: Venice palazzo (10 nights), Amalfi Coast villa (10 nights), Lake Como estate (10 nights)</li><li>Sea Cruise: 7-night Adriatic cruise to Croatia</li><li>Hot Air Balloon: Tuscany vineyards sunrise</li><li>Adventure: Kayaking Venice canals, cliff diving Amalfi</li><li>Dinner: 9-course Venetian seafood feast</li><li>Culture: Murano glass-blowing, Pompeii private tour</li><li>Spa: Thermal baths in Ischia</li><li>Nightlife: Milan fashion district party</li><li>Flights: Included</li><li>Extras: Personal photographer, Venetian mask</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Havana, Cuba",
+        "description": "Salsa through a vibrant Caribbean gem.",
+        "image": "images/havana.jpg",
+        "longDescription": "Havana pulses with retro charm, music, and tropical allure.",
+        "package": "Cuban Rhythms: 6 nights, old town tour, cigar tasting. $2,899 per person.",
+        "deluxePackage": {
+            "name": "Caribbean Salsa Adventure",
+            "price": 12550,
+            "details": "<h3>Caribbean Salsa Adventure - $12,550 per person</h3><p>A 30-night tropical escape:</p><ul><li>Stay: Havana colonial mansion (10 nights), Viñales valley lodge (10 nights), Varadero beach resort (10 nights)</li><li>Sea Cruise: 7-night Caribbean cruise to Jamaica</li><li>Hot Air Balloon: Viñales valley sunrise</li><li>Adventure: Snorkeling in Bay of Pigs, horseback riding in tobacco fields</li><li>Dinner: 8-course Cuban feast with rum pairing</li><li>Culture: Salsa lessons, Hemingway estate tour</li><li>Spa: Coconut oil massage on the beach</li><li>Nightlife: Havana jazz club VIP night</li><li>Flights: Included</li><li>Extras: Personal photographer, vintage cigar box</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Hawaii",
+    "description": "Explore volcanic landscapes and immerse in Polynesian culture.",
+    "image": "images/hawaii.jpg",
+    "longDescription": "Hawaii offers a unique blend of natural wonders, from active volcanoes to lush rainforests, combined with rich Polynesian traditions and warm hospitality.",
+    "package": "Hawaiian Island Bliss: 7 nights, luxury suite, wellness retreat. $14,999 per person.",
+    "deluxePackage": {
+        "name": "Hawaiian Island Bliss",
+        "price": 29999,
+        "details": "<h3>Hawaiian Island Bliss - $29,999 for two</h3><p>A 7-night tropical escape designed to enchant and rejuvenate:</p><ul><li>Stay: 7 nights in a luxury suite at Sensei Lanai, A Four Seasons Resort</li><li>Sea Cruise: 3-night private yacht charter along the Na Pali Coast</li><li>Hot Air Balloon: Sunrise ride over volcanic wonders</li><li>Adventure: Hiking, surfing lessons, helicopter tour over volcanoes</li><li>Dinner: Private dining with a farm-to-table Hawaiian menu</li><li>Culture: Pearl Harbor visit, authentic luau with hula dancing</li><li>Spa: Couples’ massage with volcanic clay treatments</li><li>Nightlife: Tiki bar evening with mai tais</li><li>Flights: Included</li><li>Extras: Personal photographer, welcome lei and gift box</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Buenos Aires, Argentina",
+        "description": "Tango through a city of passion.",
+        "image": "images/buenosaires.jpg",
+        "longDescription": "Buenos Aires blends European elegance with South American flair.",
+        "package": "Argentine Escape: 5 nights, tango show, steak dinner. $2,799 per person.",
+        "deluxePackage": {
+            "name": "Patagonia & Pampas Journey",
+            "price": 12850,
+            "details": "<h3>Patagonia & Pampas Journey - $12,850 per person</h3><p>A 30-night Argentine epic:</p><ul><li>Stay: Buenos Aires loft (10 nights), Patagonia glacier camp (10 nights), Mendoza vineyard estate (10 nights)</li><li>Sea Cruise: 7-night South Atlantic cruise to Ushuaia</li><li>Hot Air Balloon: Pampas sunrise</li><li>Adventure: Glacier trekking, gaucho horseback ride</li><li>Dinner: 10-course asado BBQ</li><li>Culture: Tango masterclass, Iguazu Falls tour</li><li>Spa: Wine therapy in Mendoza</li><li>Nightlife: Palermo Soho club night</li><li>Flights: Included</li><li>Extras: Personal photographer, mate gourd set</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Edinburgh, Scotland",
+        "description": "Step into a land of castles and legends.",
+        "image": "images/edinburgh.jpg",
+        "longDescription": "Edinburgh is a historic city of rugged beauty and Celtic mystique.",
+        "package": "Scottish Highlands: 5 nights, castle tour, whisky tasting. $3,099 per person.",
+        "deluxePackage": {
+            "name": "Celtic Highlands Odyssey",
+            "price": 26999,
+            "details": "<h3>Celtic Highlands Odyssey - $26,999 per person</h3><p>A 30-night Scottish adventure:</p><ul><li>Stay: Edinburgh castle-view suite (10 nights), Isle of Skye lodge (10 nights), Loch Ness retreat (10 nights)</li><li>Sea Cruise: 7-night North Sea cruise to Orkney</li><li>Hot Air Balloon: Highlands sunrise</li><li>Adventure: Kayaking Loch Ness, hiking Ben Nevis</li><li>Dinner: 8-course haggis banquet</li><li>Culture: Bagpipe lessons, Stonehenge visit</li><li>Spa: Peat bath in the Highlands</li><li>Nightlife: Edinburgh pub crawl</li><li>Flights: Included</li><li>Extras: Personal photographer, tartan kilt</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Seoul, South Korea",
+        "description": "Dive into a futuristic cultural hub.",
+        "image": "images/seoul.jpg",
+        "longDescription": "Seoul blends K-pop energy with ancient palaces and mountain trails.",
+        "package": "Korean Wave: 6 nights, palace tour, KBBQ dinner. $2,999 per person.",
+        "deluxePackage": {
+            "name": "Korean Peninsula Quest",
+            "price": 26999,
+            "details": "<h3>Korean Peninsula Quest - $26,999 per person</h3><p>A 30-night cultural journey:</p><ul><li>Stay: Seoul skyscraper suite (10 nights), Busan beach resort (10 nights), Jeju Island villa (10 nights)</li><li>Sea Cruise: 7-night Yellow Sea cruise</li><li>Hot Air Balloon: Jeju sunrise over lava fields</li><li>Adventure: DMZ tour, surfing in Busan</li><li>Dinner: 9-course hanjeongsik feast</li><li>Culture: K-pop dance class, temple stay</li><li>Spa: Jjimjilbang sauna experience</li><li>Nightlife: Gangnam club night</li><li>Flights: Included</li><li>Extras: Personal photographer, hanbok rental</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Prague, Czech Republic",
+        "description": "Wander through a fairytale city.",
+        "image": "images/prague.jpg",
+        "longDescription": "Prague is a medieval masterpiece of cobblestone and castles.",
+        "package": "Bohemian Bliss: 5 nights, Charles Bridge tour, beer tasting. $2,699 per person.",
+        "deluxePackage": {
+            "name": "Central European Fairytale",
+            "price": 25999,
+            "details": "<h3>Central European Fairytale - $25,999 per person</h3><p>A 30-night medieval journey:</p><ul><li>Stay: Prague castle-view hotel (10 nights), Cesky Krumlov chateau (10 nights), Karlovy Vary spa town (10 nights)</li><li>Sea Cruise: 7-night Danube River cruise</li><li>Hot Air Balloon: Bohemian countryside sunrise</li><li>Adventure: Cave exploring in Moravia, biking Vltava River</li><li>Dinner: 8-course Czech goulash feast</li><li>Culture: Pilsner brewery tour, Kafka museum</li><li>Spa: Thermal springs in Karlovy Vary</li><li>Nightlife: Prague jazz cellar night</li><li>Flights: Included</li><li>Extras: Personal photographer, crystal glassware</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Nairobi, Kenya",
+        "description": "Embark on a safari in the heart of Africa.",
+        "image": "images/nairobi.jpg",
+        "longDescription": "Nairobi is a vibrant hub surrounded by savannahs and wildlife.",
+        "package": "Safari Starter: 6 nights, Maasai Mara game drive, giraffe center. $3,299 per person.",
+        "deluxePackage": {
+            "name": "East African Safari Epic",
+            "price": 28999,
+            "details": "<h3>East African Safari Epic - $28,999 per person</h3><p>A 30-night wildlife odyssey:</p><ul><li>Stay: Nairobi safari lodge (10 nights), Maasai Mara camp (10 nights), Lamu Island resort (10 nights)</li><li>Sea Cruise: 7-night Indian Ocean cruise to Zanzibar</li><li>Hot Air Balloon: Serengeti sunrise</li><li>Adventure: Big Five safari, dhow sailing in Lamu</li><li>Dinner: 9-course bush banquet</li><li>Culture: Maasai warrior training, Swahili village visit</li><li>Spa: Savannah mud bath</li><li>Nightlife: Nairobi rooftop party</li><li>Flights: Included</li><li>Extras: Personal photographer, beaded necklace</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Lisbon, Portugal",
+        "description": "Sail into a city of hills and history.",
+        "image": "images/lisbon.jpg",
+        "longDescription": "Lisbon offers coastal charm, pastel streets, and Atlantic vibes.",
+        "package": "Portuguese Charm: 5 nights, tram tour, pastel de nata tasting. $2,799 per person.",
+        "deluxePackage": {
+            "name": "Iberian Coastal Quest",
+            "price": 26999,
+            "details": "<h3>Iberian Coastal Quest - $26,999 per person</h3><p>A 30-night Iberian adventure:</p><ul><li>Stay: Lisbon riverfront (10 nights), Algarve beach villa (10 nights), Madeira island retreat (10 nights)</li><li>Sea Cruise: 7-night Atlantic cruise to the Azores</li><li>Hot Air Balloon: Douro Valley sunrise</li><li>Adventure: Surfing in Nazaré, hiking Pico Ruivo</li><li>Dinner: 8-course seafood cataplana</li><li>Culture: Fado music night, Sintra palace tour</li><li>Spa: Volcanic hot springs in Madeira</li><li>Nightlife: Bairro Alto party</li><li>Flights: Included</li><li>Extras: Personal photographer, azulejo tile</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Hanoi, Vietnam",
+        "description": "Explore a city of lakes and lanterns.",
+        "image": "images/hanoi.jpg",
+        "longDescription": "Hanoi combines colonial charm with vibrant street life and natural wonders.",
+        "package": "Vietnamese Essence: 6 nights, Old Quarter tour, pho cooking class. $2,599 per person.",
+        "deluxePackage": {
+            "name": "Indochina Grand Voyage",
+            "price": 25999,
+            "details": "<h3>Indochina Grand Voyage - $25,999 per person</h3><p>A 30-night Southeast Asian journey:</p><ul><li>Stay: Hanoi lakeside hotel (10 nights), Hoi An lantern town (10 nights), Halong Bay cruise ship (10 nights)</li><li>Sea Cruise: 7-night South China Sea cruise</li><li>Hot Air Balloon: Sapa rice terrace sunrise</li><li>Adventure: Kayaking Halong Bay, motorbike Mekong Delta</li><li>Dinner: 9-course imperial banquet</li><li>Culture: Water puppet show, Hue citadel tour</li><li>Spa: Herbal bath in Hoi An</li><li>Nightlife: Hanoi beer street night</li><li>Flights: Included</li><li>Extras: Personal photographer, conical hat</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Stockholm, Sweden",
+        "description": "Sail through a Nordic archipelago.",
+        "image": "images/stockholm.jpg",
+        "longDescription": "Stockholm blends modern design with Viking heritage and island beauty.",
+        "package": "Nordic Escape: 5 nights, Gamla Stan tour, ABBA museum. $3,199 per person.",
+        "deluxePackage": {
+            "name": "Scandinavian Archipelago Adventure",
+            "price": 27999,
+            "details": "<h3>Scandinavian Archipelago Adventure - $27,999 per person</h3><p>A 30-night Nordic odyssey:</p><ul><li>Stay: Stockholm island hotel (10 nights), Lapland igloo (10 nights), Gotland seaside cabin (10 nights)</li><li>Sea Cruise: 7-night Baltic Sea cruise</li><li>Hot Air Balloon: Lapland midnight sun</li><li>Adventure: Dogsledding, sailing Stockholm archipelago</li><li>Dinner: 8-course smorgasbord feast</li><li>Culture: Viking rune workshop, Vasa ship tour</li><li>Spa: Sauna on a frozen lake</li><li>Nightlife: Stockholm ice bar</li><li>Flights: Included</li><li>Extras: Personal photographer, wool sweater</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Mexico City, Mexico",
+        "description": "Discover a vibrant cultural mosaic.",
+        "image": "images/mexicocity.jpg",
+        "longDescription": "Mexico City is a bustling metropolis with Aztec ruins and coastal escapes.",
+        "package": "Mexican Fiesta: 6 nights, pyramid tour, taco tasting. $2,799 per person.",
+        "deluxePackage": {
+            "name": "Mesoamerican Marvels",
+            "price": 26999,
+            "details": "<h3>Mesoamerican Marvels - $26,999 per person</h3><p>A 30-night Mexican journey:</p><ul><li>Stay: Mexico City zocalo suite (10 nights), Oaxaca mountain retreat (10 nights), Riviera Maya beach villa (10 nights)</li><li>Sea Cruise: 7-night Caribbean cruise to Cozumel</li><li>Hot Air Balloon: Teotihuacan sunrise</li><li>Adventure: Cenote diving, zip-lining in Chiapas</li><li>Dinner: 9-course mole tasting</li><li>Culture: Day of the Dead festival, Chichen Itza tour</li><li>Spa: Temazcal sweat lodge</li><li>Nightlife: Mexico City mezcal bar crawl</li><li>Flights: Included</li><li>Extras: Personal photographer, alebrije figurine</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Istanbul, Turkey",
+        "description": "Bridge continents in a historic city.",
+        "image": "images/istanbul.jpg",
+        "longDescription": "Istanbul straddles Europe and Asia with bazaars and Byzantine wonders.",
+        "package": "Turkish Delight: 5 nights, Hagia Sophia tour, Bosphorus cruise. $2,899 per person.",
+        "deluxePackage": {
+            "name": "Ottoman & Aegean Odyssey",
+            "price": 27999,
+            "details": "<h3>Ottoman & Aegean Odyssey - $27,999 per person</h3><p>A 30-night Turkish adventure:</p><ul><li>Stay: Istanbul Bosphorus suite (10 nights), Cappadocia cave hotel (10 nights), Bodrum beach resort (10 nights)</li><li>Sea Cruise: 7-night Aegean Sea cruise to Rhodes</li><li>Hot Air Balloon: Cappadocia fairy chimneys sunrise</li><li>Adventure: Paragliding in Oludeniz, Ephesus ruins trek</li><li>Dinner: 10-course Ottoman feast</li><li>Culture: Whirling dervish show, Troy visit</li><li>Spa: Turkish hammam in Istanbul</li><li>Nightlife: Taksim Square party</li><li>Flights: Included</li><li>Extras: Personal photographer, evil eye charm</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Singapore",
+        "description": "Marvel at a futuristic garden city.",
+        "image": "images/singapore.jpg",
+        "longDescription": "Singapore is a sleek blend of innovation, greenery, and island escapes.",
+        "package": "Lion City Break: 5 nights, Gardens by the Bay, hawker food tour. $3,299 per person.",
+        "deluxePackage": {
+            "name": "Southeast Asian Skyline Journey",
+            "price": 28999,
+            "details": "<h3>Southeast Asian Skyline Journey - $28,999 per person</h3><p>A 30-night urban and island adventure:</p><ul><li>Stay: Singapore rooftop suite (10 nights), Sentosa island villa (10 nights), Bintan resort (10 nights)</li><li>Sea Cruise: 7-night Malacca Strait cruise</li><li>Hot Air Balloon: Marina Bay sunrise</li><li>Adventure: Night safari, scuba diving in Bintan</li><li>Dinner: 9-course Michelin-star fusion meal</li><li>Culture: Peranakan heritage tour, Merlion photo shoot</li><li>Spa: Rooftop infinity pool massage</li><li>Nightlife: Clarke Quay party</li><li>Flights: Included</li><li>Extras: Personal photographer, orchid keepsake</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Zurich, Switzerland",
+        "description": "Revel in Alpine luxury.",
+        "image": "images/zurich.jpg",
+        "longDescription": "Zurich offers pristine lakes, mountains, and Swiss precision.",
+        "package": "Swiss Serenity: 5 nights, lake cruise, chocolate tasting. $3,499 per person.",
+        "deluxePackage": {
+            "name": "Alpine Peaks Extravaganza",
+            "price": 29999,
+            "details": "<h3>Alpine Peaks Extravaganza - $29,999 per person</h3><p>A 30-night Swiss adventure:</p><ul><li>Stay: Zurich lakefront hotel (10 nights), Zermatt chalet (10 nights), Lucerne castle suite (10 nights)</li><li>Sea Cruise: 7-night Rhine River cruise</li><li>Hot Air Balloon: Matterhorn sunrise</li><li>Adventure: Skiing Jungfrau, paragliding Interlaken</li><li>Dinner: 10-course fondue feast</li><li>Culture: Watchmaking workshop, Bern old town tour</li><li>Spa: Thermal baths in Leukerbad</li><li>Nightlife: Zurich opera night</li><li>Flights: Included</li><li>Extras: Personal photographer, Swiss army knife</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {"name": "Bahamas",
+    "description": "Relax on pristine beaches and swim in crystal-clear waters.",
+    "image": "images/bahamas.jpg",
+    "longDescription": "The Bahamas is a tropical paradise with stunning beaches, vibrant marine life, and a laid-back atmosphere perfect for couples seeking relaxation and adventure.",
+    "package": "Bahamian Paradise Escape: 7 nights, private villa, yacht charter. $14,999 per person.",
+    "deluxePackage": {
+        "name": "Bahamian Paradise Escape",
+        "price": 29999,
+        "details": "<h3>Bahamian Paradise Escape - $29,999 for two</h3><p>A 7-night romantic odyssey crafted for couples seeking bliss:</p><ul><li>Stay: 7 nights in a private villa at The Cove Eleuthera, complete with a personal chef</li><li>Sea Cruise: 3-night private yacht charter through the Exumas</li><li>Hot Air Balloon: Sunrise ride over the islands</li><li>Adventure: Snorkeling in coral reefs, diving, island-hopping</li><li>Dinner: Private beachfront dining with Bahamian seafood</li><li>Culture: Guided visit to local markets and historical museums</li><li>Spa: Couples’ massage and oceanfront treatments</li><li>Nightlife: Beach bar with live calypso music</li><li>Flights: Included</li><li>Extras: Personal photographer, welcome gift basket</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Oslo, Norway",
+        "description": "Explore fjords and Viking heritage.",
+        "image": "images/oslo.jpg",
+        "longDescription": "Oslo is a gateway to Norway’s dramatic fjords and Arctic wonders.",
+        "package": "Fjord Fantasy: 5 nights, Viking Ship Museum, fjord cruise. $3,299 per person.",
+        "deluxePackage": {
+            "name": "Nordic Fjord Expedition",
+            "price": 28999,
+            "details": "<h3>Nordic Fjord Expedition - $28,999 per person</h3><p>A 30-night Arctic adventure:</p><ul><li>Stay: Oslo harbor hotel (10 nights), Bergen fjord cabin (10 nights), Tromsø aurora lodge (10 nights)</li><li>Sea Cruise: 7-night Norwegian Sea cruise</li><li>Hot Air Balloon: Lofoten Islands sunrise</li><li>Adventure: Fjord kayaking, husky sledding</li><li>Dinner: 9-course seafood smørbrød</li><li>Culture: Viking longhouse stay, Sami reindeer herding</li><li>Spa: Arctic sauna in Tromsø</li><li>Nightlife: Oslo waterfront party</li><li>Flights: Included</li><li>Extras: Personal photographer, Viking rune stone</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Athens, Greece",
+        "description": "Walk among ancient ruins and myths.",
+        "image": "images/athens.jpg",
+        "longDescription": "Athens is the cradle of democracy with timeless history and island charm.",
+        "package": "Greek Origins: 5 nights, Acropolis tour, souvlaki tasting. $2,899 per person.",
+        "deluxePackage": {
+            "name": "Hellenic Isles Odyssey",
+            "price": 27999,
+            "details": "<h3>Hellenic Isles Odyssey - $27,999 per person</h3><p>A 30-night Greek adventure:</p><ul><li>Stay: Athens acropolis hotel (10 nights), Crete seaside villa (10 nights), Rhodes medieval town (10 nights)</li><li>Sea Cruise: 7-night Aegean cruise to Santorini</li><li>Hot Air Balloon: Crete sunrise over Knossos</li><li>Adventure: Sea kayaking, hiking Samaria Gorge</li><li>Dinner: 9-course meze feast</li><li>Culture: Oracle of Delphi visit, Greek dance lessons</li><li>Spa: Olive oil spa in Crete</li><li>Nightlife: Athens Plaka party</li><li>Flights: Included</li><li>Extras: Personal photographer, amphora replica</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Kyoto, Japan",
+        "description": "Find peace in temples and cherry blossoms.",
+        "image": "images/kyoto.jpg",
+        "longDescription": "Kyoto is Japan’s cultural heart with serene gardens and historic charm.",
+        "package": "Zen Retreat: 6 nights, Fushimi Inari, tea ceremony. $3,199 per person.",
+        "deluxePackage": {
+            "name": "Japanese Zen Journey",
+            "price": 27999,
+            "details": "<h3>Japanese Zen Journey - $27,999 per person</h3><p>A 30-night spiritual odyssey:</p><ul><li>Stay: Kyoto ryokan (10 nights), Nara temple lodge (10 nights), Shikoku island retreat (10 nights)</li><li>Sea Cruise: 7-night Sea of Japan cruise</li><li>Hot Air Balloon: Arashiyama bamboo forest sunrise</li><li>Adventure: Pilgrimage on Shikoku 88 Temple trail, bamboo rafting</li><li>Dinner: 10-course kaiseki meal</li><li>Culture: Geisha tea ceremony, Zen meditation</li><li>Spa: Onsen hot springs in Kinosaki</li><li>Nightlife: Osaka Dotonbori night</li><li>Flights: Included</li><li>Extras: Personal photographer, calligraphy set</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Santiago, Chile",
+        "description": "Journey from Andes to ocean.",
+        "image": "images/santiago.jpg",
+        "longDescription": "Santiago offers urban energy, mountain vistas, and coastal escapes.",
+        "package": "Chilean Charm: 5 nights, wine tasting, Andes hike. $2,799 per person.",
+        "deluxePackage": {
+            "name": "Andean & Pacific Adventure",
+            "price": 22999,
+            "details": "<h3>Andean & Pacific Adventure - $22,999 per person</h3><p>A 30-night Chilean odyssey:</p><ul><li>Stay: Santiago city suite (10 nights), Atacama desert camp (10 nights), Valparaiso coast villa (10 nights)</li><li>Sea Cruise: 7-night Pacific cruise to Easter Island</li><li>Hot Air Balloon: Atacama desert sunrise</li><li>Adventure: Sandboarding in San Pedro, surfing in Pichilemu</li><li>Dinner: 9-course Chilean seafood empanada feast</li><li>Culture: Moai statue tour, Mapuche village visit</li><li>Spa: Hot springs in Pucón</li><li>Nightlife: Santiago Bellavista party</li><li>Flights: Included</li><li>Extras: Personal photographer, lapis lazuli jewelry</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Casablanca, Morocco",
+        "description": "Savor the romance of North Africa.",
+        "image": "images/casablanca.jpg",
+        "longDescription": "Casablanca blends modern vibes with Moroccan traditions and coastal allure.",
+        "package": "Moroccan Romance: 5 nights, Hassan II Mosque, mint tea tasting. $2,699 per person.",
+        "deluxePackage": {
+            "name": "Maghreb Coastal Quest",
+            "price": 14999,
+            "details": "<h3>Maghreb Coastal Quest - $14,999 per person</h3><p>A 30-night North African journey:</p><ul><li>Stay: Casablanca oceanfront (10 nights), Chefchaouen blue town (10 nights), Essaouira beach retreat (10 nights)</li><li>Sea Cruise: 7-night Mediterranean cruise to Tangier</li><li>Hot Air Balloon: Atlas Mountains sunrise</li><li>Adventure: Camel trek in Erg Chebbi, windsurfing in Essaouira</li><li>Dinner: 8-course couscous feast</li><li>Culture: Medina souk tour, Gnawa music night</li><li>Spa: Argan oil massage in Marrakech</li><li>Nightlife: Casablanca jazz club</li><li>Flights: Included</li><li>Extras: Personal photographer, Moroccan rug</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Montreal, Canada",
+        "description": "Experience French flair in North America.",
+        "image": "images/montreal.jpg",
+        "longDescription": "Montreal fuses European charm with Canadian wilderness and urban energy.",
+        "package": "Quebec Escape: 5 nights, Old Montreal tour, poutine tasting. $2,999 per person.",
+        "deluxePackage": {
+            "name": "Canadian Eastern Odyssey",
+            "price": 24999,
+            "details": "<h3>Canadian Eastern Odyssey - $27,999 per person</h3><p>A 30-night northern adventure:</p><ul><li>Stay: Montreal old town hotel (10 nights), Quebec City chateau (10 nights), Gaspé Peninsula lodge (10 nights)</li><li>Sea Cruise: 7-night St. Lawrence River cruise</li><li>Hot Air Balloon: Laurentian Mountains sunrise</li><li>Adventure: Ice fishing, snowmobiling in Charlevoix</li><li>Dinner: 9-course maple syrup feast</li><li>Culture: Cirque du Soleil show, First Nations powwow</li><li>Spa: Nordic spa in Mont-Tremblant</li><li>Nightlife: Montreal jazz festival</li><li>Flights: Included</li><li>Extras: Personal photographer, beaver tail pastry kit</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Amman, Jordan",
+        "description": "Uncover ancient wonders in the desert.",
+        "image": "images/amman.jpg",
+        "longDescription": "Amman is a historic city with Roman ruins and desert landscapes.",
+        "package": "Jordanian Journey: 6 nights, Petra tour, Dead Sea float. $2,999 per person.",
+        "deluxePackage": {
+            "name": "Levantine Desert Expedition",
+            "price": 20999,
+            "details": "<h3>Levantine Desert Expedition - $27,999 per person</h3><p>A 30-night Middle Eastern odyssey:</p><ul><li>Stay: Amman citadel hotel (10 nights), Wadi Rum Bedouin camp (10 nights), Aqaba beach resort (10 nights)</li><li>Sea Cruise: 7-night Red Sea cruise</li><li>Hot Air Balloon: Wadi Rum sunrise</li><li>Adventure: Jeep safari, snorkeling in Aqaba</li><li>Dinner: 9-course Bedouin mansaf feast</li><li>Culture: Petra by night, Roman Jerash tour</li><li>Spa: Dead Sea mud wrap</li><li>Nightlife: Amman rooftop shisha lounge</li><li>Flights: Included</li><li>Extras: Personal photographer, keffiyeh scarf</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    },
+    {
+        "name": "Beijing, China",
+        "description": "Step into an imperial legacy.",
+        "image": "images/beijing.jpg",
+        "longDescription": "Beijing blends ancient dynasties with modern marvels and vast landscapes.",
+        "package": "Imperial China: 6 nights, Great Wall tour, Peking duck dinner. $3,199 per person.",
+        "deluxePackage": {
+            "name": "Silk Road & Sea Adventure",
+            "price": 22999,
+            "details": "<h3>Silk Road & Sea Adventure - $28,999 per person</h3><p>A 30-night Chinese epic:</p><ul><li>Stay: Beijing Forbidden City hotel (10 nights), Xi’an terracotta lodge (10 nights), Shanghai bund suite (10 nights)</li><li>Sea Cruise: 7-night East China Sea cruise</li><li>Hot Air Balloon: Great Wall sunrise</li><li>Adventure: Camel trek on Silk Road, bamboo rafting Yangtze</li><li>Dinner: 10-course imperial banquet</li><li>Culture: Kung fu show, panda sanctuary visit</li><li>Spa: Hot springs in Hangzhou</li><li>Nightlife: Shanghai skyline party</li><li>Flights: Included</li><li>Extras: Personal photographer, jade pendant</li></ul><p>All-inclusive: flights, transfers, meals, adventures.</p>"
+        }
+    }
+]
+

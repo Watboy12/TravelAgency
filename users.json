@@ -1,0 +1,219 @@
+[
+  {
+    "name": "Watboy",
+    "username": "Watboy1",
+    "email": "Watboy@gmail.com",
+    "phone": "",
+    "password": "$2b$10$qLa3q/MawbvwN5BK7EZ7N.C7p3O5AXvRCHMNH.CgxINC/jHXDaD/2",
+    "balance": 125374,
+    "deposits": 812000,
+    "bonus": 14500,
+    "pendingVacations": [
+      {
+        "name": "Parisian Odyssey Extravaganza",
+        "cost": 10000,
+        "date": "2025-04-10"
+      },
+      {
+        "name": "Hellenic Isles Odyssey",
+        "cost": 27999,
+        "date": "2025-04-10"
+      },
+      {
+        "name": "Silk Road & Sea Adventure",
+        "cost": 22999,
+        "date": "2025-04-10"
+      },
+      {
+        "name": "Hawaiian Island Bliss",
+        "cost": 29999,
+        "date": "2025-04-13"
+      }
+    ],
+    "upcomingVacations": [],
+    "completedVacations": [],
+    "transactions": [
+      {
+        "date": "2025-04-10",
+        "type": "Booking",
+        "amount": 10000
+      },
+      {
+        "date": "2025-04-10",
+        "type": "Deposit",
+        "amount": 200000
+      },
+      {
+        "date": "2025-04-10",
+        "type": "Deposit",
+        "amount": 2000
+      },
+      {
+        "date": "2025-04-10",
+        "type": "Booking",
+        "amount": 27999
+      },
+      {
+        "date": "2025-04-10",
+        "type": "Booking",
+        "amount": 22999
+      },
+      {
+        "date": "2025-04-13",
+        "type": "Booking",
+        "amount": 29999
+      }
+    ],
+    "usageHistory": [
+      {
+        "date": "2025-04-10",
+        "action": "Requested Parisian Odyssey Extravaganza",
+        "cost": 10000
+      },
+      {
+        "date": "2025-04-10",
+        "action": "Pending Deposit $200000 via Crypto",
+        "cost": 0
+      },
+      {
+        "date": "2025-04-10",
+        "action": "Approved Deposit $200000 via Crypto",
+        "cost": 0
+      },
+      {
+        "date": "2025-04-10",
+        "action": "Approved Deposit $2000 via Crypto",
+        "cost": 0
+      },
+      {
+        "date": "2025-04-10",
+        "action": "Requested Hellenic Isles Odyssey",
+        "cost": 27999
+      },
+      {
+        "date": "2025-04-10",
+        "action": "Requested Silk Road & Sea Adventure",
+        "cost": 22999
+      },
+      {
+        "date": "2025-04-13",
+        "action": "Requested Hawaiian Island Bliss",
+        "cost": 29999
+      }
+    ],
+    "profilePic": "images/profilePic-1744168164694.jpg",
+    "verified": false,
+    "personalInfo": {
+      "email": "Watboy@gmail.com",
+      "phone": "Not set",
+      "address": "Not set"
+    },
+    "pendingDeposits": [],
+    "lastDepositAccepted": {
+      "amount": 2000,
+      "timestamp": "2025-04-10T01:54:35.040Z"
+    }
+  },
+  {
+    "name": "Robert Rochella",
+    "username": "robert",
+    "email": "robert@gmail.com",
+    "phone": "2332222",
+    "password": "$2b$10$0kXf2x59k3R39QI3s3auTO3RsReN5ULVqwbXqbnFw9NemvGETTxqi",
+    "balance": 10000000,
+    "deposits": 0,
+    "bonus": 0,
+    "verified": false,
+    "verificationMethod": "",
+    "pendingVacations": [],
+    "upcomingVacations": [],
+    "completedVacations": [],
+    "transactions": [],
+    "usageHistory": [],
+    "profilePic": "images/default-pic.jpg",
+    "pendingDeposits": [],
+    "lastDepositAccepted": {},
+    "personalInfo": {
+      "email": "robert@gmail.com",
+      "phone": "Not set",
+      "address": "Not set"
+    },
+    "role": "user"
+  },
+  {
+    "name": "Fedy enkaka",
+    "username": "fedy",
+    "email": "fedy@gmail.com",
+    "phone": "",
+    "password": "$2b$10$Qeyak4yD5Aee2wl9zcE/suenwL0SKEXNMKyfj47rDsclJQoLGJjn2",
+    "balance": 0,
+    "deposits": 0,
+    "bonus": 0,
+    "verified": false,
+    "verificationMethod": "",
+    "pendingVacations": [],
+    "upcomingVacations": [],
+    "completedVacations": [],
+    "transactions": [],
+    "usageHistory": [],
+    "profilePic": "images/default-pic.jpg",
+    "pendingDeposits": [],
+    "lastDepositAccepted": {},
+    "personalInfo": {
+      "email": "fedy@gmail.com",
+      "phone": "Not set",
+      "address": "Not set"
+    },
+    "role": "user"
+  },
+  {
+    "name": "Getmoney",
+    "username": "admin",
+    "email": "getmoney@gmail.com",
+    "phone": "",
+    "password": "$2b$10$7113JqyLVH204Key87rUae8AHJzbeGAiTvOgCDT06FMOc7twi8832",
+    "balance": 1000000,
+    "deposits": 0,
+    "bonus": 0,
+    "verified": false,
+    "verificationMethod": "",
+    "pendingVacations": [],
+    "upcomingVacations": [],
+    "completedVacations": [],
+    "transactions": [],
+    "usageHistory": [
+      {
+        "date": "2025-05-12",
+        "action": "Pending Deposit $120000 via Bank",
+        "cost": 0
+      },
+      {
+        "date": "2025-05-12",
+        "action": "Pending Deposit $120000 via Bank",
+        "cost": 0
+      }
+    ],
+    "profilePic": "images/default-pic.jpg",
+    "pendingDeposits": [
+      {
+        "amount": 120000,
+        "method": "Bank",
+        "date": "2025-05-12",
+        "payerName": "Getmoney"
+      },
+      {
+        "amount": 120000,
+        "method": "Bank",
+        "date": "2025-05-12",
+        "payerName": "Getmoney"
+      }
+    ],
+    "lastDepositAccepted": {},
+    "personalInfo": {
+      "email": "getmoney@gmail.com",
+      "phone": "Not set",
+      "address": "Not set"
+    },
+    "role": "user"
+  }
+]

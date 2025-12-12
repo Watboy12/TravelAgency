@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
+    <title>Create Account - ExploreWorld</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
+            <div class="nav-container">
+                <ul class="nav-links"></ul>
+                <div class="hamburger" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="register-page">
+        <div class="register-container">
+            <div class="register-left">
+                <img src="images/create-account-image.jpg" alt="Create Account" class="register-image">
+                <div class="register-writeup">
+                    <h2>Join ExploreWorld</h2>
+                    <p>Create your account to start planning your dream vacations. Enjoy exclusive bonuses and manage your bookings with ease.</p>
+                    <p><strong>Already have an account?</strong> <a href="login.html">Login here</a>.</p>
+                </div>
+            </div>
+            <div class="register-right">
+                <h2>Create Account</h2>
+                <form id="create-account-form">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    <label for="phone">Phone Number (Optional)</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </form>
+                <p id="error-message" class="error-message hidden"></p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="contact-info">
+                <p>Executive Services</p>
+                <p>ExploreWorld, Inc</p>
+                <p>Phone: +1 (555) 123-4567</p>
+                <p>Email: info@exploreworld.com</p>
+                <p>800 Connecticut Avenue, Norwalk, CT 06854</p>
+            </div>
+            <div class="social-icons">
+                <a href="https://twitter.com/exploreworld" target="_blank"><img src="images/default-twitter.png" alt="Twitter" loading="lazy"></a>
+                <a href="https://facebook.com/exploreworld" target="_blank"><img src="images/default-facebook.png" alt="Facebook" loading="lazy"></a>
+                <a href="https://instagram.com/exploreworld" target="_blank"><img src="images/default-instagram.png" alt="Instagram" loading="lazy"></a>
+            </div>
+            <div class="newsletter">
+                <input type="email" placeholder="Your Email">
+                <button class="btn btn-primary">Subscribe</button>
+            </div>
+        </div>
+    </footer>
+
+    <div id="notifications"></div>
+    <script src="script.js"></script>
+</body>
+</html>

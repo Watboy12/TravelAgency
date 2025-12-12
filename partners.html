@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
+    <title>Our Partners - ExploreWorld</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+ 
+        <nav>
+            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
+            <div class="nav-container">
+                <ul class="nav-links"></ul>
+                <div class="hamburger" aria-label="Toggle navigation">                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+
+    <section class="partners-page">
+        <h1>Our Partners</h1>
+        <div class="partners-content">
+            <p>At ExploreWorld, we believe that exceptional travel experiences are built on strong partnerships. Over the past 20 years, we’ve cultivated relationships with industry leaders across the globe to ensure your journeys are seamless, luxurious, and unforgettable. Our network spans airlines, financial institutions, cruise lines, hotels, and more, allowing us to offer you unparalleled access to the world’s best travel options.</p>
+            
+            <p>We collaborate with top-tier flight providers to secure exclusive deals and priority bookings, ensuring you reach your destination comfortably and on time. Our partnerships with leading banks and payment platforms enable secure, flexible deposit options—whether you prefer traditional bank transfers or cutting-edge cryptocurrency transactions like Bitcoin. On the open seas, we work with premier cruise lines to bring you world-class voyages, from exotic island hops to transatlantic adventures. And when it comes to accommodations, our alliances with renowned hotel chains and boutique properties guarantee a stay that matches your style and budget.</p>
+            
+            <p>These partnerships are the backbone of ExploreWorld, reflecting our commitment to quality, reliability, and innovation. By working with the best in travel and hospitality, we craft personalized itineraries that turn your vacation dreams into reality—every step of the way.</p>
+        </div>
+        
+        <div id="partner-list" class="partner-grid">
+            <!-- Partner items will be dynamically added here -->
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="social-icons">
+                <a href="#" id="twitter-link"><img src="images/default-twitter.png" alt="Twitter" id="twitter-logo-img"></a>
+                <a href="#" id="facebook-link"><img src="images/default-facebook.png" alt="Facebook" id="facebook-logo-img"></a>
+                <a href="#" id="instagram-link"><img src="images/default-instagram.png" alt="Instagram" id="instagram-logo-img"></a>
+            </div>
+            <div class="newsletter">
+                <input type="email" placeholder="Your Email">
+                <button class="btn btn-primary">Subscribe</button>
+            </div>
+        </div>
+    </footer>
+
+    <div id="notifications"></div>
+    <script src="/script.js"></script>
+</body>
+</html>

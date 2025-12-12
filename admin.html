@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
+    <title>Admin - ExploreWorld</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
+        <div class="nav-container">
+            <ul class="nav-links"></ul>
+            <div class="hamburger" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section id="admin-login" class="admin-login">
+        <h1>Admin Login</h1>
+        <form id="admin-login-form" class="login-form">
+            <input type="text" id="admin-username" name="username" placeholder="Username" required autocomplete="username">
+            <input type="password" id="admin-password" name="password" placeholder="Password" required autocomplete="current-password">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </section>
+
+    <section id="admin-panel" class="admin-panel hidden">
+        <h1>Admin Panel</h1>
+        <button id="admin-logout" class="btn btn-danger">Logout</button>
+        <div id="user-list" class="user-list"></div>
+
+        <div class="btc-address-management">
+            <h2>Manage BTC Wallet Address</h2>
+            <form id="btc-address-form">
+                <input type="text" id="btc-address" name="btcAddress" placeholder="Enter BTC Wallet Address" required>
+                <button type="submit" class="btn btn-primary">Update BTC Address</button>
+            </form>
+        </div>
+        
+        <div class="social-media-management">
+            <h2>Manage Social Media Links</h2>
+            <form id="social-media-form" enctype="multipart/form-data">
+                <div class="social-input">
+                    <label for="twitter-logo">Twitter Logo:</label>
+                    <input type="file" id="twitter-logo" name="twitterLogo" accept="image/*">
+                    <input type="url" name="twitterUrl" placeholder="Twitter URL">
+                </div>
+                <div class="social-input">
+                    <label for="facebook-logo">Facebook Logo:</label>
+                    <input type="file" id="facebook-logo" name="facebookLogo" accept="image/*">
+                    <input type="url" name="facebookUrl" placeholder="Facebook URL">
+                </div>
+                <div class="social-input">
+                    <label for="instagram-logo">Instagram Logo:</label>
+                    <input type="file" id="instagram-logo" name="instagramLogo" accept="image/*">
+                    <input type="url" name="instagramUrl" placeholder="Instagram URL">
+                </div>
+                <button type="submit" class="btn btn-primary">Update Social Media</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="notification" class="hidden"></div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com; media-src 'self';">
+    <script src="https://cdn.jsdelivr.net/npm/i18next@21.6.14/dist/umd/i18next.min.js"></script>
+    <meta name="description" content="Book your dream vacation with ExploreWorld">
+    <title>ExploreWorld</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="leaflet.css">
+</head>
+<body>
+        <nav>
+            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
+            <div class="nav-container">
+                <ul class="nav-links"></ul>
+                <div class="hamburger" aria-label="Toggle navigation">                    
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>   
+
+        <section class="hero parallax">
+            <video autoplay muted loop class="hero-video">
+                <source src="/videos/travel-highlights.mp4" type="video/mp4">
+                <source src="/videos/travel-highlights.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+            <div class="hero-content">
+                <h1>Explore the World with Us</h1>
+                <p>Your adventure starts here. Discover amazing destinations and book your next trip!</p>
+                <p class="intro-text">At ExploreWorld, we bring over 20 years of expertise in the vacation and travel industry, crafting unforgettable journeys with professionalism and passion.</p>
+                <div class="travel-quiz">
+                    <h3>Find Your Perfect Trip</h3>
+                    <form id="travel-quiz-form">
+                        <label><input type="radio" name="type" value="beach"> Beach</label>
+                        <label><input type="radio" name="type" value="mountain"> Mountain</label>
+                        <label><input type="radio" name="travel" value="solo"> Solo</label>
+                        <label><input type="radio" name="travel" value="group"> Group</label>
+                        <button type="submit" class="btn">Get Suggestion</button>
+                    </form>
+                    <p id="quiz-result"></p>
+                </div>
+                <a href="login.html" class="btn get-started">Get Started</a>
+            </div>
+        </section>
+        
+        <section id="destinations" class="destinations parallax">
+            <h2>Popular Destinations</h2>
+            <div id="destination-map"></div>
+            <div class="destination-grid"></div>
+        </section>
+
+        <section id="hot-destinations" class="hot-destinations">
+            <h2>Hot Destinations</h2>
+            <p class="hot-destinations-subtitle">Exclusive Travel Packages Currently in High Demand</p>
+            <div class="hot-destinations-slideshow">
+                <!-- Slides will be dynamically inserted here -->
+            </div>
+        </section>
+
+    <section class="testimonials">
+        <h2>What Our Travelers Say</h2>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <img src="images/avatar1.jpg" alt="Emily R." class="testimonial-avatar" loading="lazy">
+                <p>"Our trip to Paris was nothing short of magical. The ExploreWorld team handled every detail, from booking our flights to arranging a private tour of the Louvre. Their attention to detail and personal touch made it an unforgettable experience."</p>
+                <span>- Emily R. <img src="images/verified.png" alt="Verified" class="verified-badge"></span>
+            </div>
+            <div class="testimonial-card">
+                <img src="images/avatar2.jpg" alt="Michael T." class="testimonial-avatar" loading="lazy">
+                <p>"I’ve traveled with many agencies, but ExploreWorld stands out. Our New York adventure included Broadway tickets and a rooftop dinner—everything was seamless. The deposit process was straightforward, and the bonus was a nice surprise!"</p>
+                <span>- Michael T. <img src="images/verified.png" alt="Verified" class="verified-badge"></span>
+            </div>
+            <div class="testimonial-card">
+                <img src="images/avatar3.jpg" alt="Sophia L." class="testimonial-avatar" loading="lazy">
+                <p>"Tokyo was a dream come true thanks to ExploreWorld. They recommended hidden gems we’d never have found on our own, and the whole booking process was so easy. Their customer service team was always there when we needed them."</p>
+                <span>- Sophia L. <img src="images/verified.png" alt="Verified" class="verified-badge"></span>
+            </div>
+            <div class="testimonial-card">
+                <img src="images/avatar4.jpg" alt="James P." class="testimonial-avatar" loading="lazy">
+                <p>"Bali with ExploreWorld was pure bliss. From the moment we signed up, they took care of everything—flights, villa stay, and even a cooking class. The dashboard made tracking our trip and deposits a breeze."</p>
+                <span>- James P. <img src="images/verified.png" alt="Verified" class="verified-badge"></span>
+            </div>
+            <div class="testimonial-card">
+                <img src="images/avatar5.jpg" alt="Olivia M." class="testimonial-avatar" loading="lazy">
+                <p>"Cape Town was breathtaking, and ExploreWorld made it stress-free. Their deluxe package included a safari that was out of this world. I loved how transparent they were about costs and how quickly they credited my account."</p>
+                <span>- Olivia M. <img src="images/verified.png" alt="Verified" class="verified-badge"></span>
+            </div>
+            <div class="testimonial-card">
+                <img src="images/avatar6.jpg" alt="David K." class="testimonial-avatar" loading="lazy">
+                <p>"Sydney was our family’s best vacation yet, all thanks to ExploreWorld. They tailored the trip to our kids’ interests, and the admin support was top-notch when we had questions about payment. Highly recommend them!"</p>
+                <span>- David K. <img src="images/verified.png" alt="Verified" class="verified-badge"></span>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq parallax">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <h3>How do I open an account with ExploreWorld?</h3>
+                <p>Click on 'Create Account' in the top menu.
+                    Fill in the required information: your full name, a unique username, your email address, and a secure password (at least 8 characters with uppercase, lowercase, and numbers).
+                    Optional: Provide your phone number for better communication.
+                    Agree to our terms and conditions, then click 'Create Account'.
+                    
+                    After successfully registering, you’ll be redirected to the login page. Upon your first login, you’ll see a prompt to verify your identity by contacting our support team. This verification is required before you can book any trips.
+                    If you need assistance at any stage, our customer support team is here to help. Welcome to ExploreWorld—we’re thrilled to have you join our community of travelers!
+                    .</p>
+            </div>
+            <div class="faq-item">
+                <h3>What payment methods are accepted?</h3>
+                <p>We accept bank transfers and Bitcoin (BTC) deposits. Bank transfers require a verified name matching your account, while BTC deposits are credited within 10-60 minutes after confirmation.</p>
+            </div>
+            <div class="faq-item">
+                <h3>How long does it take to process a deposit?</h3>
+                <p>Bank deposits are processed within 1-3 business days, depending on your bank. Crypto deposits (BTC) are credited to your account within 10-60 minutes once the transaction is confirmed on the blockchain.</p>
+            </div>
+            <div class="faq-item">
+                <h3>Can I cancel or change my trip?</h3>
+                <p>Yes, cancellations or changes are possible up to 30 days before departure, subject to our terms. Contact our support team via the form below to discuss your options."</p>
+            </div>
+            <div class="faq-item">
+                <h3>What’s included in the deluxe packages?</h3>
+                <p>Deluxe packages vary by destination but typically include flights, premium accommodations, guided tours, and exclusive experiences. Check the ‘Learn More’ section for each destination for specifics.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="trusted-by">
+        <h2>Trusted By</h2>
+        <div class="trusted-by-grid">
+            <img src="images/travel-association-logo.png" alt="Travel Association Certified" class="trusted-by-logo" loading="lazy">
+            <img src="images/partner2-logo.png" alt="Partner 2" class="trusted-by-logo" loading="lazy">
+            <img src="images/partner3-logo.png" alt="Partner 3" class="trusted-by-logo" loading="lazy">
+        </div>
+    </section>
+
+
+    <section id="contact" class="contact parallax">
+        <h2>Contact Us</h2>
+        <form id="contact-form" class="contact-form-card">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Your Email" required>
+            <textarea name="message" placeholder="Your Message" required></textarea>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+        <div class="footer-links">
+            <div class="footer-row">
+                <a href="partners.html" class="btn footer-btn">Partners</a>
+                <a href="terms.html" class="btn footer-btn">Terms and Conditions</a>
+                <a href="/privacy-policy.html" class="btn footer-btn">Privacy Policy</a>
+                <a href="about.html" class="btn footer-btn">About Us</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="contact-info">
+                <p>Executive Services</p>
+                <p>ExploreWorld, Inc</p>
+                <p>Phone: +1 (718) 635-2839</p>
+                <p>Email: info@exploreworld.com</p>
+                <p>800 Connecticut Avenue, Norwalk, CT 06854</p>
+            </div>
+            <div class="social-icons">
+                <a href="https://twitter.com/exploreworld" target="_blank"><img src="images/default-twitter.png" alt="Twitter" loading="lazy"></a>
+                <a href="https://facebook.com/exploreworld" target="_blank"><img src="images/default-facebook.png" alt="Facebook" loading="lazy"></a>
+                <a href="https://instagram.com/exploreworld" target="_blank"><img src="images/default-instagram.png" alt="Instagram" loading="lazy"></a>
+            </div>
+            <div class="newsletter">
+                <input type="email" placeholder="Your Email">
+                <button class="btn btn-primary">Subscribe</button>
+            </div>
+        </div>
+    </footer>
+
+    <div id="destination-modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="modal-close" class="modal-close">×</span>
+            <div class="modal-inner">
+                <div class="modal-info">
+                    <h2 id="modal-title"></h2>
+                    <p id="modal-description"></p>
+                    <div id="modal-package"></div>
+                </div>
+                <div class="modal-action">
+                    <button id="modal-action-btn" class="btn btn-success"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notifications"></div>
+    <script src="leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
