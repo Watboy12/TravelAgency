@@ -347,35 +347,6 @@ function showAccountCreationThankYouModal() {
     }, 10000);
 }
 
-function showAccountCreationThankYouModal() {
-    console.log('Creating account creation thank you modal');
-    const modal = document.createElement('div');
-    modal.className = 'modal active';
-    modal.innerHTML = `
-         <div class="modal-content">
-            <h2>Welcome to ExploreWorld!</h2>
-            <p>Thank you for creating an account with us. We’re delighted to welcome you to our community of passionate travelers. Your journey to extraordinary adventures starts here!</p>
-            <p>Click OK to go to your dashboard.</p>
-            <button id="close-modal" class="btn btn-primary">OK</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    closeModalOnOutsideClick(modal);
-
-    // Important: Only redirect when user clicks OK
-    document.getElementById('close-modal').onclick = () => {
-        document.body.removeChild(modal);
-        window.location.href = 'client.html';  // This ensures fresh load of dashboard
-    };
-
-    // Optional: Auto-close after 10 seconds as backup
-    setTimeout(() => {
-        if (modal.parentNode) {
-            document.body.removeChild(modal);
-            window.location.href = 'client.html';
-        }
-    }, 10000);
-}
 
 function initCreateAccountForm() {
     const createAccountForm = document.getElementById('create-account-form');
@@ -968,8 +939,8 @@ async function updateUser(username, updates) {
         }
         const data = await response.json();
         if (data.success) {
-            showNotification('User updated successfully.');
-            loadUsers();
+            showNotification('User updated successfully!');
+            loadUsers(); // Refresh the user list
         } else {
             showNotification(data.message || 'Failed to update user.');
         }
