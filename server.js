@@ -290,19 +290,16 @@ app.post('/api/user/:username/update', verifyToken, async (req, res) => {
   }
 });
 
-// Admin Login
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const users = loadUsers();
-    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.role === 'admin');
+    const user = await User.findOne({ username: username.toLowerCase(), role: 'admin' });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
       const token = jwt.sign({ username: user.username, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
-      req.session.user = { username: user.username, role: 'admin' };
       res.json({ success: true, token });
     } else {
       res.json({ success: false, message: 'Invalid admin credentials' });
@@ -314,7 +311,7 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // Get All Users (Admin)
-app.get('/api/admin/users', verifyToken, (req, res) => {
+app.get('/api/admin/users', verifyToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ success: false, message: 'Unauthorized access' });
   }
@@ -322,361 +319,375 @@ app.get('/api/admin/users', verifyToken, (req, res) => {
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
 
-  const users = loadUsers();
-  const paginatedUsers = users.slice(skip, skip + limit).map(user => ({ ...user, password: undefined }));
-  const total = users.length;
-
-  res.json({ users: paginatedUsers, total, page, pages: Math.ceil(total / limit) });
+  try {
+    const users = await User.find().skip(skip).limit(limit).select('-password');
+    const total = await User.countDocuments();
+    res.json({ users, total, page, pages: Math.ceil(total / limit) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // Verify User (Admin)
-app.post('/api/admin/verify/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/verify/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
   const { verified } = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOneAndUpdate(
+      { username: username.toLowerCase() },
+      { verified },
+      { new: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  users[userIndex].verified = verified;
-  saveUsers(users);
-  res.json({ success: true, user: { ...users[userIndex], password: undefined } });
 });
 
 // Update User (Admin)
-app.post('/api/admin/update-user/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/update-user/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
-  const updatedData = req.body;
+  const updates = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOneAndUpdate(
+      { username: username.toLowerCase() },
+      updates,
+      { new: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  Object.assign(users[userIndex], updatedData);
-  saveUsers(users);
-  res.json({ success: true, user: { ...users[userIndex], password: undefined } });
 });
 
 // Clear Vacations (Admin)
-app.post('/api/admin/clear-vacations/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/clear-vacations/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    user.pendingVacations = [];
+    user.upcomingVacations = [];
+    user.completedVacations = [];
+    user.transactions = user.transactions.filter(tx => tx.type !== 'Booking');
+    user.usageHistory = user.usageHistory.filter(h => !h.action.includes('Requested') && !h.action.includes('Approved') && !h.action.includes('Completed'));
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  user.pendingVacations = [];
-  user.upcomingVacations = [];
-  user.completedVacations = [];
-  user.transactions = user.transactions.filter(tx => tx.type !== 'Booking');
-  user.usageHistory = user.usageHistory.filter(h => !h.action.includes('Requested') && !h.action.includes('Approved') && !h.action.includes('Completed'));
-  saveUsers(users);
-
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
 
 // Clear Transactions (Admin)
-app.post('/api/admin/clear-transactions/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/clear-transactions/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    user.transactions = [];
+    user.usageHistory = [];
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  user.transactions = [];
-  user.usageHistory = [];
-  saveUsers(users);
-
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
 
 // Accept Vacation (Admin)
-app.post('/api/admin/accept-vacation/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/accept-vacation/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
   const { vacationIndex } = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1 || !users[userIndex].pendingVacations[vacationIndex]) {
-    return res.status(404).json({ success: false, message: 'User or vacation not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user || !user.pendingVacations[vacationIndex]) {
+      return res.status(404).json({ success: false, message: 'Not found' });
+    }
+    const vacation = user.pendingVacations.splice(vacationIndex, 1)[0];
+    user.upcomingVacations.push(vacation);
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Approved ${vacation.name}`,
+      cost: vacation.cost
+    });
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  const vacation = user.pendingVacations.splice(vacationIndex, 1)[0];
-  user.upcomingVacations.push({ ...vacation });
-  user.usageHistory.push({
-    date: new Date().toISOString().split('T')[0],
-    action: `Approved ${vacation.name}`,
-    cost: vacation.cost
-  });
-  saveUsers(users);
-
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
 
 // Complete Vacation (Admin)
-app.post('/api/admin/complete-vacation/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/complete-vacation/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
   const { vacationIndex } = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1 || !users[userIndex].upcomingVacations[vacationIndex]) {
-    return res.status(404).json({ success: false, message: 'User or vacation not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user || !user.upcomingVacations[vacationIndex]) {
+      return res.status(404).json({ success: false, message: 'User or vacation not found' });
+    }
+
+    const vacation = user.upcomingVacations.splice(vacationIndex, 1)[0];
+    user.completedVacations.push({ ...vacation, completedDate: new Date().toISOString().split('T')[0] });
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Completed ${vacation.name}`,
+      cost: vacation.cost
+    });
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  const vacation = user.upcomingVacations.splice(vacationIndex, 1)[0];
-  user.completedVacations.push({ ...vacation, completedDate: new Date().toISOString().split('T')[0] });
-  user.usageHistory.push({
-    date: new Date().toISOString().split('T')[0],
-    action: `Completed ${vacation.name}`,
-    cost: vacation.cost
-  });
-  saveUsers(users);
-
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
 
 // Update Past Vacation (Admin)
-app.post('/api/admin/update-past-vacation/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/update-past-vacation/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
   const { index, add, ...updatedVacation } = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    if (add) {
+      user.completedVacations.push(add);
+      user.usageHistory.push({
+        date: new Date().toISOString().split('T')[0],
+        action: `Added past vacation ${add.name}`,
+        cost: add.cost
+      });
+    } else if (index !== undefined && user.completedVacations[index]) {
+      Object.assign(user.completedVacations[index], updatedVacation);
+      user.usageHistory.push({
+        date: new Date().toISOString().split('T')[0],
+        action: `Updated past vacation ${updatedVacation.name || user.completedVacations[index].name}`,
+        cost: updatedVacation.cost || user.completedVacations[index].cost
+      });
+    } else {
+      return res.status(404).json({ success: false, message: 'Vacation not found' });
+    }
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-
-  if (add) {
-    user.completedVacations.push(add);
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Added past vacation ${add.name}`,
-      cost: add.cost
-    });
-  } else if (index !== undefined && user.completedVacations[index]) {
-    user.completedVacations[index] = { ...user.completedVacations[index], ...updatedVacation };
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Updated past vacation ${updatedVacation.name}`,
-      cost: updatedVacation.cost
-    });
-  } else {
-    return res.status(404).json({ success: false, message: 'Vacation not found' });
-  }
-
-  saveUsers(users);
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
 
 // Clear Users (Admin)
-app.post('/api/admin/clear-users', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+app.post('/api/admin/clear-users', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+
+  try {
+    await User.deleteMany({ role: { $ne: 'admin' } });
+    res.json({ success: true, message: 'All non-admin users cleared' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  let users = loadUsers();
-  users = users.filter(u => u.role === 'admin');
-  saveUsers(users);
-
-  res.json({ success: true, message: 'All users cleared' });
 });
 
 // Clear Past Vacations (Admin)
-app.post('/api/admin/clear-past-vacations/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/clear-past-vacations/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    user.completedVacations = [];
+    user.usageHistory = user.usageHistory.filter(h => 
+      !h.action.includes('Completed') && 
+      !h.action.includes('Added past vacation') && 
+      !h.action.includes('Updated past vacation')
+    );
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  user.completedVacations = [];
-  user.usageHistory = user.usageHistory.filter(h => !h.action.includes('Completed') && !h.action.includes('Added past vacation') && !h.action.includes('Updated past vacation'));
-  saveUsers(users);
-
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
 
-// Bank Deposit
-app.post('/api/deposit/bank', verifyToken, (req, res) => {
+app.post('/api/deposit/bank', verifyToken, async (req, res) => {
   const { username, amount, payerName } = req.body;
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+    return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1 || users[userIndex].name !== payerName) {
-    return res.json({ success: false, message: 'Payer name does not match or user not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user || user.name !== payerName) {
+      return res.json({ success: false, message: 'Payer name does not match or user not found' });
+    }
+
+    user.pendingDeposits.push({ amount, method: 'Bank', date: new Date().toISOString().split('T')[0], payerName });
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Pending Deposit $${amount} via Bank`,
+      cost: 0
+    });
+    await user.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  user.pendingDeposits = user.pendingDeposits || [];
-  user.pendingDeposits.push({ amount, method: 'Bank', date: new Date().toISOString().split('T')[0], payerName });
-  user.usageHistory.push({
-    date: new Date().toISOString().split('T')[0],
-    action: `Pending Deposit $${amount} via Bank`,
-    cost: 0
-  });
-  saveUsers(users);
-
-  res.json({ success: true });
 });
 
-// Crypto Deposit
-app.post('/api/deposit/crypto', verifyToken, (req, res) => {
+app.post('/api/deposit/crypto', verifyToken, async (req, res) => {
   const { username, amount } = req.body;
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+    return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) return res.json({ success: false, message: 'User not found' });
+
+    user.pendingDeposits.push({ amount, method: 'Crypto', date: new Date().toISOString().split('T')[0] });
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Pending Deposit $${amount} via Crypto`,
+      cost: 0
+    });
+    await user.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  user.pendingDeposits = user.pendingDeposits || [];
-  user.pendingDeposits.push({ amount, method: 'Crypto', date: new Date().toISOString().split('T')[0] });
-  user.usageHistory.push({
-    date: new Date().toISOString().split('T')[0],
-    action: `Pending Deposit $${amount} via Crypto`,
-    cost: 0
-  });
-  saveUsers(users);
-
-  res.json({ success: true });
 });
 
-// Agent Deposit (Added from your old code)
-app.post('/api/deposit/agent', verifyToken, (req, res) => {
+app.post('/api/deposit/agent', verifyToken, async (req, res) => {
   const { username, amount, transactionId, paymentMethod } = req.body;
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+    return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) return res.json({ success: false, message: 'User not found' });
+
+    user.pendingDeposits.push({ 
+      amount, 
+      method: 'Agent', 
+      date: new Date().toISOString().split('T')[0], 
+      transactionId, 
+      paymentMethod 
+    });
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Pending Deposit $${amount} via Agent (${paymentMethod})`,
+      cost: 0
+    });
+    await user.save();
+
+    res.json({ success: true, message: 'Agent deposit submitted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  user.pendingDeposits = user.pendingDeposits || [];
-  user.pendingDeposits.push({ amount, method: 'Agent', date: new Date().toISOString().split('T')[0], transactionId, paymentMethod });
-  user.usageHistory.push({
-    date: new Date().toISOString().split('T')[0],
-    action: `Pending Deposit $${amount} via Agent (${paymentMethod})`,
-    cost: 0
-  });
-  saveUsers(users);
-
-  res.json({ success: true, message: 'Agent deposit submitted successfully' });
 });
 
+
 // Accept Deposit (Admin)
-app.post('/api/admin/accept-deposit/:username', verifyToken, (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+app.post('/api/admin/accept-deposit/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
   const { username } = req.params;
   const { depositIndex } = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1 || !users[userIndex].pendingDeposits[depositIndex]) {
-    return res.status(404).json({ success: false, message: 'User or deposit not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user || !user.pendingDeposits[depositIndex]) {
+      return res.status(404).json({ success: false, message: 'User or deposit not found' });
+    }
+
+    const deposit = user.pendingDeposits.splice(depositIndex, 1)[0];
+    user.balance += deposit.amount;
+    user.deposits += deposit.amount;
+    user.transactions.push({
+      date: new Date().toISOString().split('T')[0],
+      type: 'Deposit',
+      amount: deposit.amount
+    });
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Approved Deposit $${deposit.amount} via ${deposit.method}`,
+      cost: 0
+    });
+    user.lastDepositAccepted = { amount: deposit.amount, timestamp: new Date().toISOString() };
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  const deposit = user.pendingDeposits.splice(depositIndex, 1)[0];
-  user.balance += deposit.amount;
-  user.deposits += deposit.amount;
-  user.transactions.push({
-    date: new Date().toISOString().split('T')[0],
-    type: 'Deposit',
-    amount: deposit.amount
-  });
-  user.usageHistory.push({
-    date: new Date().toISOString().split('T')[0],
-    action: `Approved Deposit $${deposit.amount} via ${deposit.method}`,
-    cost: 0
-  });
-  user.lastDepositAccepted = { amount: deposit.amount, timestamp: new Date().toISOString() };
-  saveUsers(users);
-
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
 
 // Rate Vacation
-app.post('/api/user/:username/rate-vacation', verifyToken, (req, res) => {
+app.post('/api/user/:username/rate-vacation', verifyToken, async (req, res) => {
   const { username } = req.params;
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
+    return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
   const { index, rating, comment } = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1 || !users[userIndex].completedVacations[index]) {
-    return res.status(404).json({ success: false, message: 'User or vacation not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user || !user.completedVacations[index]) {
+      return res.status(404).json({ success: false, message: 'User or vacation not found' });
+    }
+
+    user.completedVacations[index].rating = rating;
+    user.completedVacations[index].comment = comment;
+    user.usageHistory.push({
+      date: new Date().toISOString().split('T')[0],
+      action: `Rated ${user.completedVacations[index].name} (${rating}/5)`,
+      cost: 0
+    });
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-
-  const user = users[userIndex];
-  user.completedVacations[index].rating = rating;
-  user.completedVacations[index].comment = comment;
-  user.usageHistory.push({
-    date: new Date().toISOString().split('T')[0],
-    action: `Rated ${user.completedVacations[index].name} (${rating}/5)`,
-    cost: 0
-  });
-  saveUsers(users);
-
-  res.json({ success: true, user: { ...user, password: undefined } });
 });
-
 
 // Define the hot destinations file path
 const HOT_DESTINATIONS_FILE = path.join(__dirname, 'hotDestinations.json');
