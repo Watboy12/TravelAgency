@@ -1,6 +1,9 @@
 const express = require('express');
+const app = express();
+app.set('trust proxy', 1);
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
@@ -9,16 +12,18 @@ const jwt = require('jsonwebtoken');
 const session = require('express-session');
 require('dotenv').config();
 
-const app = express();
 const port = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/exploreworld';
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB successfully'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 30000,
+  connectTimeoutMS: 30000
+})
+.then(() => console.log('Connected to MongoDB successfully'))
+.catch(err => console.error('MongoDB connection error:', err));
 
   // User Schema and Model
 const userSchema = new mongoose.Schema({
