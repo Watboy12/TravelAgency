@@ -101,24 +101,6 @@ app.use('/fonts', express.static(path.join(__dirname, 'fonts')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/create-admin', async (req, res) => {
-  const existing = await User.findOne({ role: 'admin' });
-  if (!existing) {
-    const hashed = await bcrypt.hash('YourStrongPassword123', 10);
-    const admin = new User({
-      name: 'Admin',
-      username: 'admin',
-      email: 'admin@exploreworld.com',
-      password: hashed,
-      role: 'admin',
-      verified: true
-    });
-    await admin.save();
-    res.send('Admin created! Username: admin, Password: YourStrongPassword123');
-  } else {
-    res.send('Admin already exists');
-  }
-});
 
 // Rate Limiting
 const createAccountLimiter = rateLimit({
