@@ -109,14 +109,20 @@ function loadUserData(username) {
             const pendingDeposits = document.getElementById('pending-deposits');
             if (pendingDeposits) pendingDeposits.textContent = (user.pendingDeposits || []).reduce((sum, dep) => sum + (dep.amount || 0), 0).toFixed(2);
 
-            const userEmail = document.getElementById('user-email');
-            if (userEmail) userEmail.textContent = user.personalInfo?.email || 'Not set';
+const userEmail = document.getElementById('user-email');
+if (userEmail) userEmail.textContent = user.personalInfo?.email || user.email || 'Not set';
 
-            const userPhone = document.getElementById('user-phone');
-            if (userPhone) userPhone.textContent = user.personalInfo?.phone || 'Not set';
+const userPhone = document.getElementById('user-phone');
+if (userPhone) userPhone.textContent = user.personalInfo?.phone || user.phone || 'Not set';
 
-            const userAddress = document.getElementById('user-address');
-            if (userAddress) userAddress.textContent = user.personalInfo?.address || 'Not set';
+const userAddress = document.getElementById('user-address');
+if (userAddress) userAddress.textContent = user.personalInfo?.address || 'Not set';
+
+const userVerified = document.getElementById('user-verified');
+if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
+
+const userVerificationMethod = document.getElementById('user-verification-method');
+if (userVerificationMethod) userVerificationMethod.textContent = user.verificationMethod || 'None';
 
             const pendingVacations = document.getElementById('pending-vacations');
             if (pendingVacations) {
@@ -319,48 +325,56 @@ function showAccountCreationThankYouModal() {
          <div class="modal-content">
             <h2>Welcome to ExploreWorld!</h2>
             <p>Thank you for creating an account with us. We’re delighted to welcome you to our community of passionate travelers. Your journey to extraordinary adventures starts here!</p>
-            <p>You’ll be redirected to the login page in a moment. If you’re not redirected, <a href="login.html">click here</a>.</p>
+            <p>Click OK to go to your dashboard.</p>
             <button id="close-modal" class="btn btn-primary">OK</button>
         </div>
     `;
     document.body.appendChild(modal);
-    console.log('Modal appended to body:', modal);
     closeModalOnOutsideClick(modal);
 
-    document.getElementById('close-modal').addEventListener('click', () => {
+    // Important: Only redirect when user clicks OK
+    document.getElementById('close-modal').onclick = () => {
         document.body.removeChild(modal);
-        window.location.href = 'login.html';
-    });
+        window.location.href = 'client.html';  // This ensures fresh load of dashboard
+    };
+
+    // Optional: Auto-close after 10 seconds as backup
     setTimeout(() => {
         if (modal.parentNode) {
             document.body.removeChild(modal);
-            window.location.href = 'login.html';
+            window.location.href = 'client.html';
         }
-    }, 5000);
+    }, 10000);
 }
 
-function showThankYouModal(destination) {
+function showAccountCreationThankYouModal() {
+    console.log('Creating account creation thank you modal');
     const modal = document.createElement('div');
     modal.className = 'modal active';
-    const packageName = destination?.deluxePackage?.name || 'Unknown Package';
     modal.innerHTML = `
-        <div class="modal-content thank-you-modal">
-            <h2>Thank You!</h2>
-            <p>Your booking for <strong>${packageName}</strong> has been successfully requested.</p>
-            <p>We appreciate your trust in ExploreWorld. Full details of your trip, including the confirmed date, will be sent to your email shortly.</p>
+         <div class="modal-content">
+            <h2>Welcome to ExploreWorld!</h2>
+            <p>Thank you for creating an account with us. We’re delighted to welcome you to our community of passionate travelers. Your journey to extraordinary adventures starts here!</p>
+            <p>Click OK to go to your dashboard.</p>
             <button id="close-modal" class="btn btn-primary">OK</button>
         </div>
     `;
-    
     document.body.appendChild(modal);
     closeModalOnOutsideClick(modal);
 
-    document.getElementById('close-modal').addEventListener('click', () => {
+    // Important: Only redirect when user clicks OK
+    document.getElementById('close-modal').onclick = () => {
         document.body.removeChild(modal);
-    });
+        window.location.href = 'client.html';  // This ensures fresh load of dashboard
+    };
+
+    // Optional: Auto-close after 10 seconds as backup
     setTimeout(() => {
-        if (modal.parentNode) document.body.removeChild(modal);
-    }, 5000);
+        if (modal.parentNode) {
+            document.body.removeChild(modal);
+            window.location.href = 'client.html';
+        }
+    }, 10000);
 }
 
 function initCreateAccountForm() {
