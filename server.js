@@ -1,9 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
@@ -13,27 +13,44 @@ const app = express();
 const port = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
-const USERS_FILE = path.join(__dirname, 'users.json');
+// MongoDB Connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/exploreworld';
 
-// Load users from users.json
-function loadUsers() {
-  try {
-    const data = fs.readFileSync(USERS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Error loading users:', err);
-    return [];
-  }
-}
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB successfully'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-// Save users to users.json
-function saveUsers(users) {
-  try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-  } catch (err) {
-    console.error('Error saving users:', err);
-  }
-}
+  // User Schema and Model
+const userSchema = new mongoose.Schema({
+  name: String,
+  username: { type: String, unique: true, lowercase: true },
+  email: { type: String, unique: true, lowercase: true },
+  phone: String,
+  password: String,
+  balance: { type: Number, default: 0 },
+  deposits: { type: Number, default: 0 },
+  bonus: { type: Number, default: 0 },
+  verified: { type: Boolean, default: false },
+  verificationMethod: String,
+  pendingVacations: [Object],
+  upcomingVacations: [Object],
+  completedVacations: [Object],
+  transactions: [Object],
+  usageHistory: [Object],
+  profilePic: { type: String, default: 'images/default-pic.jpg' },
+  pendingDeposits: [Object],
+  lastDepositAccepted: Object,
+  personalInfo: {
+    email: String,
+    phone: String,
+    address: String
+  },
+  role: { type: String, default: 'user' }
+});
+
+const User = mongoose.model('User', userSchema);
+
+
 
 // Token verification middleware
 function verifyToken(req, res, next) {
@@ -109,7 +126,6 @@ app.get('/partners.html', (req, res) => res.sendFile(path.join(__dirname, 'partn
 app.get('/terms.html', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
 app.get('/about.html', (req, res) => res.sendFile(path.join(__dirname, 'about.html')));
 
-// Create Account
 app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   const { name, username, email, phone, password } = req.body;
 
@@ -127,14 +143,15 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   }
 
   try {
-    const users = loadUsers();
-    const existingUser = users.find(u => u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
+    const existingUser = await User.findOne({
+      $or: [{ username: username.toLowerCase() }, { email: email.toLowerCase() }]
+    });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Username or email already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
+    const newUser = new User({
       name,
       username: username.toLowerCase(),
       email: email.toLowerCase(),
@@ -155,10 +172,9 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
       lastDepositAccepted: {},
       personalInfo: { email: email.toLowerCase(), phone: phone || 'Not set', address: 'Not set' },
       role: 'user'
-    };
+    });
 
-    users.push(newUser);
-    saveUsers(users);
+    await newUser.save();
 
     const token = jwt.sign({ username: newUser.username, role: newUser.role }, JWT_SECRET, { expiresIn: '1h' });
     req.session.user = { username: newUser.username, role: newUser.role };
@@ -169,12 +185,10 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   }
 });
 
-// Login
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const users = loadUsers();
-    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    const user = await User.findOne({ username: username.toLowerCase() });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -185,7 +199,7 @@ app.post('/api/login', async (req, res) => {
       res.status(200).json({
         success: true,
         token,
-        user: { ...user, password: undefined }
+        user: { ...user.toObject(), password: undefined }
       });
     } else {
       res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -196,77 +210,84 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Get User
-app.get('/api/user/:username', verifyToken, (req, res) => {
+app.get('/api/user/:username', verifyToken, async (req, res) => {
   const { username } = req.params;
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
     return res.status(403).json({ success: false, message: 'Unauthorized access' });
   }
-  const users = loadUsers();
-  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-  if (user) {
-    res.json({ ...user, password: undefined });
-  } else {
-    res.status(404).json({ success: false, message: 'User not found' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (user) {
+      const userObj = user.toObject();
+      delete userObj.password;
+      res.json(userObj);
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Update User
-app.post('/api/user/:username/update', verifyToken, (req, res) => {
+app.post('/api/user/:username/update', verifyToken, async (req, res) => {
   const { username } = req.params;
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
     return res.status(403).json({ success: false, message: 'Unauthorized access' });
   }
   const { deposit, vacation, bonus } = req.body;
 
-  const users = loadUsers();
-  const userIndex = users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-  if (userIndex === -1) {
-    return res.status(404).json({ success: false, message: 'User not found' });
-  }
-
-  const user = users[userIndex];
-
-  if (deposit) {
-    user.balance += deposit;
-    user.deposits += deposit;
-    user.transactions.push({
-      date: new Date().toISOString().split('T')[0],
-      type: 'Deposit',
-      amount: deposit
-    });
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Deposited $${deposit}`,
-      cost: 0
-    });
-  }
-
-  if (vacation) {
-    if (user.balance < vacation.cost) {
-      return res.status(400).json({ success: false, message: 'Insufficient balance' });
+  try {
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-    user.balance -= vacation.cost;
-    user.pendingVacations.push({
-      name: vacation.name,
-      cost: vacation.cost,
-      date: new Date().toISOString().split('T')[0]
-    });
-    user.transactions.push({
-      date: new Date().toISOString().split('T')[0],
-      type: 'Booking',
-      amount: vacation.cost
-    });
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Requested ${vacation.name}`,
-      cost: vacation.cost
-    });
-    user.bonus = (user.bonus || 0) + (bonus || 500);
-  }
 
-  saveUsers(users);
-  res.json({ success: true, user: { ...user, password: undefined } });
+    if (deposit) {
+      user.balance += deposit;
+      user.deposits += deposit;
+      user.transactions.push({
+        date: new Date().toISOString().split('T')[0],
+        type: 'Deposit',
+        amount: deposit
+      });
+      user.usageHistory.push({
+        date: new Date().toISOString().split('T')[0],
+        action: `Deposited $${deposit}`,
+        cost: 0
+      });
+    }
+
+    if (vacation) {
+      if (user.balance < vacation.cost) {
+        return res.status(400).json({ success: false, message: 'Insufficient balance' });
+      }
+      user.balance -= vacation.cost;
+      user.pendingVacations.push({
+        name: vacation.name,
+        cost: vacation.cost,
+        date: new Date().toISOString().split('T')[0]
+      });
+      user.transactions.push({
+        date: new Date().toISOString().split('T')[0],
+        type: 'Booking',
+        amount: vacation.cost
+      });
+      user.usageHistory.push({
+        date: new Date().toISOString().split('T')[0],
+        action: `Requested ${vacation.name}`,
+        cost: vacation.cost
+      });
+      user.bonus = (user.bonus || 0) + (bonus || 500);
+    }
+
+    await user.save();
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.json({ success: true, user: userObj });
+  } catch (err) {
+    console.error('Error updating user:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // Admin Login
