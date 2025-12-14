@@ -36,7 +36,6 @@ const userSchema = new mongoose.Schema({
   deposits: { type: Number, default: 0 },
   bonus: { type: Number, default: 0 },
   verified: { type: Boolean, default: false },
-  verificationMethod: String,
   pendingVacations: [Object],
   upcomingVacations: [Object],
   completedVacations: [Object],
@@ -166,7 +165,6 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
       deposits: 0,
       bonus: 0,
       verified: false,
-      verificationMethod: '',
       pendingVacations: [],
       upcomingVacations: [],
       completedVacations: [],
@@ -351,22 +349,45 @@ app.post('/api/admin/verify/:username', verifyToken, async (req, res) => {
   }
 });
 
-// Update User (Admin)
+// Update User (Admin) - FIXED VERSION
 app.post('/api/admin/update-user/:username', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized' });
+  }
   const { username } = req.params;
-  const updates = req.body;
+  let updates = req.body;
 
   try {
+    // Build the update object safely
+    const updateObj = { $set: {} };
+
+    // Top-level fields
+    if (updates.name !== undefined) updateObj.$set.name = updates.name;
+    if (updates.balance !== undefined) updateObj.$set.balance = Number(updates.balance);
+    if (updates.bonus !== undefined) updateObj.$set.bonus = Number(updates.bonus);
+    if (updates.deposits !== undefined) updateObj.$set.deposits = Number(updates.deposits);
+
+    // Nested personalInfo fields
+    if (updates.personalInfo) {
+      if (updates.personalInfo.email !== undefined) updateObj.$set['personalInfo.email'] = updates.personalInfo.email;
+      if (updates.personalInfo.phone !== undefined) updateObj.$set['personalInfo.phone'] = updates.personalInfo.phone || '';
+      if (updates.personalInfo.address !== undefined) updateObj.$set['personalInfo.address'] = updates.personalInfo.address || '';
+    }
+
     const user = await User.findOneAndUpdate(
       { username: username.toLowerCase() },
-      updates,
-      { new: true }
+      updateObj,
+      { new: true, runValidators: true }
     ).select('-password');
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
     res.json({ success: true, user });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error updating user (admin):', err);
+    res.status(500).json({ success: false, message: 'Server error while updating user' });
   }
 });
 
