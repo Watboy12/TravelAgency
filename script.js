@@ -1782,7 +1782,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initTravelQuiz();
     loadDestinations();
     initHotDestinations();
-    if (window.location.pathname.split('/').pop() === 'client.html') {
+     if (window.location.pathname.split('/').pop() === 'client.html') {
+        const username = localStorage.getItem('username');
+        if (username) {
+            loadUserData(username);  // This loads name, email, phone, verified, balance, etc.
+        } else {
+            showNotification('Please log in to view your dashboard.');
+            window.location.href = 'login.html';
+        }
         loadCurrentDestinations();
     }
 
