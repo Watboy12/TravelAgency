@@ -94,9 +94,6 @@ function loadUserData(username) {
             const userName = document.getElementById('user-name');
             if (userName) userName.textContent = user.name || 'User';
 
-            const userPic = document.getElementById('user-pic');
-            if (userPic) userPic.src = user.profilePic || 'images/default-pic.jpg';
-
             const userBalance = document.getElementById('user-balance');
             if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
 
@@ -1108,7 +1105,6 @@ function loadUsers() {
                     <input type="text" name="email" value="${user.personalInfo?.email || user.email || ''}" placeholder="Email">
                     <input type="text" name="phone" value="${user.personalInfo?.phone || user.phone || ''}" placeholder="Phone">
                     <input type="text" name="address" value="${user.personalInfo?.address || ''}" placeholder="Address">
-                    <input type="file" name="profilePic" accept="image/*">
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
                 <button class="btn btn-danger btn-clear-vacations" data-username="${user.username}">Clear Vacation History</button>
@@ -1166,12 +1162,7 @@ function loadUsers() {
                         address: formData.get('address')
                     }
                 };
-                const profilePic = formData.get('profilePic');
-                if (profilePic.size > 0) {
-                    uploadAdminProfilePic(username, formData);
-                } else {
-                    updateUser(username, updates);
-                }
+              updateUser(username, updates);
             });
 
             div.querySelectorAll('.verify-checkbox').forEach(checkbox => {

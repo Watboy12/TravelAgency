@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema({
   completedVacations: [Object],
   transactions: [Object],
   usageHistory: [Object],
-  profilePic: { type: String, default: 'images/default-pic.jpg' },
   pendingDeposits: [Object],
   lastDepositAccepted: Object,
   personalInfo: {
@@ -173,7 +172,6 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
       completedVacations: [],
       transactions: [],
       usageHistory: [],
-      profilePic: 'images/default-pic.jpg',
       pendingDeposits: [],
       lastDepositAccepted: {},
       personalInfo: { email: email.toLowerCase(), phone: phone || 'Not set', address: 'Not set' },

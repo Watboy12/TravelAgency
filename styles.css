@@ -821,27 +821,6 @@ nav {
     margin-bottom: 10px;
 }
 
-.profile-pic-container {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 15px;
-}
-
-.profile-pic {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 15px;
-    border: 3px solid #00ffcc;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.profile-pic:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
-}
-
 .vacation-list {
     list-style: none;
     padding: 0;
