@@ -118,9 +118,6 @@ if (userAddress) userAddress.textContent = user.personalInfo?.address || 'Not se
 const userVerified = document.getElementById('user-verified');
 if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
 
-const userVerificationMethod = document.getElementById('user-verification-method');
-if (userVerificationMethod) userVerificationMethod.textContent = user.verificationMethod || 'None';
-
             const pendingVacations = document.getElementById('pending-vacations');
             if (pendingVacations) {
                 pendingVacations.innerHTML = '';
@@ -1775,6 +1772,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('nav-links element not found');
     }
+
+        // Auto-refresh dashboard when returning to the tab
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && window.location.pathname.endsWith('client.html')) {
+            const username = localStorage.getItem('username');
+            if (username) {
+                loadUserData(username);
+            }
+        }
+    });
 
 
     initMenu();
