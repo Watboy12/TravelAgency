@@ -5,14 +5,30 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const { supabase } = require('./lib/supabase');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
 require('dotenv').config();
 
-const port = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+// lib/supabase.js (or wherever your client is created)
+const { createClient } = require('@supabase/supabase-js');
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;  // ← new key
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Missing Supabase URL or Service Role Key');
+}
+
+// Create admin client with service_role key (bypasses RLS)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
+
+module.exports = { supabaseAdmin };  // Export the admin client
 
 
 
@@ -72,7 +88,7 @@ const createAccountLimiter = rateLimit({
 app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   const { name, username, email, phone, password } = req.body;
 
-  // Keep validation
+  // Validation (unchanged)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -87,19 +103,27 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   }
 
   try {
-    const response = await fetch(
-      'https://yktgsxfpvmloocrlvuhb.supabase.co/functions/v1/create-user-profile', // ← replace with YOUR function URL
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, username, email, phone, password })
-      }
-    );
+    console.log('Creating account for:', { username, email }); // ← helps debug in Vercel logs
+
+    const functionUrl = 'https://yktgsxfpvmloocrlvuhb.supabase.co/functions/v1/create-user-profile';
+
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, username, email, phone, password })
+    });
 
     const data = await response.json();
 
-    if (!data.success) {
-      return res.status(response.status).json(data);
+    console.log('Edge function response:', { status: response.status, data }); // ← log full response
+
+    if (!response.ok || !data.success) {
+      return res.status(response.status).json({
+        success: false,
+        message: data.message || 'Failed to create account via Supabase function'
+      });
     }
 
     // Generate your custom JWT
@@ -116,8 +140,8 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Proxy error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error proxying to Edge Function:', err.message, err.stack);
+    res.status(500).json({ success: false, message: 'Server error during account creation' });
   }
 });
 
