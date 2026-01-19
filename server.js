@@ -5,8 +5,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const { supabase } = require('./lib/supabase');
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
@@ -14,44 +14,6 @@ require('dotenv').config();
 
 const port = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
-
-// MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/exploreworld';
-
-mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 30000,
-  connectTimeoutMS: 30000
-})
-.then(() => console.log('Connected to MongoDB successfully'))
-.catch(err => console.error('MongoDB connection error:', err));
-
-  // User Schema and Model
-const userSchema = new mongoose.Schema({
-  name: String,
-  username: { type: String, unique: true, lowercase: true },
-  email: { type: String, unique: true, lowercase: true },
-  phone: String,
-  password: String,
-  balance: { type: Number, default: 0 },
-  deposits: { type: Number, default: 0 },
-  bonus: { type: Number, default: 0 },
-  verified: { type: Boolean, default: false },
-  pendingVacations: [Object],
-  upcomingVacations: [Object],
-  completedVacations: [Object],
-  transactions: [Object],
-  usageHistory: [Object],
-  pendingDeposits: [Object],
-  lastDepositAccepted: Object,
-  personalInfo: {
-    email: String,
-    phone: String,
-    address: String
-  },
-  role: { type: String, default: 'user' }
-});
-
-const User = mongoose.model('User', userSchema);
 
 
 
@@ -133,6 +95,7 @@ app.get('/about.html', (req, res) => res.sendFile(path.join(__dirname, 'about.ht
 app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   const { name, username, email, phone, password } = req.body;
 
+  // Your existing validation – keep it
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -147,43 +110,78 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   }
 
   try {
-    const existingUser = await User.findOne({
-      $or: [{ username: username.toLowerCase() }, { email: email.toLowerCase() }]
+    // 1. Sign up with Supabase Auth (creates auth.users entry)
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      email: email.toLowerCase(),
+      password,
+      options: {
+        data: { 
+          name, 
+          username: username.toLowerCase(),
+          phone: phone || null
+        }
+      }
     });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Username or email already exists' });
+
+    if (signUpError) {
+      console.error('Supabase signUp error:', signUpError);
+      return res.status(400).json({ success: false, message: signUpError.message });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      name,
-      username: username.toLowerCase(),
-      email: email.toLowerCase(),
-      phone: phone || '',
-      password: hashedPassword,
-      balance: 0,
-      deposits: 0,
-      bonus: 0,
-      verified: false,
-      pendingVacations: [],
-      upcomingVacations: [],
-      completedVacations: [],
-      transactions: [],
-      usageHistory: [],
-      pendingDeposits: [],
-      lastDepositAccepted: {},
-      personalInfo: { email: email.toLowerCase(), phone: phone || 'Not set', address: 'Not set' },
-      role: 'user'
+    if (!authData.user) {
+      return res.status(500).json({ success: false, message: 'No user returned from signup' });
+    }
+
+    const userId = authData.user.id;
+
+    // 2. Insert extra profile data into public.users table
+    // (You must have created this table in Supabase first – see Step 5 below)
+    const { error: profileError } = await supabase
+      .from('users')
+      .insert({
+        id: userId,
+        name,
+        username: username.toLowerCase(),
+        email: email.toLowerCase(),
+        phone: phone || null,
+        balance: 0,
+        deposits: 0,
+        bonus: 0,
+        verified: false,
+        pending_vacations: [],
+        upcoming_vacations: [],
+        completed_vacations: [],
+        transactions: [],
+        usage_history: [],
+        pending_deposits: [],
+        last_deposit_accepted: null,
+        role: 'user'
+      });
+
+    if (profileError) {
+      console.error('Profile insert error:', profileError);
+      // Optional: delete the auth user if profile fails (cleanup)
+      await supabase.auth.admin.deleteUser(userId);
+      return res.status(500).json({ success: false, message: 'Failed to create user profile' });
+    }
+
+    // 3. Generate JWT (you can use Supabase session or your own)
+    // For simplicity, we'll create a custom token like before
+    const token = jwt.sign(
+      { username: username.toLowerCase(), role: 'user' },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({ 
+      success: true, 
+      message: 'Account created successfully', 
+      token 
     });
 
-    await newUser.save();
-
-    const token = jwt.sign({ username: newUser.username, role: newUser.role }, JWT_SECRET, { expiresIn: '1h' });
-    req.session.user = { username: newUser.username, role: newUser.role };
-    res.json({ success: true, message: 'Account created', token });
   } catch (err) {
-    console.error('Error creating account:', err);
-    res.status(500).json({ success: false, message: 'Error creating account' });
+    console.error('Error in create-account:', err);
+    res.status(500).json({ success: false, message: 'Server error during account creation' });
   }
 });
 
