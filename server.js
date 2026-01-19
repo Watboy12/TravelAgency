@@ -88,7 +88,7 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
 
   try {
     const response = await fetch(
-      'https://yktgsxfpvmloocrlvuhb.supabase.co/functions/v1/clever-processor', // ← replace with YOUR function URL
+      'https://yktgsxfpvmloocrlvuhb.supabase.co/functions/v1/create-user-profile', // ← replace with YOUR function URL
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
