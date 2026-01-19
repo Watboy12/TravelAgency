@@ -6,7 +6,6 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 const { supabase } = require('./lib/supabase');
-const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
@@ -68,34 +67,10 @@ const createAccountLimiter = rateLimit({
   max: 5,
   message: { success: false, message: 'Too many account creation attempts. Please try again later.' }
 });
-app.use('/api/create-account', createAccountLimiter);
-
-// Multer for File Uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'images/'),
-  filename: (req, file, cb) => {
-    const fieldName = file.fieldname;
-    cb(null, `${fieldName}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-const upload = multer({ storage });
-
-// Routes
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
-app.get('/destinations', (req, res) => res.sendFile(path.join(__dirname, 'destinations.html')));
-app.get('/client', (req, res) => res.sendFile(path.join(__dirname, 'client.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-app.get('/create-account.html', (req, res) => res.sendFile(path.join(__dirname, 'create-account.html')));
-app.get('/deposit.html', (req, res) => res.sendFile(path.join(__dirname, 'deposit.html')));
-app.get('/partners.html', (req, res) => res.sendFile(path.join(__dirname, 'partners.html')));
-app.get('/terms.html', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
-app.get('/about.html', (req, res) => res.sendFile(path.join(__dirname, 'about.html')));
-
 app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   const { name, username, email, phone, password } = req.body;
 
-  // Your existing validation – keep it
+  // Keep your excellent validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -110,78 +85,71 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   }
 
   try {
-    // 1. Sign up with Supabase Auth (creates auth.users entry)
+    // 1. Create user in Supabase Auth (automatically hashes password)
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: email.toLowerCase(),
-      password,
+      email: email.toLowerCase().trim(),
+      password: password.trim(),
       options: {
-        data: { 
-          name, 
-          username: username.toLowerCase(),
-          phone: phone || null
+        data: {
+          full_name: name.trim(),
+          username: username.toLowerCase().trim()
         }
       }
     });
 
     if (signUpError) {
-      console.error('Supabase signUp error:', signUpError);
+      console.error('Supabase signup error:', signUpError.message);
       return res.status(400).json({ success: false, message: signUpError.message });
     }
 
-    if (!authData.user) {
-      return res.status(500).json({ success: false, message: 'No user returned from signup' });
+    if (!authData?.user) {
+      return res.status(500).json({ success: false, message: 'Signup failed - no user returned' });
     }
 
     const userId = authData.user.id;
 
-    // 2. Insert extra profile data into public.users table
-    // (You must have created this table in Supabase first – see Step 5 below)
+    // 2. Insert into your public.profiles table (matches your table schema)
     const { error: profileError } = await supabase
-      .from('users')
+      .from('profiles')
       .insert({
         id: userId,
-        name,
-        username: username.toLowerCase(),
-        email: email.toLowerCase(),
-        phone: phone || null,
+        username: username.toLowerCase().trim(),
+        full_name: name.trim(),
+        email: email.toLowerCase().trim(),
+        phone: phone ? phone.trim() : null,
         balance: 0,
         deposits: 0,
         bonus: 0,
-        verified: false,
-        pending_vacations: [],
-        upcoming_vacations: [],
-        completed_vacations: [],
-        transactions: [],
-        usage_history: [],
-        pending_deposits: [],
-        last_deposit_accepted: null,
-        role: 'user'
-      });
+        verified: false
+        // You can add more defaults here later, e.g.:
+        // pending_vacations: [], etc.
+      })
+      .select()
+      .single();
 
     if (profileError) {
-      console.error('Profile insert error:', profileError);
-      // Optional: delete the auth user if profile fails (cleanup)
+      console.error('Profile insert error:', profileError.message);
+      // Clean up: delete the auth user if profile fails
       await supabase.auth.admin.deleteUser(userId);
       return res.status(500).json({ success: false, message: 'Failed to create user profile' });
     }
 
-    // 3. Generate JWT (you can use Supabase session or your own)
-    // For simplicity, we'll create a custom token like before
+    // 3. Generate your custom JWT (same as before)
     const token = jwt.sign(
-      { username: username.toLowerCase(), role: 'user' },
+      { username: username.toLowerCase().trim(), role: 'user' },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.json({ 
-      success: true, 
-      message: 'Account created successfully', 
-      token 
+    res.json({
+      success: true,
+      message: 'Account created successfully',
+      token
     });
 
   } catch (err) {
-    console.error('Error in create-account:', err);
-    res.status(500).json({ success: false, message: 'Server error during account creation' });
+    console.error('Create account server error:', err.message, err.stack);
+    res.status(500).json({ success: false, message: 'Server error - please try again later' });
   }
 });
 
