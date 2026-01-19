@@ -67,10 +67,12 @@ const createAccountLimiter = rateLimit({
   max: 5,
   message: { success: false, message: 'Too many account creation attempts. Please try again later.' }
 });
+
+
 app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   const { name, username, email, phone, password } = req.body;
 
-  // Keep your excellent validation
+  // Keep validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -85,56 +87,22 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   }
 
   try {
-    // 1. Create user in Supabase Auth (automatically hashes password)
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: email.toLowerCase().trim(),
-      password: password.trim(),
-      options: {
-        data: {
-          full_name: name.trim(),
-          username: username.toLowerCase().trim()
-        }
+    const response = await fetch(
+      'https://yktgsxfpvmloocrlvuhb.supabase.co/functions/v1/clever-processor', // ← replace with YOUR function URL
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, username, email, phone, password })
       }
-    });
+    );
 
-    if (signUpError) {
-      console.error('Supabase signup error:', signUpError.message);
-      return res.status(400).json({ success: false, message: signUpError.message });
+    const data = await response.json();
+
+    if (!data.success) {
+      return res.status(response.status).json(data);
     }
 
-    if (!authData?.user) {
-      return res.status(500).json({ success: false, message: 'Signup failed - no user returned' });
-    }
-
-    const userId = authData.user.id;
-
-    // 2. Insert into your public.profiles table (matches your table schema)
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: userId,
-        username: username.toLowerCase().trim(),
-        full_name: name.trim(),
-        email: email.toLowerCase().trim(),
-        phone: phone ? phone.trim() : null,
-        balance: 0,
-        deposits: 0,
-        bonus: 0,
-        verified: false
-        // You can add more defaults here later, e.g.:
-        // pending_vacations: [], etc.
-      })
-      .select()
-      .single();
-
-    if (profileError) {
-      console.error('Profile insert error:', profileError.message);
-      // Clean up: delete the auth user if profile fails
-      await supabase.auth.admin.deleteUser(userId);
-      return res.status(500).json({ success: false, message: 'Failed to create user profile' });
-    }
-
-    // 3. Generate your custom JWT (same as before)
+    // Generate your custom JWT
     const token = jwt.sign(
       { username: username.toLowerCase().trim(), role: 'user' },
       JWT_SECRET,
@@ -148,8 +116,8 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Create account server error:', err.message, err.stack);
-    res.status(500).json({ success: false, message: 'Server error - please try again later' });
+    console.error('Proxy error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
