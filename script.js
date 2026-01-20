@@ -243,9 +243,22 @@ function initLoginForm() {
         console.log('Login form found');
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const emailOrUsername = document.getElementById('email').value.trim(); // or 'username' if you keep the ID
-            const password = document.getElementById('password').value;
-            console.log('Attempting login with:', username, password);
+
+            // Read from the correct input ID (change 'username' to match your HTML)
+            const emailOrUsername = document.getElementById('username')?.value?.trim();  // ← safe with ?
+            const password = document.getElementById('password')?.value;
+
+            if (!emailOrUsername || !password) {
+                const errorMessage = document.getElementById('error-message');
+                if (errorMessage) {
+                    errorMessage.textContent = 'Please fill in both fields.';
+                    errorMessage.classList.remove('hidden');
+                }
+                return;
+            }
+
+            console.log('Attempting login with:', emailOrUsername);
+
             fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -254,7 +267,6 @@ function initLoginForm() {
             .then(response => {
                 console.log('Response status:', response.status);
                 if (!response.ok) {
-                    // Throw an error if the response isn’t successful (e.g., 401 or 500)
                     throw new Error(`Login failed with status: ${response.status}`);
                 }
                 return response.json();
@@ -263,11 +275,11 @@ function initLoginForm() {
                 console.log('Response data:', data);
                 if (data.success) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', username);
+                    localStorage.setItem('username', emailOrUsername);  // store what user entered
                     window.location.href = 'client.html';
                 } else {
                     const errorMessage = document.getElementById('error-message');
-                    if (errorMessage) { // Check if the element exists to avoid errors
+                    if (errorMessage) {
                         errorMessage.textContent = data.message || 'Invalid credentials';
                         errorMessage.classList.remove('hidden');
                     }
@@ -277,7 +289,7 @@ function initLoginForm() {
             .catch(error => {
                 console.error('Login error:', error);
                 const errorMessage = document.getElementById('error-message');
-                if (errorMessage) { // Same check here
+                if (errorMessage) {
                     errorMessage.textContent = 'Login failed. Please try again.';
                     errorMessage.classList.remove('hidden');
                 }
@@ -357,7 +369,7 @@ function initCreateAccountForm() {
             errorMessage.classList.add('hidden');
 
             const name = document.getElementById('name').value;
-            const username = document.getElementById('username').value;
+            const emailOrUsername = document.getElementById('email-or-username').value.trim();
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
             const password = document.getElementById('password').value;
