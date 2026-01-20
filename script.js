@@ -24,39 +24,37 @@ function showNotification(message) {
 }
 
 let destinationsData = [];
-
 function loadSocialMedia() {
-    fetch('/api/social-media')
-        .then(response => {
-            if (!response.ok) throw new Error('Social media fetch failed');
-            return response.json();
-        })
-        .then(data => {
-            const twitterImg = document.getElementById('twitter-logo-img');
-            const facebookImg = document.getElementById('facebook-logo-img');
-            const instagramImg = document.getElementById('instagram-logo-img');
-            if (twitterImg && data.twitter?.logo) {
-                twitterImg.src = data.twitter.logo;
-                twitterImg.parentElement.href = data.twitter.url || '#';
-            }
-            if (facebookImg && data.facebook?.logo) {
-                facebookImg.src = data.facebook.logo;
-                facebookImg.parentElement.href = data.facebook.url || '#';
-            }
-            if (instagramImg && data.instagram?.logo) {
-                instagramImg.src = data.instagram.logo;
-                instagramImg.parentElement.href = data.instagram.url || '#';
-            }
-        })
-        .catch(error => {
-            console.error('Error loading social media:', error);
-            const twitterImg = document.getElementById('twitter-logo-img');
-            if (twitterImg) twitterImg.src = 'images/default-twitter.png';
-            const facebookImg = document.getElementById('facebook-logo-img');
-            if (facebookImg) facebookImg.src = 'images/default-facebook.png';
-            const instagramImg = document.getElementById('instagram-logo-img');
-            if (instagramImg) instagramImg.src = 'images/default-instagram.png';
-        });
+    // Manually set social media links and logos (no API call needed)
+    console.log('Loading hardcoded social media links');
+
+    // Twitter / X
+    const twitterImg = document.getElementById('twitter-logo-img');
+    if (twitterImg) {
+        twitterImg.src = 'images/default-twitter.png';  // your fallback image
+        twitterImg.parentElement.href = 'https://twitter.com/yourhandle';  // ← CHANGE THIS TO YOUR REAL LINK
+    }
+
+    // Facebook
+    const facebookImg = document.getElementById('facebook-logo-img');
+    if (facebookImg) {
+        facebookImg.src = 'images/default-facebook.png';
+        facebookImg.parentElement.href = 'https://facebook.com/yourpage';  // ← CHANGE THIS TO YOUR REAL LINK
+    }
+
+    // Instagram
+    const instagramImg = document.getElementById('instagram-logo-img');
+    if (instagramImg) {
+        instagramImg.src = 'images/default-instagram.png';
+        instagramImg.parentElement.href = 'https://instagram.com/yourhandle';  // ← CHANGE THIS TO YOUR REAL LINK
+    }
+
+    // TikTok (new - add your logo image and link)
+    const tiktokImg = document.getElementById('tiktok-logo-img');  // add this ID to your HTML if not there yet
+    if (tiktokImg) {
+        tiktokImg.src = 'images/tiktok-logo.png';  // ← add this image to your images/ folder
+        tiktokImg.parentElement.href = 'https://tiktok.com/@yourhandle';  // ← CHANGE THIS TO YOUR REAL LINK
+    }
 }
 
 let updateInterval;

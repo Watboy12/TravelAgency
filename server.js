@@ -171,19 +171,35 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/user/:username', verifyToken, async (req, res) => {
   const { username } = req.params;
+
+  // Security check: only allow fetching own data
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
     return res.status(403).json({ success: false, message: 'Unauthorized access' });
   }
+
   try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (user) {
-      const userObj = user.toObject();
-      delete userObj.password;
-      res.json(userObj);
-    } else {
-      res.status(404).json({ success: false, message: 'User not found' });
+    // Fetch from Supabase profiles table
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    if (error || !profile) {
+      console.error('Supabase profile fetch error:', error);
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
+
+    // Remove sensitive fields (like password — but you don't store it anyway)
+    const safeProfile = {
+      ...profile,
+      password: undefined // just in case
+    };
+
+    res.json(safeProfile);
+
   } catch (err) {
+    console.error('Error fetching user:', err.message, err.stack);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
