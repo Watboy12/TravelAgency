@@ -244,14 +244,15 @@ function initLoginForm() {
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Read from the correct input ID (change 'username' to match your HTML)
-            const emailOrUsername = document.getElementById('username')?.value?.trim();  // ← safe with ?
-            const password = document.getElementById('password')?.value;
+            // Use the correct ID from your HTML
+            const emailOrUsername = document.getElementById('email-or-username')?.value?.trim();
+            const passwordElement = document.getElementById('password');
+            const password = passwordElement ? passwordElement.value : '';
 
             if (!emailOrUsername || !password) {
                 const errorMessage = document.getElementById('error-message');
                 if (errorMessage) {
-                    errorMessage.textContent = 'Please fill in both fields.';
+                    errorMessage.textContent = 'Please fill in both Username/Email and Password.';
                     errorMessage.classList.remove('hidden');
                 }
                 return;
@@ -265,17 +266,17 @@ function initLoginForm() {
                 body: JSON.stringify({ username: emailOrUsername, password })
             })
             .then(response => {
-                console.log('Response status:', response.status);
+                console.log('Login response status:', response.status);
                 if (!response.ok) {
                     throw new Error(`Login failed with status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Response data:', data);
+                console.log('Login response data:', data);
                 if (data.success) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', emailOrUsername);  // store what user entered
+                    localStorage.setItem('username', emailOrUsername); // store what the user typed
                     window.location.href = 'client.html';
                 } else {
                     const errorMessage = document.getElementById('error-message');
@@ -290,13 +291,15 @@ function initLoginForm() {
                 console.error('Login error:', error);
                 const errorMessage = document.getElementById('error-message');
                 if (errorMessage) {
-                    errorMessage.textContent = 'Login failed. Please try again.';
+                    errorMessage.textContent = error.message.includes('status: 401') 
+                        ? 'Invalid username/email or password'
+                        : 'Login failed. Please try again or check your connection.';
                     errorMessage.classList.remove('hidden');
                 }
             });
         });
     } else {
-        console.error('Login form not found');
+        console.error('Login form not found on this page');
     }
 }
 
