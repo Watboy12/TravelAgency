@@ -153,25 +153,65 @@ res.json({
 
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: 'Username and password are required' });
+  }
+
   try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (!user) {
+    // Step 1: Try to sign in with Supabase Auth
+    const { data: { session, user }, error } = await supabaseAdmin.auth.signInWithPassword({
+      email: username,          // we're using email as "username" for login
+      password,
+    });
+
+    if (error || !user || !session) {
+      console.error('Supabase login error:', error?.message);
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
-      const token = jwt.sign({ username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-      res.status(200).json({
-        success: true,
-        token,
-        user: { ...user.toObject(), password: undefined }
-      });
-    } else {
-      res.status(401).json({ success: false, message: 'Invalid credentials' });
+    // Step 2: Get the profile from 'profiles' table to include extra data
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Profile fetch error:', profileError?.message);
+      // Still allow login, but without extra profile data
     }
+
+    // Step 3: Generate your custom JWT (now safe because JWT_SECRET is set)
+    const token = jwt.sign(
+      {
+        username: profile?.username || username.toLowerCase().trim(),
+        role: profile?.role || 'user',
+        userId: user.id
+      },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Step 4: Return success + token + basic user info
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: profile?.full_name || 'User',
+        username: profile?.username || username,
+        role: profile?.role || 'user',
+        // Add more fields from profile if needed
+        balance: profile?.balance || 0,
+        bonus: profile?.bonus || 0,
+        verified: profile?.verified || false
+      }
+    });
+
   } catch (err) {
-    console.error('Error during login:', err);
+    console.error('Login server error:', err.message, err.stack);
     res.status(500).json({ success: false, message: 'Server error during login' });
   }
 });

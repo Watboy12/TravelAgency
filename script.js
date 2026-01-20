@@ -249,7 +249,7 @@ function initLoginForm() {
             fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username: email, password })  // ← use email here
             })
             .then(response => {
                 console.log('Response status:', response.status);
