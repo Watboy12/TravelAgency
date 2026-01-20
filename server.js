@@ -311,62 +311,106 @@ app.get('/api/user/:username', verifyToken, async (req, res) => {
 
 app.post('/api/user/:username/update', verifyToken, async (req, res) => {
   const { username } = req.params;
-  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
+
+  // Security check
+  if (req.user.username.toLowerCase().trim() !== username.toLowerCase().trim()) {
     return res.status(403).json({ success: false, message: 'Unauthorized access' });
   }
+
   const { deposit, vacation, bonus } = req.body;
 
   try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (!user) {
+    // Fetch current profile
+    const { data: profile, error: fetchError } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    if (fetchError || !profile) {
+      console.error('Profile fetch error:', fetchError?.message);
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    let updates = { ...profile }; // We'll build changes here
+
+    // Handle deposit (if any)
     if (deposit) {
-      user.balance += deposit;
-      user.deposits += deposit;
-      user.transactions.push({
+      const depositAmount = Number(deposit);
+      updates.balance = (profile.balance || 0) + depositAmount;
+      updates.deposits = (profile.deposits || 0) + depositAmount;
+
+      // Optional: record transaction
+      const newTx = {
         date: new Date().toISOString().split('T')[0],
         type: 'Deposit',
-        amount: deposit
-      });
-      user.usageHistory.push({
-        date: new Date().toISOString().split('T')[0],
-        action: `Deposited $${deposit}`,
-        cost: 0
-      });
+        amount: depositAmount
+      };
+      updates.transactions = [...(profile.transactions || []), newTx];
     }
 
+    // Handle vacation booking
     if (vacation) {
-      if (user.balance < vacation.cost) {
+      const vacationCost = Number(vacation.cost);
+      const currentBalance = profile.balance || 0;
+
+      if (currentBalance < vacationCost) {
         return res.status(400).json({ success: false, message: 'Insufficient balance' });
       }
-      user.balance -= vacation.cost;
-      user.pendingVacations.push({
+
+      // Deduct cost
+      updates.balance = currentBalance - vacationCost;
+
+      // Create vacation object
+      const newVacation = {
         name: vacation.name,
-        cost: vacation.cost,
+        cost: vacationCost,
         date: new Date().toISOString().split('T')[0]
-      });
-      user.transactions.push({
-        date: new Date().toISOString().split('T')[0],
-        type: 'Booking',
-        amount: vacation.cost
-      });
-      user.usageHistory.push({
+      };
+
+      // Add to pending_vacations
+      updates.pending_vacations = [...(profile.pending_vacations || []), newVacation];
+
+      // Add bonus if provided
+      if (bonus) {
+        updates.bonus = (profile.bonus || 0) + Number(bonus);
+      }
+
+      // Optional: log to usage_history
+      const newLog = {
         date: new Date().toISOString().split('T')[0],
         action: `Requested ${vacation.name}`,
-        cost: vacation.cost
-      });
-      user.bonus = (user.bonus || 0) + (bonus || 500);
+        cost: vacationCost
+      };
+      updates.usage_history = [...(profile.usage_history || []), newLog];
     }
 
-    await user.save();
-    const userObj = user.toObject();
-    delete userObj.password;
-    res.json({ success: true, user: userObj });
+    // Apply updates to Supabase
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update(updates)
+      .eq('username', username.toLowerCase().trim());
+
+    if (updateError) {
+      console.error('Supabase update error:', updateError.message);
+      return res.status(500).json({ success: false, message: 'Failed to save booking' });
+    }
+
+    // Return fresh profile
+    const { data: updatedProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    res.json({
+      success: true,
+      user: updatedProfile
+    });
+
   } catch (err) {
-    console.error('Error updating user:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Booking update error:', err.message, err.stack);
+    res.status(500).json({ success: false, message: 'Server error during booking' });
   }
 });
 
