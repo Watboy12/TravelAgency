@@ -436,7 +436,7 @@ function initCreateAccountForm() {
 
                 if (data.success) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', username);
+                    localStorage.setItem('username', data.user.username || username); // use returned username
                     showAccountCreationThankYouModal();
                 } else {
                     errorMessage.textContent = data.message || 'Registration failed.';

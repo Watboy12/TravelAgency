@@ -118,7 +118,7 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`  // ← THIS IS THE FIX
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
       },
       body: JSON.stringify({ name, username, email, phone, password })
     });
@@ -128,25 +128,47 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
     console.log('Edge function returned:', { status: response.status, data });
 
     if (!response.ok || !data.success) {
-      return res.status(response.status).json(data);
+      return res.status(response.status || 500).json(data || { message: 'Edge function failed' });
     }
 
-    // Generate your custom JWT
-// Comment out JWT for testing – remove this after adding env var
-// const token = jwt.sign(
-//   { username: username.toLowerCase().trim(), role: 'user' },
-//   JWT_SECRET,
-//   { expiresIn: '1h' }
-// );
+    // IMPORTANT: Fetch the newly created profile so we have the correct username
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('username')
+      .eq('email', email.toLowerCase().trim())
+      .single();
 
-res.json({
-  success: true,
-  message: 'Account created successfully (JWT disabled for testing)',
-  // token   // ← comment this out too
-});
+    if (profileError || !profile) {
+      console.error('Failed to fetch new profile after signup:', profileError?.message);
+      // Continue anyway – we can still use the provided username
+    }
+
+    const finalUsername = profile?.username || username.toLowerCase().trim();
+
+    // Generate secure JWT token for immediate login after signup
+    const token = jwt.sign(
+      {
+        username: finalUsername,
+        role: 'user'  // default role – you can change later
+      },
+      JWT_SECRET,
+      { expiresIn: '1h' }  // token valid for 1 hour
+    );
+
+    // Return success + token + basic user info
+    res.json({
+      success: true,
+      message: 'Account created successfully',
+      token,
+      user: {
+        username: finalUsername,
+        email: email.toLowerCase().trim(),
+        name: name.trim()
+      }
+    });
 
   } catch (err) {
-    console.error('Proxy error:', err.message, err.stack);
+    console.error('Signup proxy error:', err.message, err.stack);
     res.status(500).json({ success: false, message: 'Server error during account creation' });
   }
 });
