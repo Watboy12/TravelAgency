@@ -172,35 +172,35 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/user/:username', verifyToken, async (req, res) => {
   const { username } = req.params;
 
-  // Security check: only allow fetching own data
+  // Security: only allow users to fetch their own profile
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
     return res.status(403).json({ success: false, message: 'Unauthorized access' });
   }
 
   try {
-    // Fetch from Supabase profiles table
+    // Fetch profile from Supabase 'profiles' table
     const { data: profile, error } = await supabaseAdmin
       .from('profiles')
-      .select('*')
+      .select('*')                          // gets name, balance, bonus, verified, pendingDeposits, etc.
       .eq('username', username.toLowerCase().trim())
-      .single();
+      .single();                            // expect one matching row
 
     if (error || !profile) {
-      console.error('Supabase profile fetch error:', error);
-      return res.status(404).json({ success: false, message: 'User not found' });
+      console.error('Supabase profile error:', error?.message || 'No profile found');
+      return res.status(404).json({ success: false, message: 'Profile not found' });
     }
 
-    // Remove sensitive fields (like password — but you don't store it anyway)
+    // Safety: remove any sensitive field (you don't have password)
     const safeProfile = {
       ...profile,
-      password: undefined // just in case
+      password: undefined
     };
 
     res.json(safeProfile);
 
   } catch (err) {
-    console.error('Error fetching user:', err.message, err.stack);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error in /api/user route:', err.message, err.stack);
+    res.status(500).json({ success: false, message: 'Server error while loading profile' });
   }
 });
 
