@@ -103,7 +103,7 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
   }
 
   try {
-    console.log('Creating account for:', { username, email }); // ← helps debug in Vercel logs
+    console.log('Proxying create-account request for:', username);
 
     const functionUrl = 'https://yktgsxfpvmloocrlvuhb.supabase.co/functions/v1/create-user-profile';
 
@@ -111,19 +111,17 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`  // ← THIS IS THE FIX
       },
       body: JSON.stringify({ name, username, email, phone, password })
     });
 
     const data = await response.json();
 
-    console.log('Edge function response:', { status: response.status, data }); // ← log full response
+    console.log('Edge function returned:', { status: response.status, data });
 
     if (!response.ok || !data.success) {
-      return res.status(response.status).json({
-        success: false,
-        message: data.message || 'Failed to create account via Supabase function'
-      });
+      return res.status(response.status).json(data);
     }
 
     // Generate your custom JWT
@@ -140,7 +138,7 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Error proxying to Edge Function:', err.message, err.stack);
+    console.error('Proxy error:', err.message, err.stack);
     res.status(500).json({ success: false, message: 'Server error during account creation' });
   }
 });
