@@ -243,13 +243,13 @@ function initLoginForm() {
         console.log('Login form found');
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const username = document.getElementById('username').value;
+            const emailOrUsername = document.getElementById('email').value.trim(); // or 'username' if you keep the ID
             const password = document.getElementById('password').value;
             console.log('Attempting login with:', username, password);
             fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: email, password })  // ← use email here
+                body: JSON.stringify({ username: emailOrUsername, password })
             })
             .then(response => {
                 console.log('Response status:', response.status);
@@ -1920,7 +1920,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch('/api/admin/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username: document.getElementById('email').value || username, password })
             })
             .then(response => response.json())
             .then(data => {

@@ -152,25 +152,60 @@ res.json({
 });
 
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ success: false, message: 'Username and password are required' });
+    return res.status(400).json({ success: false, message: 'Email/Username and password are required' });
   }
 
-  try {
-    // Step 1: Try to sign in with Supabase Auth
-    const { data: { session, user }, error } = await supabaseAdmin.auth.signInWithPassword({
-      email: username,          // we're using email as "username" for login
-      password,
-    });
+  username = username.trim().toLowerCase();
 
-    if (error || !user || !session) {
-      console.error('Supabase login error:', error?.message);
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+  try {
+    // Step 1: Determine if input is email or username
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username);
+
+    let user;
+
+    if (isEmail) {
+      // Login with email
+      const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+        email: username,
+        password,
+      });
+
+      if (error || !data.user || !data.session) {
+        console.error('Supabase email login error:', error?.message);
+        return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      }
+
+      user = data.user;
+    } else {
+      // Login with username → first find email from profiles
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('email')
+        .eq('username', username)
+        .single();
+
+      if (profileError || !profile?.email) {
+        console.error('Username not found or no email:', profileError?.message);
+        return res.status(401).json({ success: false, message: 'Invalid username or password' });
+      }
+
+      const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+        email: profile.email,
+        password,
+      });
+
+      if (error || !data.user || !data.session) {
+        console.error('Supabase username login error:', error?.message);
+        return res.status(401).json({ success: false, message: 'Invalid username or password' });
+      }
+
+      user = data.user;
     }
 
-    // Step 2: Get the profile from 'profiles' table to include extra data
+    // Step 2: Fetch full profile
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('*')
@@ -179,21 +214,23 @@ app.post('/api/login', async (req, res) => {
 
     if (profileError || !profile) {
       console.error('Profile fetch error:', profileError?.message);
-      // Still allow login, but without extra profile data
+      // Continue without profile data
     }
 
-    // Step 3: Generate your custom JWT (now safe because JWT_SECRET is set)
+    // Step 3: Create JWT with consistent username
+    const tokenUsername = profile?.username || username;
+
     const token = jwt.sign(
       {
-        username: profile?.username || username.toLowerCase().trim(),
-        role: profile?.role || 'user',
-        userId: user.id
+        username: tokenUsername,
+        userId: user.id,
+        role: profile?.role || 'user'
       },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // Step 4: Return success + token + basic user info
+    // Step 4: Return success
     res.json({
       success: true,
       token,
@@ -201,9 +238,8 @@ app.post('/api/login', async (req, res) => {
         id: user.id,
         email: user.email,
         name: profile?.full_name || 'User',
-        username: profile?.username || username,
+        username: tokenUsername,
         role: profile?.role || 'user',
-        // Add more fields from profile if needed
         balance: profile?.balance || 0,
         bonus: profile?.bonus || 0,
         verified: profile?.verified || false
@@ -220,9 +256,9 @@ app.get('/api/user/:username', verifyToken, async (req, res) => {
   const { username } = req.params;
 
   // Security: only allow users to fetch their own profile
-  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
+  if (req.user.username.toLowerCase().trim() !== username.toLowerCase().trim()) {
+  return res.status(403).json({ success: false, message: 'Unauthorized access' });
+}
 
   try {
     // Fetch profile from Supabase 'profiles' table
