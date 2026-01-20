@@ -374,24 +374,24 @@ function initCreateAccountForm() {
             errorMessage.textContent = '';
             errorMessage.classList.add('hidden');
 
-            const name = document.getElementById('name').value;
-            const emailOrUsername = document.getElementById('email-or-username').value.trim();
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
+            const name = document.getElementById('name')?.value?.trim() || '';
+const username = document.getElementById('username')?.value?.trim() || '';
+const email = document.getElementById('email')?.value?.trim() || '';
+const phone = document.getElementById('phone')?.value?.trim() || '';
+const password = document.getElementById('password')?.value || '';
+const confirmPassword = document.getElementById('confirm-password')?.value || '';
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
-            if (!name.trim()) {
-                errorMessage.textContent = 'Name is required.';
-                errorMessage.classList.remove('hidden');
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'Create Account';
-                return;
-            }
+            if (!name || !username || !email || !password) {
+        errorMessage.textContent = 'All required fields must be provided.';
+        errorMessage.classList.remove('hidden');
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Create Account';
+        return;
+      }
 
             if (!emailRegex.test(email)) {
                 errorMessage.textContent = 'Invalid email format.';
@@ -436,7 +436,7 @@ function initCreateAccountForm() {
 
                 if (data.success) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', data.user.username || username); // use returned username
+                    localStorage.setItem('username', data.user?.username || username);
                     showAccountCreationThankYouModal();
                 } else {
                     errorMessage.textContent = data.message || 'Registration failed.';
