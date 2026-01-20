@@ -353,6 +353,13 @@ app.post('/api/user/:username/update', verifyToken, async (req, res) => {
     if (vacation) {
       const vacationCost = Number(vacation.cost);
       const currentBalance = profile.balance || 0;
+      // Add transaction for booking
+const newBookingTx = {
+  date: new Date().toISOString().split('T')[0],
+  type: 'Booking',
+  amount: -vacationCost  // negative to show deduction
+};
+updates.transactions = [...(profile.transactions || []), newBookingTx];
 
       if (currentBalance < vacationCost) {
         return res.status(400).json({ success: false, message: 'Insufficient balance' });

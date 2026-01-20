@@ -87,43 +87,52 @@ function loadUserData(username) {
             return response.json();
         })
         .then(user => {
-           console.log('User data:', user);
-           console.log('Pending vacations from Supabase:', user.pendingVacations);
+            console.log('User data:', user);
 
-// No need for personalInfo check — fields are flat in Supabase
-const userName = document.getElementById('user-name');
-if (userName) userName.textContent = user.full_name || user.name || 'User';
+            // Safe access to all array fields (handles snake_case or camelCase)
+            const pendingList = user.pendingVacations || user.pending_vacations || [];
+            const upcomingList = user.upcomingVacations || user.upcoming_vacations || [];
+            const completedList = user.completedVacations || user.completed_vacations || [];
+            const txList = user.transactions || user.transactions || [];
+            const usageList = user.usageHistory || user.usage_history || [];
 
-const userBalance = document.getElementById('user-balance');
-if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
+            console.log('Pending vacations from Supabase:', pendingList);
 
-const userBonus = document.getElementById('user-bonus');
-if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
+            // Name, balance, etc. (unchanged)
+            const userName = document.getElementById('user-name');
+            if (userName) userName.textContent = user.full_name || user.name || 'User';
 
-const userDeposits = document.getElementById('user-deposits');
-if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
+            const userBalance = document.getElementById('user-balance');
+            if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
 
-const pendingDeposits = document.getElementById('pending-deposits');
-if (pendingDeposits) {
-  pendingDeposits.textContent = (user.pendingDeposits || []).reduce((sum, dep) => sum + (dep.amount || 0), 0).toFixed(2);
-}
+            const userBonus = document.getElementById('user-bonus');
+            if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
 
-const userEmail = document.getElementById('user-email');
-if (userEmail) userEmail.textContent = user.email || 'Not set';
+            const userDeposits = document.getElementById('user-deposits');
+            if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
 
-const userPhone = document.getElementById('user-phone');
-if (userPhone) userPhone.textContent = user.phone || 'Not set';
+            const pendingDeposits = document.getElementById('pending-deposits');
+            if (pendingDeposits) {
+                pendingDeposits.textContent = (user.pendingDeposits || []).reduce((sum, dep) => sum + (dep.amount || 0), 0).toFixed(2);
+            }
 
-const userAddress = document.getElementById('user-address');
-if (userAddress) userAddress.textContent = user.address || 'Not set';  // add this field to profiles if needed
+            const userEmail = document.getElementById('user-email');
+            if (userEmail) userEmail.textContent = user.email || 'Not set';
 
-const userVerified = document.getElementById('user-verified');
-if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
+            const userPhone = document.getElementById('user-phone');
+            if (userPhone) userPhone.textContent = user.phone || 'Not set';
 
+            const userAddress = document.getElementById('user-address');
+            if (userAddress) userAddress.textContent = user.address || 'Not set';
+
+            const userVerified = document.getElementById('user-verified');
+            if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
+
+            // Pending Vacations
             const pendingVacations = document.getElementById('pending-vacations');
             if (pendingVacations) {
                 pendingVacations.innerHTML = '';
-                (user.pendingVacations || []).forEach(vacation => {
+                pendingList.forEach(vacation => {
                     if (!vacation || typeof vacation !== 'object') {
                         console.warn('Invalid vacation object:', vacation);
                         return;
@@ -133,39 +142,54 @@ if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
                     li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
                     pendingVacations.appendChild(li);
                 });
+                if (pendingList.length === 0) {
+                    pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
+                }
             }
 
+            // Upcoming Vacations + Progress Bar (restored!)
             const upcomingVacations = document.getElementById('upcoming-vacations');
             if (upcomingVacations) {
                 upcomingVacations.innerHTML = '';
-                (user.upcomingVacations || []).forEach(vacation => {
+                upcomingList.forEach(vacation => {
                     const li = document.createElement('li');
                     const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                     li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
                     upcomingVacations.appendChild(li);
                 });
+                if (upcomingList.length === 0) {
+                    upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
+                }
+
+                // Restore progress bar
                 const progressBarFill = document.querySelector('.progress-bar-fill');
                 if (progressBarFill) {
-                    const progress = (user.upcomingVacations?.length || 0) / 3 * 100;
+                    const progress = (upcomingList.length / 3) * 100; // max 3 vacations for progress
                     progressBarFill.style.width = `${progress}%`;
+                    progressBarFill.textContent = `${progress.toFixed(0)}%`; // optional: show %
                 }
             }
 
+            // Transaction History
             const transactionHistory = document.getElementById('transaction-history');
             if (transactionHistory) {
                 transactionHistory.innerHTML = '';
-                const sortedTransactions = (user.transactions || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+                const sortedTransactions = txList.sort((a, b) => new Date(b.date) - new Date(a.date));
                 sortedTransactions.forEach(tx => {
                     const li = document.createElement('li');
-                    li.textContent = `${tx.date}: ${tx.type} $${tx.amount.toFixed(2)}`;
+                    li.textContent = `${tx.date}: ${tx.type} $${(tx.amount || 0).toFixed(2)}`;
                     transactionHistory.appendChild(li);
                 });
+                if (sortedTransactions.length === 0) {
+                    transactionHistory.innerHTML = '<li>No transactions yet.</li>';
+                }
             }
 
+            // Past Vacations (unchanged)
             const pastVacationsGrid = document.getElementById('past-vacations-grid');
             if (pastVacationsGrid) {
                 pastVacationsGrid.innerHTML = '';
-                const completedVacations = user.completedVacations || [];
+                const completedVacations = completedList;
                 if (completedVacations.length === 0) {
                     pastVacationsGrid.innerHTML = '<p>No past vacations yet.</p>';
                 } else {
@@ -208,6 +232,7 @@ if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
                 }
             }
 
+            // Rest of your code (welcome notification, last deposit modal, etc.)
             if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
                 const storedTimestamp = localStorage.getItem('lastDepositTimestamp');
                 if (storedTimestamp !== user.lastDepositAccepted.timestamp) {
@@ -222,7 +247,6 @@ if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
                 localStorage.setItem('welcomeShown', 'true');
             }
 
-        
         })
         .catch(error => {
             console.error('Error loading user data:', error);
@@ -2154,10 +2178,16 @@ function showBookingModal(dest, username, cost) {
     const cancelBtn = modal.querySelector('.cancel-btn');
 
     closeBtn.addEventListener('click', () => modal.remove());
-    confirmBtn.addEventListener('click', () => {
-        bookVacation(username, cost, dest.packageName);
+    confirmBtn.addEventListener('click', async () => {
+    const success = await bookVacation(username, cost, dest.packageName);
+    if (success) {
+        // Show thank-you modal (same as regular destinations)
+        showThankYouModal({ deluxePackage: { name: dest.packageName } }); // fake object for name
         modal.remove();
-    });
+        // Refresh dashboard data
+        loadUserData(username);
+    }
+});
     cancelBtn.addEventListener('click', () => modal.remove());
 
     modal.addEventListener('click', (e) => {
