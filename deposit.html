@@ -11,132 +11,136 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 </head>
 <body class="dashboard">
- 
-        <nav>
-            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
-            <div class="nav-container">
-                <ul class="nav-links"></ul>
-                <div class="hamburger" aria-label="Toggle navigation">                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </nav>
- 
 
-        <section class="deposit-wrapper">
-            <div class="deposit-container">
-                <h1>Deposit Funds</h1>
-        
-                <!-- Bank Transfer Section (Existing) -->
-                <div class="deposit-section">
-                    <h2 class="deposit-title">Bank Transfer</h2>
-                    <div class="deposit-details-container">
-                        <p><strong>Account Holder:</strong> Explore World Group</p>
-                        <p><strong>Bank Name:</strong> Wells Fargo</p>
-                        <p><strong>Account Number:</strong> 406302537581059997</p>
-                        <p><strong>Account Type:</strong> Checking</p>
-                        <p><strong>Routing Number:</strong> 121000379</p>
-                        <p><strong>Swift Code:</strong> WFBIUS9S</p>
-                        <p><strong>Bank Address:</strong> 580, California Street, CA 94104, USA</p>
-                        <p class="deposit-note"><strong>Note:</strong> Payments must match the verified name on your ExploreWorld account, or funds will not be credited.</p>
-                    </div>
-                    <form id="bank-form" class="deposit-form">
-                        <input type="text" id="payer-name" name="payerName" placeholder="Payer Name (Must Match Account)" required>
-                        <input type="number" id="bank-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
-                        <button type="submit" class="btn btn-primary deposit-btn">Submit Bank Deposit</button>
-                    </form>
+    <nav>
+        <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
+        <div class="nav-container">
+            <ul class="nav-links"></ul>
+            <div class="hamburger" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="deposit-wrapper">
+        <div class="deposit-container">
+            <h1>Deposit Funds</h1>
+
+            <!-- Bank Transfer Section -->
+            <div class="deposit-section">
+                <h2 class="deposit-title">Bank Transfer</h2>
+                <div class="deposit-details-container">
+                    <p><strong>Account Holder:</strong> Explore World Group</p>
+                    <p><strong>Bank Name:</strong> Wells Fargo</p>
+                    <p><strong>Account Number:</strong> 406302537581059997</p>
+                    <p><strong>Account Type:</strong> Checking</p>
+                    <p><strong>Routing Number:</strong> 121000379</p>
+                    <p><strong>Swift Code:</strong> WFBIUS9S</p>
+                    <p><strong>Bank Address:</strong> 580, California Street, CA 94104, USA</p>
+                    <p class="deposit-note"><strong>Note:</strong> Payments must match the verified name on your ExploreWorld account, or funds will not be credited.</p>
                 </div>
-        
-                <!-- Crypto Deposit Section (Updated) -->
-                <div class="deposit-section">
-                    <h2 class="deposit-title">Crypto Deposit (BTC Only)</h2>
-                    <div class="deposit-details-container">
-                        <p><strong>Bitcoin Wallet Address:</strong> <span id="btc-wallet-address">bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6</span></p>
-                        <p><strong>Instructions:</strong> Send Bitcoin (BTC) only to this address. Deposits will be reflected in your account within 10 to 60 minutes upon confirmation.</p>
-                    </div>
+                <form id="bank-form" class="deposit-form">
+                    <input type="text" id="payer-name" name="payerName" placeholder="Payer Name (Must Match Account)" required>
+                    <input type="number" id="bank-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
+                    <button type="submit" class="btn btn-primary deposit-btn">Submit Bank Deposit</button>
+                </form>
+            </div>
+
+            <!-- Crypto Deposit Section -->
+            <div class="deposit-section">
+                <h2 class="deposit-title">Crypto Deposit (BTC Only)</h2>
+                <div class="deposit-details-container">
+                    <p><strong>Bitcoin Wallet Address:</strong> <span id="btc-wallet-address">bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6</span></p>
+                    <p><strong>Instructions:</strong> Send Bitcoin (BTC) only to this address. Deposits will be reflected in your account within 10 to 60 minutes upon confirmation.</p>
+                </div>
+                <form id="crypto-qr-form" class="deposit-form">
+                    <input type="number" id="crypto-qr-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
+                    <input type="text" id="btc-sender-address" name="senderAddress" placeholder="Your BTC Sender Address" required>
                     <button type="button" id="generate-qr-btn" class="btn btn-secondary">Generate QR Code</button>
 
-<!-- Loading spinner (shows during 4-second delay) -->
-<div id="qr-loading" class="hidden" style="text-align:center; padding:20px;">
-    <img src="images/logo.png" alt="Loading" style="width:80px; height:80px; animation: spin 2s linear infinite;">
-    <p style="color:#00ffcc; margin-top:10px;">Preparing secure QR code...</p>
-</div>
+                    <!-- Loading spinner (shows during 4-second delay) -->
+                    <div id="qr-loading" class="hidden" style="text-align:center; padding:20px;">
+                        <img src="images/logo.png" alt="Loading" style="width:80px; height:80px; animation: spin 2s linear infinite;">
+                        <p style="color:#00ffcc; margin-top:10px;">Preparing secure QR code...</p>
+                    </div>
 
-<!-- QR code will appear here after loading -->
-<div id="qrcode" class="qrcode-container hidden"></div>
+                    <!-- QR code will appear here after loading -->
+                    <div id="qrcode" class="qrcode-container hidden"></div>
 
-<button type="submit" class="btn btn-primary deposit-btn">Confirm Crypto Deposit</button>
+                    <button type="submit" class="btn btn-primary deposit-btn">Confirm Crypto Deposit</button>
+                </form>
+            </div>
+
+            <!-- Pay to our verified travel agents -->
+            <div class="deposit-section">
+                <h2 class="deposit-title">Pay to our verified travel agents</h2>
+                <div class="deposit-method-selection">
+                    <label for="agent-payment-method">Select Payment Method:</label>
+                    <select id="agent-payment-method" name="method">
+                        <option value="paypal">PayPal</option>
+                        <option value="cashapp">Cash App</option>
+                        <option value="venmo">Venmo</option>
+                        <option value="applepay">Apple Pay</option>
+                        <option value="zelle">Zelle</option>
+                    </select>
                 </div>
-        
-               <!-- New Section: Pay to our verified travel agents -->
-<div class="deposit-section">
-    <h2 class="deposit-title">Pay to our verified travel agents</h2>
-    <div class="deposit-method-selection">
-        <label for="agent-payment-method">Select Payment Method:</label>
-        <select id="agent-payment-method" name="method">
-            <option value="paypal">PayPal</option>
-            <option value="cashapp">Cash App</option>
-            <option value="venmo">Venmo</option>
-            <option value="applepay">Apple Pay</option>
-            <option value="zelle">Zelle</option>
-        </select>
-    </div>
-    <div class="deposit-note">
-        <p><strong>Notes:</strong> You may use a third-party account to make the payment, however, please note that processing may take up to one business day to verify and ensure the legitimacy of the funds. We appreciate your understanding and patience.</p>
-    </div>
-    <div id="agent-payment-details" class="deposit-details-container">
-        <!-- Payment details will be dynamically inserted here -->
-    </div>
-    <form id="agent-payment-form" class="deposit-form">
-        <input type="number" id="agent-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
-        <input type="text" id="transaction-id" name="transactionId" placeholder="Transaction ID" required>
-        <button type="submit" class="btn btn-primary deposit-btn">Submit Agent Payment</button>
-    </form>
-</div>
-    <!-- ... your last deposit-section ... -->
+                <div class="deposit-note">
+                    <p><strong>Notes:</strong> You may use a third-party account to make the payment, however, please note that processing may take up to one business day to verify and ensure the legitimacy of the funds. We appreciate your understanding and patience.</p>
+                </div>
+                <div id="agent-payment-details" class="deposit-details-container">
+                    <!-- Payment details will be dynamically inserted here -->
+                </div>
+                <form id="agent-payment-form" class="deposit-form">
+                    <input type="number" id="agent-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
+                    <input type="text" id="transaction-id" name="transactionId" placeholder="Transaction ID" required>
+                    <button type="submit" class="btn btn-primary deposit-btn">Submit Agent Payment</button>
+                </form>
+            </div>
+        </div>
+    </section>
 
-    </div> <!-- closing deposit-container -->
-</section>
+    <!-- FIX: Populate nav links + activate hamburger on deposit.html -->
+    <script>
+        // Fill nav links dynamically (logged in vs not logged in)
+        const username = localStorage.getItem('username');
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks) {
+            navLinks.innerHTML = username ? `
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#destinations">Destinations</a></li>
+                <li><a href="client.html">Client Area</a></li>
+                <li><a href="index.html#hot-destinations">Hot Destinations</a></li>
+                <li><a href="deposit.html">Deposit</a></li>
+                <li><a href="#" id="logout-btn">Logout</a></li>
+            ` : `
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#destinations">Destinations</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="create-account.html">Create Account</a></li>
+            `;
+        } else {
+            console.error('nav-links element not found on deposit page');
+        }
 
-<!-- FIX: Populate nav links + activate hamburger on deposit.html -->
-<script>
-    // Fill nav links dynamically (logged in vs not logged in)
-    const username = localStorage.getItem('username');
-    const navLinks = document.querySelector('.nav-links');
-    if (navLinks) {
-        navLinks.innerHTML = username ? `
-            <li><a href="index.html">Home</a></li>
-            <li><a href="index.html#destinations">Destinations</a></li>
-            <li><a href="client.html">Client Area</a></li>
-            <li><a href="index.html#hot-destinations">Hot Destinations</a></li>
-            <li><a href="deposit.html">Deposit</a></li>
-            <li><a href="#" id="logout-btn">Logout</a></li>
-        ` : `
-            <li><a href="index.html">Home</a></li>
-            <li><a href="index.html#destinations">Destinations</a></li>
-            <li><a href="login.html">Login</a></li>
-            <li><a href="create-account.html">Create Account</a></li>
-        `;
-    } else {
-        console.error('nav-links element not found on deposit page');
-    }
+        // Add logout functionality
+        document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        });
 
-    // Add logout functionality
-    document.getElementById('logout-btn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        window.location.href = 'index.html';
-    });
+        // Re-run initMenu() to make hamburger clickable now that links are filled
+        if (typeof initMenu === 'function') {
+            initMenu();
+        } else {
+            console.warn('initMenu() function not found — check if script.js is loading correctly');
+        }
+    </script>
 
-    // Re-run initMenu() to make hamburger clickable now that links are filled
-    if (typeof initMenu === 'function') {
-        initMenu();
-    } else {
-        console.warn('initMenu() function not found — check if script.js is loading correctly');
-    }
-</script>
-
+    <div id="notifications"></div>
+    <script src="script.js"></script>
 </body>
 </html>
