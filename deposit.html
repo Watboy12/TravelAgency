@@ -55,13 +55,18 @@
                         <p><strong>Bitcoin Wallet Address:</strong> <span id="btc-wallet-address">bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6</span></p>
                         <p><strong>Instructions:</strong> Send Bitcoin (BTC) only to this address. Deposits will be reflected in your account within 10 to 60 minutes upon confirmation.</p>
                     </div>
-                    <form id="crypto-qr-form" class="deposit-form">
-                        <input type="number" id="crypto-qr-amount" name="amount" placeholder="Amount ($)" step="0.01" required>
-                        <input type="text" id="btc-sender-address" name="senderAddress" placeholder="Your BTC Sender Address" required>
-                        <button type="button" id="generate-qr-btn" class="btn btn-secondary">Generate QR Code</button>
-                        <div id="qrcode" class="qrcode-container hidden"></div>
-                        <button type="submit" class="btn btn-primary deposit-btn">Confirm Crypto Deposit</button>
-                    </form>
+                    <button type="button" id="generate-qr-btn" class="btn btn-secondary">Generate QR Code</button>
+
+<!-- Loading spinner (shows during 4-second delay) -->
+<div id="qr-loading" class="hidden" style="text-align:center; padding:20px;">
+    <img src="images/logo.png" alt="Loading" style="width:80px; height:80px; animation: spin 2s linear infinite;">
+    <p style="color:#00ffcc; margin-top:10px;">Preparing secure QR code...</p>
+</div>
+
+<!-- QR code will appear here after loading -->
+<div id="qrcode" class="qrcode-container hidden"></div>
+
+<button type="submit" class="btn btn-primary deposit-btn">Confirm Crypto Deposit</button>
                 </div>
         
                <!-- New Section: Pay to our verified travel agents -->

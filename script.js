@@ -393,6 +393,21 @@ function initCreateAccountForm() {
         createAccountForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // Add click handlers for info icons
+document.querySelectorAll('.info-icon').forEach(icon => {
+    icon.addEventListener('click', (e) => {
+        e.preventDefault();
+        const message = `
+            We kindly request your phone number and address for the following professional reasons:
+            • To contact you directly regarding your booking confirmations, updates, or urgent travel changes.
+            • To determine the closest international airport for better package recommendations and logistics.
+            • To ensure secure and accurate processing of your travel arrangements and any future communications.
+            Your information is kept strictly confidential and protected under our privacy policy.
+        `;
+        showNotification(message);  // Reuses your existing notification system
+    });
+});
+
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner"></span> Creating Account...';
 
@@ -410,13 +425,13 @@ const confirmPassword = document.getElementById('confirm-password')?.value || ''
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
-            if (!name || !username || !email || !password) {
-        errorMessage.textContent = 'All required fields must be provided.';
-        errorMessage.classList.remove('hidden');
-        submitButton.disabled = false;
-        submitButton.innerHTML = 'Create Account';
-        return;
-      }
+            if (!name || !username || !email || !phone || !address || !password) {
+    errorMessage.textContent = 'All fields (including phone and address) are required.';
+    errorMessage.classList.remove('hidden');
+    submitButton.disabled = false;
+    submitButton.innerHTML = 'Create Account';
+    return;
+}
 
             if (!emailRegex.test(email)) {
                 errorMessage.textContent = 'Invalid email format.';
@@ -800,159 +815,204 @@ async function bookVacation(username, cost, name) {
 function initDepositForms(username) {
     // Bank Deposit Form Submission
     document.getElementById('bank-form').addEventListener('submit', async (e) => {
-     e.preventDefault();
-     const payerName = document.getElementById('payer-name').value;
-     const amount = document.getElementById('bank-amount').value;
-     const token = localStorage.getItem('token');
-     const username = localStorage.getItem('username');
- 
-     console.log('Submitting deposit with:', { username, amount, payerName, token });
- 
-     try {
-         const response = await fetch('/api/deposit/bank', {
-             method: 'POST',
-             headers: {
-                 'Content-Type': 'application/json',
-                 'Authorization': `Bearer ${token}`
-             },
-             body: JSON.stringify({ username, amount: parseFloat(amount), payerName })
-         });
-         console.log('Response status:', response.status);
-         const data = await response.json();
-         console.log('Response data:', data);
- 
-         if (data.success) {
-             showDepositSubmissionThankYouModal();
-         } else {
-             alert('Deposit failed: ' + data.message);
-         }
-     } catch (error) {
-         console.error('Error during deposit submission:', error);
-         alert('An error occurred during deposit submission');
-     }
- }); 
- 
- document.getElementById('btc-address-form')?.addEventListener('submit', async (e) => {
-     e.preventDefault();
-     const btcAddress = document.getElementById('btc-address').value;
-     const token = localStorage.getItem('token');
- 
-     try {
-         const response = await fetch('/api/admin/settings/btc-address', {
-             method: 'POST',
-             headers: {
-                 'Content-Type': 'application/json',
-                 'Authorization': `Bearer ${token}`
-             },
-             body: JSON.stringify({ btcWalletAddress: btcAddress })
-         });
-         const data = await response.json();
-         if (data.success) {
-             alert('BTC address updated successfully');
-         } else {
-             alert('Failed to update BTC address: ' + data.message);
-         }
-     } catch (err) {
-         alert('Error updating BTC address');
-     }
- });
- 
- // Payment method handling for "Pay to our verified travel agents"
- const paymentDetails = {
-     paypal: 'PayPal email: payments@exploreworld.com',
-     cashapp: 'Cash App tag: $ExploreWorld',
-     venmo: 'Venmo account: @ExploreWorld',
-     applepay: 'Apple Pay instructions: Use payments@exploreworld.com',
-     zelle: 'Zelle account: payments@exploreworld.com'
- };
- 
- document.getElementById('payment-method').addEventListener('change', (e) => {
-     const method = e.target.value;
-     document.getElementById('payment-details').innerHTML = paymentDetails[method];
- });
- 
- // Generate QR Code
- document.getElementById('generate-qr').addEventListener('click', async () => {
-     const amount = document.getElementById('crypto-qr-amount').value;
-     if (!amount) {
-         alert('Please enter an amount');
-         return;
-     }
-     try {
-         const token = localStorage.getItem('token');
-         const response = await fetch('/api/settings/btc-address', {
-             headers: {
-                 'Authorization': `Bearer ${token}`
-             }
-         });
-         if (!response.ok) {
-             throw new Error('Failed to fetch wallet address');
-         }
-         const data = await response.json();
-         const walletAddress = data.btcWalletAddress;
-         const qrData = `bitcoin:${walletAddress}?amount=${amount / 30000}`; // Adjust conversion rate as needed
-         document.getElementById('qrcode').innerHTML = '';
-         QRCode.toCanvas(document.getElementById('qrcode'), qrData, { width: 200 }, (err) => {
-             if (err) console.error('QRCode error:', err);
-         });
-     } catch (err) {
-         console.error('Error generating QR code:', err);
-         alert('Failed to generate QR code');
-     }
- });
- 
- // Crypto Deposit Form Submission
- document.getElementById('crypto-qr-form').addEventListener('submit', async (e) => {
-     e.preventDefault();
-     const amount = document.getElementById('crypto-qr-amount').value;
-     const userBtcAddress = document.getElementById('user-btc-address').value;
-     const token = localStorage.getItem('token');
-     const username = localStorage.getItem('username');
- 
-     const response = await fetch('/api/deposit/crypto', {
-         method: 'POST',
-         headers: {
-             'Content-Type': 'application/json',
-             'Authorization': `Bearer ${token}`
-         },
-         body: JSON.stringify({ username, amount: parseFloat(amount), userBtcAddress })
-     });
-     const data = await response.json();
- 
-     if (data.success) {
-         showDepositSubmissionThankYouModal();
-     } else {
-         alert('Deposit failed: ' + data.message);
-     }
- });
- 
- // Agent Deposit Form Submission (example, adjust endpoint as needed)
- document.getElementById('agent-payment-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const amount = document.getElementById('agent-amount').value;
-    const transactionId = document.getElementById('transaction-id').value; // Note: This input is missing in HTML
-    const paymentMethod = document.getElementById('agent-payment-method').value; // Updated to match select ID
-    const token = localStorage.getItem('token');
+        e.preventDefault();
+        const payerName = document.getElementById('payer-name').value.trim();
+        const amountInput = document.getElementById('bank-amount');
+        const amount = parseFloat(amountInput.value);
+        const token = localStorage.getItem('token');
 
-    
-    
+        console.log('Submitting bank deposit:', { username, amount, payerName, token });
 
-    const response = await fetch('/api/deposit/agent', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ username, amount: parseFloat(amount), transactionId, paymentMethod })
+        if (!amount || amount <= 0) {
+            showNotification('Please enter a valid amount greater than $0.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/deposit/bank', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username, amount, payerName })
+            });
+
+            console.log('Bank deposit response status:', response.status);
+
+            const data = await response.json();
+            console.log('Bank deposit full response:', data);
+
+            if (data.success) {
+                showDepositSubmissionThankYouModal(); // This will now show reliably
+                document.getElementById('bank-form').reset(); // Clear form
+                showNotification('Bank deposit submitted successfully — awaiting approval!');
+            } else {
+                showNotification(data.message || 'Deposit failed. Please check your details and try again.');
+            }
+        } catch (error) {
+            console.error('Bank deposit submission error:', error);
+            showNotification('An error occurred while submitting your deposit. Please try again or contact support.');
+        }
     });
-    const data = await response.json();
 
-    if (data.success) {
-        showDepositSubmissionThankYouModal();
-    } else {
-        alert('Deposit failed: ' + data.message);
+    // BTC Address Update Form (admin use — keep as is, just add logging)
+    document.getElementById('btc-address-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btcAddress = document.getElementById('btc-address').value.trim();
+        const token = localStorage.getItem('token');
+
+        if (!btcAddress) {
+            showNotification('Please enter a valid BTC address.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/settings/btc-address', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ btcWalletAddress: btcAddress })
+            });
+
+            const data = await response.json();
+            console.log('BTC address update response:', data);
+
+            if (data.success) {
+                alert('BTC address updated successfully');
+                document.getElementById('btc-address-form').reset();
+            } else {
+                alert('Failed to update BTC address: ' + (data.message || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error('BTC address update error:', err);
+            alert('An error occurred while updating BTC address.');
+        }
+    });
+
+    // Payment method selection for "Pay to our verified travel agents"
+    const paymentDetails = {
+        paypal: 'PayPal email: payments@exploreworld.com',
+        cashapp: 'Cash App tag: $ExploreWorld',
+        venmo: 'Venmo account: @ExploreWorld',
+        applepay: 'Apple Pay instructions: Use payments@exploreworld.com',
+        zelle: 'Zelle account: payments@exploreworld.com'
+    };
+
+    const paymentMethodSelect = document.getElementById('agent-payment-method');
+    const paymentDetailsContainer = document.getElementById('agent-payment-details');
+
+    if (paymentMethodSelect && paymentDetailsContainer) {
+        paymentMethodSelect.addEventListener('change', (e) => {
+            const method = e.target.value;
+            const details = paymentDetails[method] || 'Please select a payment method.';
+            paymentDetailsContainer.innerHTML = `
+                <p><strong>Payment Instructions:</strong></p>
+                <p style="word-break: break-all;">${details}</p>
+                <p style="color:#ff0077; margin-top:10px;">
+                    Note: Always verify the details before sending funds.
+                </p>
+            `;
+        });
+
+        // Trigger once on page load
+        paymentMethodSelect.dispatchEvent(new Event('change'));
     }
-});
+
+    // Generate QR Code (already fixed in previous steps — keep your current version)
+
+    // Crypto Deposit Form Submission
+    document.getElementById('crypto-qr-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amountInput = document.getElementById('crypto-qr-amount');
+        const amount = parseFloat(amountInput.value);
+        const userBtcAddress = document.getElementById('btc-sender-address')?.value?.trim();
+        const token = localStorage.getItem('token');
+
+        console.log('Submitting crypto deposit:', { username, amount, userBtcAddress });
+
+        if (!amount || amount <= 0) {
+            showNotification('Please enter a valid amount greater than $0.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/deposit/crypto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username, amount, userBtcAddress })
+            });
+
+            console.log('Crypto deposit response status:', response.status);
+
+            const data = await response.json();
+            console.log('Crypto deposit full response:', data);
+
+            if (data.success) {
+                showDepositSubmissionThankYouModal(); // This will now show
+                document.getElementById('crypto-qr-form').reset();
+                showNotification('Crypto deposit submitted successfully — awaiting confirmation!');
+            } else {
+                showNotification(data.message || 'Crypto deposit failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Crypto deposit error:', error);
+            showNotification('An error occurred while submitting your crypto deposit.');
+        }
+    });
+
+    // Agent Deposit Form Submission
+    document.getElementById('agent-payment-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amountInput = document.getElementById('agent-amount');
+        const amount = parseFloat(amountInput.value);
+        const transactionId = document.getElementById('transaction-id')?.value?.trim();
+        const paymentMethod = document.getElementById('agent-payment-method')?.value;
+        const token = localStorage.getItem('token');
+
+        console.log('Submitting agent deposit:', { username, amount, transactionId, paymentMethod });
+
+        if (!amount || amount <= 0) {
+            showNotification('Please enter a valid amount greater than $0.');
+            return;
+        }
+        if (!transactionId) {
+            showNotification('Please provide a transaction ID.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/deposit/agent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username, amount, transactionId, paymentMethod })
+            });
+
+            console.log('Agent deposit response status:', response.status);
+
+            const data = await response.json();
+            console.log('Agent deposit full response:', data);
+
+            if (data.success) {
+                showDepositSubmissionThankYouModal(); // This will now show
+                document.getElementById('agent-payment-form').reset();
+                showNotification('Agent payment submitted successfully — awaiting approval!');
+            } else {
+                showNotification(data.message || 'Agent payment failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Agent deposit error:', error);
+            showNotification('An error occurred while submitting your agent payment.');
+        }
+    });
 }
 
 async function updateUser(username, updates) {

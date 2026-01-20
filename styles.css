@@ -2408,6 +2408,11 @@ nav {
     100% { transform: scale(1);   box-shadow: 0 8px 25px rgba(255,51,102,0.5); }
 }
 
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Fully booked stamp – make it more aggressive */
 .fully-booked-stamp {
     position: absolute;
@@ -2585,6 +2590,18 @@ nav {
     width: 100%;
     max-width: 300px;
     cursor: pointer;
+}
+
+.info-icon {
+    cursor: pointer;
+    color: #00ffcc;
+    font-size: 1.1rem;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.info-icon:hover {
+    color: #ff0077;
 }
 
 .deposit-method-selection select:hover,
