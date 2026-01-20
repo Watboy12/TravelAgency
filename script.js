@@ -87,31 +87,34 @@ function loadUserData(username) {
             return response.json();
         })
         .then(user => {
-            console.log('User data:', user);
-            if (!user.personalInfo) console.warn('personalInfo missing');
-            const userName = document.getElementById('user-name');
-            if (userName) userName.textContent = user.name || 'User';
+           console.log('User data:', user);
 
-            const userBalance = document.getElementById('user-balance');
-            if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
+// No need for personalInfo check — fields are flat in Supabase
+const userName = document.getElementById('user-name');
+if (userName) userName.textContent = user.full_name || user.name || 'User';
 
-            const userBonus = document.getElementById('user-bonus');
-            if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
+const userBalance = document.getElementById('user-balance');
+if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
 
-            const userDeposits = document.getElementById('user-deposits');
-            if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
+const userBonus = document.getElementById('user-bonus');
+if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
 
-            const pendingDeposits = document.getElementById('pending-deposits');
-            if (pendingDeposits) pendingDeposits.textContent = (user.pendingDeposits || []).reduce((sum, dep) => sum + (dep.amount || 0), 0).toFixed(2);
+const userDeposits = document.getElementById('user-deposits');
+if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
+
+const pendingDeposits = document.getElementById('pending-deposits');
+if (pendingDeposits) {
+  pendingDeposits.textContent = (user.pendingDeposits || []).reduce((sum, dep) => sum + (dep.amount || 0), 0).toFixed(2);
+}
 
 const userEmail = document.getElementById('user-email');
-if (userEmail) userEmail.textContent = user.personalInfo?.email || user.email || 'Not set';
+if (userEmail) userEmail.textContent = user.email || 'Not set';
 
 const userPhone = document.getElementById('user-phone');
-if (userPhone) userPhone.textContent = user.personalInfo?.phone || user.phone || 'Not set';
+if (userPhone) userPhone.textContent = user.phone || 'Not set';
 
 const userAddress = document.getElementById('user-address');
-if (userAddress) userAddress.textContent = user.personalInfo?.address || 'Not set';
+if (userAddress) userAddress.textContent = user.address || 'Not set';  // add this field to profiles if needed
 
 const userVerified = document.getElementById('user-verified');
 if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
