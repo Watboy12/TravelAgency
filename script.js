@@ -88,6 +88,7 @@ function loadUserData(username) {
         })
         .then(user => {
            console.log('User data:', user);
+           console.log('Pending vacations from Supabase:', user.pendingVacations);
 
 // No need for personalInfo check — fields are flat in Supabase
 const userName = document.getElementById('user-name');
@@ -1665,16 +1666,43 @@ async function showBookingConfirmationModal(username, destination) {
     closeModalOnOutsideClick(modal);
 
     document.getElementById('confirm-booking').addEventListener('click', async () => {
-        const success = await bookVacation(username, destination.deluxePackage.price, destination.deluxePackage.name);
-        if (success) {
-            showThankYouModal(destination);
-            document.body.removeChild(modal);
-        }
-    });
+    const success = await bookVacation(username, destination.deluxePackage.price, destination.deluxePackage.name);
+    if (success) {
+        showThankYouModal(destination);
+        document.body.removeChild(modal);
+        // Force reload user data to show pending vacation immediately
+        loadUserData(username);
+    }
+});
 
     document.getElementById('cancel-booking').addEventListener('click', () => {
         document.body.removeChild(modal);
     });
+}
+
+function showThankYouModal(destination) {
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Booking Confirmed!</h2>
+            <p>Thank you for booking <strong>${destination.deluxePackage?.name || destination.name || 'this package'}</strong>!</p>
+            <p>Your request has been added to Pending Vacations. It will be processed soon.</p>
+            <p>Enjoy your upcoming adventure with ExploreWorld!</p>
+            <button id="close-thank-you-modal" class="btn btn-primary">OK</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    closeModalOnOutsideClick(modal);
+
+    document.getElementById('close-thank-you-modal').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+
+    // Auto-close after 6 seconds (optional)
+    setTimeout(() => {
+        if (modal.parentNode) document.body.removeChild(modal);
+    }, 6000);
 }
 
 function showDepositSuccessModal(amount) {
