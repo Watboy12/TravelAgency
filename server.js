@@ -9,6 +9,13 @@ const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
 require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error('JWT_SECRET is missing in environment variables');
+  // Optional: crash early so you see it clearly in logs
+  // process.exit(1);
+}
 
 // lib/supabase.js (or wherever your client is created)
 const { createClient } = require('@supabase/supabase-js');
