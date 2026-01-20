@@ -125,17 +125,18 @@ app.post('/api/create-account', createAccountLimiter, async (req, res) => {
     }
 
     // Generate your custom JWT
-    const token = jwt.sign(
-      { username: username.toLowerCase().trim(), role: 'user' },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+// Comment out JWT for testing – remove this after adding env var
+// const token = jwt.sign(
+//   { username: username.toLowerCase().trim(), role: 'user' },
+//   JWT_SECRET,
+//   { expiresIn: '1h' }
+// );
 
-    res.json({
-      success: true,
-      message: 'Account created successfully',
-      token
-    });
+res.json({
+  success: true,
+  message: 'Account created successfully (JWT disabled for testing)',
+  // token   // ← comment this out too
+});
 
   } catch (err) {
     console.error('Proxy error:', err.message, err.stack);
