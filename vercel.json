@@ -42,19 +42,27 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/deposit/(.*)",
-      "dest": "/api/deposit/$1"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1",
-      "headers": { "cache-control": "public, max-age=0, must-revalidate" }
-    }
+"routes": [
+  {
+    "src": "/api/deposit/bank",
+    "dest": "/api/deposit/bank.js"
+  },
+  {
+    "src": "/api/deposit/crypto",
+    "dest": "/api/deposit/crypto.js"
+  },
+  {
+    "src": "/api/deposit/agent",
+    "dest": "/api/deposit/agent.js"
+  },
+  {
+    "src": "/api/(.*)",
+    "dest": "server.js"
+  },
+  {
+    "src": "/(.*)",
+    "dest": "/$1",
+    "headers": { "cache-control": "public, max-age=0, must-revalidate" }
+  }
   ]
 }
