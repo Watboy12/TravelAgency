@@ -1,4 +1,4 @@
-// api/deposit/bank.js - Vercel Serverless Function
+// api/deposit/crypto.js - Vercel Serverless Function
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  // Enable CORS if needed (optional but good practice)
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 
-  console.log('Bank deposit request received');
+  console.log('Crypto deposit request received');
   console.log('Headers:', req.headers);
   console.log('Body:', req.body);
 
@@ -32,9 +32,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ success: false, message: 'No token provided' });
   }
 
-  // Optional: Add JWT verification here if you want to keep it
-  // For now, we'll trust the token and use username from body (secure enough for MVP)
-  // If you want full verification, uncomment and install jsonwebtoken
+  // Optional JWT verification (uncomment when ready)
   /*
   const jwt = require('jsonwebtoken');
   try {
@@ -46,18 +44,18 @@ export default async function handler(req, res) {
   }
   */
 
-  const { username, amount, payerName } = req.body;
+  const { username, amount, userBtcAddress } = req.body;
 
-  if (!username || !amount || !payerName) {
-    console.log('Missing fields:', { username, amount, payerName });
-    return res.status(400).json({ success: false, message: 'Missing required fields' });
+  if (!username || !amount || !userBtcAddress) {
+    console.log('Missing fields:', { username, amount, userBtcAddress });
+    return res.status(400).json({ success: false, message: 'Missing required fields (username, amount, sender BTC address)' });
   }
 
   try {
-    // 1. Fetch user profile
+    // Fetch user profile (we don't check name for crypto)
     const { data: profile, error: fetchError } = await supabase
       .from('profiles')
-      .select('full_name, pending_deposits')
+      .select('pending_deposits')
       .eq('username', username.toLowerCase().trim())
       .single();
 
@@ -71,26 +69,20 @@ export default async function handler(req, res) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // 2. Check name match (case-insensitive)
-    if (profile.full_name?.toLowerCase().trim() !== payerName.toLowerCase().trim()) {
-      console.log('Name mismatch:', { stored: profile.full_name, provided: payerName });
-      return res.status(400).json({ success: false, message: 'Payer name does not match account name' });
-    }
-
-    // 3. Prepare new deposit entry
+    // Prepare new deposit entry
     const newDeposit = {
       amount: parseFloat(amount),
-      method: 'bank',
-      payerName,
+      method: 'crypto',
+      senderBtcAddress: userBtcAddress.trim(),
       date: new Date().toISOString(),
       status: 'pending'
     };
 
-    // 4. Safely append to array (handle null/undefined)
+    // Safely append
     const currentDeposits = Array.isArray(profile.pending_deposits) ? profile.pending_deposits : [];
     const updatedDeposits = [...currentDeposits, newDeposit];
 
-    // 5. Update profile
+    // Update profile
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ pending_deposits: updatedDeposits })
@@ -101,11 +93,11 @@ export default async function handler(req, res) {
       throw updateError;
     }
 
-    console.log('Deposit added successfully for:', username);
-    return res.status(200).json({ success: true, message: 'Deposit submitted — pending approval' });
+    console.log('Crypto deposit added successfully for:', username);
+    return res.status(200).json({ success: true, message: 'Crypto deposit submitted — awaiting confirmation' });
 
   } catch (err) {
-    console.error('Bank deposit crash:', err.message, err.stack);
+    console.error('Crypto deposit crash:', err.message, err.stack);
     return res.status(500).json({ success: false, message: 'Server error: ' + (err.message || 'Unknown') });
   }
 }
