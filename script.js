@@ -921,7 +921,55 @@ function initDepositForms(username) {
         paymentMethodSelect.dispatchEvent(new Event('change'));
     }
 
-    // Generate QR Code (already fixed in previous steps — keep your current version)
+    document.getElementById('generate-qr-btn')?.addEventListener('click', async () => {
+    const amount = parseFloat(document.getElementById('crypto-qr-amount')?.value || '0');
+
+    if (isNaN(amount) || amount <= 0) {
+        showNotification('Please enter a valid amount greater than $0.');
+        return;
+    }
+
+    const loading = document.getElementById('qr-loading');
+    const qrDiv = document.getElementById('qrcode');
+
+    if (loading) loading.classList.remove('hidden');
+    if (qrDiv) {
+        qrDiv.classList.add('hidden');
+        qrDiv.innerHTML = '';
+    }
+
+    // Wait 4 seconds (professional delay)
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    try {
+        const wallet = document.getElementById('btc-wallet-address')?.textContent || 'bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6';
+        const btcAmount = (amount / 60000).toFixed(8); // adjust rate
+
+        const qrData = `bitcoin:${wallet}?amount=${btcAmount}`;
+
+        if (loading) loading.classList.add('hidden');
+        if (qrDiv) {
+            qrDiv.classList.remove('hidden');
+
+            // Generate QR
+            QRCode.toCanvas(qrDiv, qrData, { width: 220 }, (err) => {
+                if (err) {
+                    console.error('QR generation failed:', err);
+                    showNotification('Failed to generate QR code.');
+                }
+            });
+
+            // Add professional message
+            const msg = document.createElement('p');
+            msg.textContent = 'Send only Bitcoin (BTC) to this address. Deposits confirmed in 10–60 minutes. Thank you for choosing ExploreWorld.';
+            qrDiv.appendChild(msg);
+        }
+    } catch (err) {
+        console.error('QR error:', err);
+        showNotification('Error preparing QR code.');
+        if (loading) loading.classList.add('hidden');
+    }
+});
 
     // Crypto Deposit Form Submission
     document.getElementById('crypto-qr-form').addEventListener('submit', async (e) => {
