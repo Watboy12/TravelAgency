@@ -828,6 +828,15 @@ function initDepositForms(username) {
             return;
         }
 
+        // Show spinner
+    const loading = document.getElementById('bank-loading');
+    if (loading) loading.classList.remove('hidden');
+
+    // Disable button during verification
+    const submitBtn = document.querySelector('#bank-form button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Verifying...';
+
         try {
             const response = await fetch('/api/deposit/bank', {
                 method: 'POST',

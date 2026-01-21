@@ -995,6 +995,10 @@ nav {
     text-align: center;
 }
 
+#bank-loading img {
+    animation: spin 1.5s linear infinite;
+}
+
 /* Admin Sections */
 .admin-login,
 .admin-panel {
