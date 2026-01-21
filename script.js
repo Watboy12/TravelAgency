@@ -814,57 +814,71 @@ async function bookVacation(username, cost, name) {
 
 function initDepositForms(username) {
     // Bank Deposit Form Submission
-    document.getElementById('bank-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const payerName = document.getElementById('payer-name').value.trim();
-        const amountInput = document.getElementById('bank-amount');
-        const amount = parseFloat(amountInput.value);
-        const token = localStorage.getItem('token');
+   document.getElementById('bank-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-        console.log('Submitting bank deposit:', { username, amount, payerName, token });
+    const payerName = document.getElementById('payer-name')?.value?.trim() || '';
+    const amountInput = document.getElementById('bank-amount');
+    const amount = parseFloat(amountInput?.value || '0');
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
 
-        if (!amount || amount <= 0) {
-            showNotification('Please enter a valid amount greater than $0.');
-            return;
-        }
+    if (!username || !token) {
+        showNotification('Please log in first.');
+        return;
+    }
 
-        // Show spinner
+    if (isNaN(amount) || amount <= 0) {
+        showNotification('Please enter a valid amount greater than $0.');
+        return;
+    }
+
+    // Show spinner + disable button
     const loading = document.getElementById('bank-loading');
-    if (loading) loading.classList.remove('hidden');
-
-    // Disable button during verification
     const submitBtn = document.querySelector('#bank-form button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Verifying...';
 
-        try {
-            const response = await fetch('/api/deposit/bank', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ username, amount, payerName })
-            });
+    if (loading) loading.classList.remove('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Verifying...';
+    }
 
-            console.log('Bank deposit response status:', response.status);
+    try {
+        console.log('Sending bank deposit request:', { username, amount, payerName, token: token.substring(0, 10) + '...' });
 
-            const data = await response.json();
-            console.log('Bank deposit full response:', data);
+        const response = await fetch('/api/deposit/bank', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ username, amount, payerName })
+        });
 
-            if (data.success) {
-                showDepositSubmissionThankYouModal(); // This will now show reliably
-                document.getElementById('bank-form').reset(); // Clear form
-                showNotification('Bank deposit submitted successfully — awaiting approval!');
-            } else {
-                showNotification(data.message || 'Deposit failed. Please check your details and try again.');
-            }
-        } catch (error) {
-            console.error('Bank deposit submission error:', error);
-            showNotification('An error occurred while submitting your deposit. Please try again or contact support.');
+        console.log('Bank response status:', response.status);
+
+        const data = await response.json();
+        console.log('Bank full response:', data);
+
+        if (data.success) {
+            showDepositSubmissionThankYouModal();
+            document.getElementById('bank-form').reset();
+            showNotification('Bank deposit submitted successfully — awaiting approval!');
+        } else {
+            showNotification(data.message || 'Deposit failed. Please check details.');
         }
-    });
-
+    } catch (error) {
+        console.error('Bank deposit network error:', error);
+        showNotification('Network error submitting deposit. Please check your connection.');
+    } finally {
+        // ALWAYS hide spinner and re-enable button
+        if (loading) loading.classList.add('hidden');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Bank Deposit';
+        }
+    }
+});
     // BTC Address Update Form (admin use — keep as is, just add logging)
     document.getElementById('btc-address-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
