@@ -57,13 +57,17 @@ function loadSocialMedia() {
     }
 }
 
-let updateInterval;
+let updateInterval = null;
 let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
 
-/*function loadUserData(username) {
-    if (updateInterval) clearInterval(updateInterval);
+function loadUserData(username) {
+    // Cleanup any existing interval first
+    if (updateInterval) {
+        clearInterval(updateInterval);
+        updateInterval = null;
+    }
 
-    function checkForDepositUpdates() {
+    async function checkForDepositUpdates() {
         const token = localStorage.getItem('token');
         if (!token) {
             showNotification('Please log in to access your dashboard.');
@@ -71,139 +75,117 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
             return;
         }
 
-        fetch(`/api/user/${username}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        try {
+            const response = await fetch(`/api/user/${username}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    throw new Error('Session expired or unauthorized');
+                }
+                throw new Error('User data fetch failed');
             }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    if (response.status === 401 || response.status === 403) {
-                        throw new Error('Session expired or unauthorized');
-                    }
-                    throw new Error('User data fetch failed');
+
+            const user = await response.json();
+            console.log('User data:', user);
+
+            // Safe array fallbacks
+            const pendingList = user.pendingVacations || user.pending_vacations || [];
+            const upcomingList = user.upcomingVacations || user.upcoming_vacations || [];
+            const completedList = user.completedVacations || user.completed_vacations || [];
+            const txList = user.transactions || [];
+
+            // Basic user info
+            document.getElementById('user-name')?.textContent = user.full_name || user.name || 'User';
+            document.getElementById('user-balance')?.textContent = (user.balance || 0).toFixed(2);
+            document.getElementById('user-bonus')?.textContent = (user.bonus || 0).toFixed(2);
+            document.getElementById('user-deposits')?.textContent = (user.deposits || 0).toFixed(2);
+
+            // Pending Deposits
+            const pendingDepositsEl = document.getElementById('pending-deposits');
+            if (pendingDepositsEl) {
+                const pendingDepositsList = user.pending_deposits || [];
+                const totalPending = pendingDepositsList.reduce((sum, dep) => sum + (Number(dep?.amount) || 0), 0);
+                pendingDepositsEl.textContent = totalPending.toFixed(2);
+            }
+
+            document.getElementById('user-email')?.textContent = user.email || 'Not set';
+            document.getElementById('user-phone')?.textContent = user.phone || 'Not set';
+            document.getElementById('user-address')?.textContent = user.address || 'Not set';
+            document.getElementById('user-verified')?.textContent = user.verified ? 'Yes' : 'No';
+
+            // Pending Vacations
+            const pendingVacations = document.getElementById('pending-vacations');
+            if (pendingVacations) {
+                pendingVacations.innerHTML = '';
+                pendingList.forEach(vacation => {
+                    if (!vacation || typeof vacation !== 'object') return;
+                    const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
+                    const li = document.createElement('li');
+                    li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
+                    pendingVacations.appendChild(li);
+                });
+                if (pendingList.length === 0) {
+                    pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
                 }
-                return response.json();
-            })
-            .then(user => {
-                console.log('User data:', user);
+            }
 
-                // Safe access to all array fields (handles snake_case or camelCase)
-                const pendingList = user.pendingVacations || user.pending_vacations || [];
-                const upcomingList = user.upcomingVacations || user.upcoming_vacations || [];
-                const completedList = user.completedVacations || user.completed_vacations || [];
-                const txList = user.transactions || user.transactions || [];
-                const usageList = user.usageHistory || user.usage_history || [];
+            // Upcoming Vacations + Progress Bar
+            const upcomingVacations = document.getElementById('upcoming-vacations');
+            if (upcomingVacations) {
+                upcomingVacations.innerHTML = '';
+                upcomingList.forEach(vacation => {
+                    const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
+                    const li = document.createElement('li');
+                    li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
+                    upcomingVacations.appendChild(li);
+                });
+                if (upcomingList.length === 0) {
+                    upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
+                }
 
-                console.log('Pending vacations from Supabase:', pendingList);
+                const progressBarFill = document.querySelector('.progress-bar-fill');
+                if (progressBarFill) {
+                    const progress = (upcomingList.length / 3) * 100;
+                    progressBarFill.style.width = `${progress}%`;
+                    progressBarFill.textContent = `${progress.toFixed(0)}%`;
+                }
+            }
 
-                // Name, balance, etc. (unchanged)
-                const userName = document.getElementById('user-name');
-                if (userName) userName.textContent = user.full_name || user.name || 'User';
+            // Transaction History
+            const transactionHistory = document.getElementById('transaction-history');
+            if (transactionHistory) {
+                transactionHistory.innerHTML = '';
+                const sortedTransactions = txList.sort((a, b) => 
+                    new Date(b?.date || 0) - new Date(a?.date || 0)
+                );
+                sortedTransactions.forEach(tx => {
+                    const li = document.createElement('li');
+                    li.textContent = `${tx.date || 'N/A'}: ${tx.type || 'Unknown'} $${(tx.amount || 0).toFixed(2)}`;
+                    transactionHistory.appendChild(li);
+                });
+                if (sortedTransactions.length === 0) {
+                    transactionHistory.innerHTML = '<li>No transactions yet.</li>';
+                }
+            }
 
-                const userBalance = document.getElementById('user-balance');
-                if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
-
-                const userBonus = document.getElementById('user-bonus');
-                if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
-
-                const userDeposits = document.getElementById('user-deposits');
-                if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
-
-                // Pending Deposits Display - FIXED & SAFE
-                const pendingDepositsEl = document.getElementById('pending-deposits');
-                if (pendingDepositsEl) {
-                    const pendingDepositsList = user.pending_deposits || []; // snake_case from Supabase
-                    const totalPending = pendingDepositsList.reduce((sum, dep) => {
-                        return sum + (Number(dep?.amount) || 0);
-                    }, 0);
-                    pendingDepositsEl.textContent = totalPending.toFixed(2);
-             }  // ← No semicolon here; the blank line below separates statements 
-
-
-                const userEmail = document.getElementById('user-email');
-                if (userEmail) userEmail.textContent = user.email || 'Not set';
-
-                const userPhone = document.getElementById('user-phone');
-                if (userPhone) userPhone.textContent = user.phone || 'Not set';
-
-                const userAddress = document.getElementById('user-address');
-                if (userAddress) userAddress.textContent = user.address || 'Not set';
-
-                const userVerified = document.getElementById('user-verified');
-                if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
-
-                // Pending Vacations
-                const pendingVacations = document.getElementById('pending-vacations');
-                if (pendingVacations) {
-                    pendingVacations.innerHTML = '';
-                    pendingList.forEach(vacation => {
-                        if (!vacation || typeof vacation !== 'object') {
-                            console.warn('Invalid vacation object:', vacation);
-                            return;
-                        }
+            // Past Vacations (kept your full logic)
+            const pastVacationsGrid = document.getElementById('past-vacations-grid');
+            if (pastVacationsGrid) {
+                pastVacationsGrid.innerHTML = '';
+                const completedVacations = completedList;
+                if (completedVacations.length === 0) {
+                    pastVacationsGrid.innerHTML = '<p>No past vacations yet.</p>';
+                } else {
+                    completedVacations.forEach((vacation, serverIndex) => {
+                        const card = document.createElement('div');
+                        card.classList.add('destination-card');
                         const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
-                        const li = document.createElement('li');
-                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
-                        pendingVacations.appendChild(li);
-                    });
-                    if (pendingList.length === 0) {
-                        pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
-                    }
-                }
-
-                // Upcoming Vacations + Progress Bar (restored!)
-                const upcomingVacations = document.getElementById('upcoming-vacations');
-                if (upcomingVacations) {
-                    upcomingVacations.innerHTML = '';
-                    upcomingList.forEach(vacation => {
-                        const li = document.createElement('li');
-                        const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
-                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
-                        upcomingVacations.appendChild(li);
-                    });
-                    if (upcomingList.length === 0) {
-                        upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
-                    }
-
-                    // Restore progress bar
-                    const progressBarFill = document.querySelector('.progress-bar-fill');
-                    if (progressBarFill) {
-                        const progress = (upcomingList.length / 3) * 100; // max 3 vacations for progress
-                        progressBarFill.style.width = `${progress}%`;
-                        progressBarFill.textContent = `${progress.toFixed(0)}%`; // optional: show %
-                    }
-                }
-
-                // Transaction History
-                const transactionHistory = document.getElementById('transaction-history');
-                if (transactionHistory) {
-                    transactionHistory.innerHTML = '';
-                    const sortedTransactions = txList.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    sortedTransactions.forEach(tx => {
-                        const li = document.createElement('li');
-                        li.textContent = `${tx.date}: ${tx.type} $${(tx.amount || 0).toFixed(2)}`;
-                        transactionHistory.appendChild(li);
-                    });
-                    if (sortedTransactions.length === 0) {
-                        transactionHistory.innerHTML = '<li>No transactions yet.</li>';
-                    }
-                }
-
-                // Past Vacations (unchanged)
-                const pastVacationsGrid = document.getElementById('past-vacations-grid');
-                if (pastVacationsGrid) {
-                    pastVacationsGrid.innerHTML = '';
-                    const completedVacations = completedList;
-                    if (completedVacations.length === 0) {
-                        pastVacationsGrid.innerHTML = '<p>No past vacations yet.</p>';
-                    } else {
-                        completedVacations.forEach((vacation, serverIndex) => {
-                            const card = document.createElement('div');
-                            card.classList.add('destination-card');
-                            const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
-                            card.innerHTML = `
+                        card.innerHTML = `
                             <img src="${vacation.image || 'images/default-pic.jpg'}" alt="${vacation.name || 'Unknown'}" loading="lazy">
                             <h3>${vacation.name || 'Unknown'}</h3>
                             <p>Completed: ${vacation.completedDate || 'N/A'}</p>
@@ -215,66 +197,80 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
                                 <button class="btn rate-trip" data-index="${serverIndex}">${vacation.rating ? 'Edit Rating' : 'Rate Trip'}</button>
                             </div>
                         `;
-                            pastVacationsGrid.appendChild(card);
+                        pastVacationsGrid.appendChild(card);
 
-                            const img = card.querySelector('img');
-                            img.addEventListener('error', function handler() {
-                                img.src = 'images/default-pic.jpg';
-                                img.removeEventListener('error', handler);
-                            });
-
-                            card.querySelector('.learn-more').addEventListener('click', () => {
-                                const destMatch = destinationsData.find(d => d.deluxePackage.name === vacation.name);
-                                if (destMatch) showDeluxePackage(destMatch);
-                            });
-                            card.querySelector('.rebook-now').addEventListener('click', () => {
-                                showBookingConfirmationModal(username, destinationsData.find(d => d.deluxePackage.name === vacation.name));
-                            });
-                            card.querySelector('.rate-trip').addEventListener('click', () => {
-                                const index = parseInt(card.querySelector('.rate-trip').getAttribute('data-index'));
-                                showRateTripModal(username, index, vacation);
-                            });
+                        const img = card.querySelector('img');
+                        img.addEventListener('error', function handler() {
+                            img.src = 'images/default-pic.jpg';
+                            img.removeEventListener('error', handler);
                         });
-                    }
+
+                        card.querySelector('.learn-more').addEventListener('click', () => {
+                            const destMatch = destinationsData?.find(d => d.deluxePackage?.name === vacation.name);
+                            if (destMatch) showDeluxePackage(destMatch);
+                        });
+
+                        card.querySelector('.rebook-now').addEventListener('click', () => {
+                            const destMatch = destinationsData?.find(d => d.deluxePackage?.name === vacation.name);
+                            if (destMatch) showBookingConfirmationModal(username, destMatch);
+                        });
+
+                        card.querySelector('.rate-trip').addEventListener('click', () => {
+                            const index = parseInt(card.querySelector('.rate-trip').getAttribute('data-index'));
+                            showRateTripModal(username, index, vacation);
+                        });
+                    });
                 }
+            }
 
-                // Rest of your code (welcome notification, last deposit modal, etc.)
-                if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
-                    const storedTimestamp = localStorage.getItem('lastDepositTimestamp');
-                    if (storedTimestamp !== user.lastDepositAccepted.timestamp) {
-                        lastDepositTimestamp = user.lastDepositAccepted.timestamp;
-                        localStorage.setItem('lastDepositTimestamp', lastDepositTimestamp);
-                        showDepositSuccessModal(user.lastDepositAccepted.amount);
-                    }
+            // Last deposit success modal
+            if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
+                const storedTimestamp = localStorage.getItem('lastDepositTimestamp');
+                if (storedTimestamp !== user.lastDepositAccepted.timestamp) {
+                    lastDepositTimestamp = user.lastDepositAccepted.timestamp;
+                    localStorage.setItem('lastDepositTimestamp', lastDepositTimestamp);
+                    showDepositSuccessModal(user.lastDepositAccepted.amount);
                 }
+            }
 
-                  
+            // Welcome notification (only once)
+            if (!localStorage.getItem('welcomeShown')) {
+                showNotification('Welcome to your dashboard!');
+                localStorage.setItem('welcomeShown', 'true');
+            }
 
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            if (error.message.includes('Session expired') || error.message.includes('unauthorized')) {
+                showNotification('Session expired. Please log in again.');
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = 'login.html';
+            } else {
+                showNotification('Failed to load user data. Retrying...');
+            }
+        }
+    }
 
-                // Only **once** — remove the duplicate
-                if (!localStorage.getItem('welcomeShown')) {
-                    showNotification('Welcome to your dashboard!');
-                    localStorage.setItem('welcomeShown', 'true');
-                }
+    // Initial call
+    checkForDepositUpdates();
 
-            })  // ← this closes the .then(user => { ... })
-            .catch(error => {
-                console.error('Error loading user data:', error);
-                if (error.message === 'Session expired or unauthorized') {
-                    showNotification('Session expired. Please log in again.');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('username');
-                    window.location.href = 'login.html';
-                } else {
-                    showNotification('Failed to load user data. Retrying...');
-                }
-            });
- }
+    // Polling every 5 seconds
+    updateInterval = setInterval(checkForDepositUpdates, 5000);
+}
 
- checkForDepositUpdates();
- updateInterval = setInterval(checkForDepositUpdates, 5000);
-*/
+// Basic cleanup when page unloads / user navigates away
+window.addEventListener('beforeunload', () => {
+    if (updateInterval) {
+        clearInterval(updateInterval);
+        updateInterval = null;
+    }
+});
 
+// If you have logout logic elsewhere, also clear interval there:
+// localStorage.removeItem('token');
+// localStorage.removeItem('username');
+// if (updateInterval) clearInterval(updateInterval);
 
 function initLoginForm() {
     const loginForm = document.getElementById('login-form');
