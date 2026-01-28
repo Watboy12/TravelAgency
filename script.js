@@ -60,7 +60,7 @@ function loadSocialMedia() {
 let updateInterval;
 let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
 
-function loadUserData(username) {
+/*function loadUserData(username) {
     if (updateInterval) clearInterval(updateInterval);
 
     function checkForDepositUpdates() {
@@ -77,127 +77,133 @@ function loadUserData(username) {
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('Session expired or unauthorized');
-                }
-                throw new Error('User data fetch failed');
-            }
-            return response.json();
-        })
-        .then(user => {
-            console.log('User data:', user);
-
-            // Safe access to all array fields (handles snake_case or camelCase)
-            const pendingList = user.pendingVacations || user.pending_vacations || [];
-            const upcomingList = user.upcomingVacations || user.upcoming_vacations || [];
-            const completedList = user.completedVacations || user.completed_vacations || [];
-            const txList = user.transactions || user.transactions || [];
-            const usageList = user.usageHistory || user.usage_history || [];
-
-            console.log('Pending vacations from Supabase:', pendingList);
-
-            // Name, balance, etc. (unchanged)
-            const userName = document.getElementById('user-name');
-            if (userName) userName.textContent = user.full_name || user.name || 'User';
-
-            const userBalance = document.getElementById('user-balance');
-            if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
-
-            const userBonus = document.getElementById('user-bonus');
-            if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
-
-            const userDeposits = document.getElementById('user-deposits');
-            if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
-
-            const pendingDeposits = document.getElementById('pending-deposits');
-            if (pendingDeposits) {
-                pendingDeposits.textContent = (user.pendingDeposits || []).reduce((sum, dep) => sum + (dep.amount || 0), 0).toFixed(2);
-            }
-
-            const userEmail = document.getElementById('user-email');
-            if (userEmail) userEmail.textContent = user.email || 'Not set';
-
-            const userPhone = document.getElementById('user-phone');
-            if (userPhone) userPhone.textContent = user.phone || 'Not set';
-
-            const userAddress = document.getElementById('user-address');
-            if (userAddress) userAddress.textContent = user.address || 'Not set';
-
-            const userVerified = document.getElementById('user-verified');
-            if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
-
-            // Pending Vacations
-            const pendingVacations = document.getElementById('pending-vacations');
-            if (pendingVacations) {
-                pendingVacations.innerHTML = '';
-                pendingList.forEach(vacation => {
-                    if (!vacation || typeof vacation !== 'object') {
-                        console.warn('Invalid vacation object:', vacation);
-                        return;
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Session expired or unauthorized');
                     }
-                    const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
-                    const li = document.createElement('li');
-                    li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
-                    pendingVacations.appendChild(li);
-                });
-                if (pendingList.length === 0) {
-                    pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
+                    throw new Error('User data fetch failed');
                 }
-            }
+                return response.json();
+            })
+            .then(user => {
+                console.log('User data:', user);
 
-            // Upcoming Vacations + Progress Bar (restored!)
-            const upcomingVacations = document.getElementById('upcoming-vacations');
-            if (upcomingVacations) {
-                upcomingVacations.innerHTML = '';
-                upcomingList.forEach(vacation => {
-                    const li = document.createElement('li');
-                    const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
-                    li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
-                    upcomingVacations.appendChild(li);
-                });
-                if (upcomingList.length === 0) {
-                    upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
-                }
+                // Safe access to all array fields (handles snake_case or camelCase)
+                const pendingList = user.pendingVacations || user.pending_vacations || [];
+                const upcomingList = user.upcomingVacations || user.upcoming_vacations || [];
+                const completedList = user.completedVacations || user.completed_vacations || [];
+                const txList = user.transactions || user.transactions || [];
+                const usageList = user.usageHistory || user.usage_history || [];
 
-                // Restore progress bar
-                const progressBarFill = document.querySelector('.progress-bar-fill');
-                if (progressBarFill) {
-                    const progress = (upcomingList.length / 3) * 100; // max 3 vacations for progress
-                    progressBarFill.style.width = `${progress}%`;
-                    progressBarFill.textContent = `${progress.toFixed(0)}%`; // optional: show %
-                }
-            }
+                console.log('Pending vacations from Supabase:', pendingList);
 
-            // Transaction History
-            const transactionHistory = document.getElementById('transaction-history');
-            if (transactionHistory) {
-                transactionHistory.innerHTML = '';
-                const sortedTransactions = txList.sort((a, b) => new Date(b.date) - new Date(a.date));
-                sortedTransactions.forEach(tx => {
-                    const li = document.createElement('li');
-                    li.textContent = `${tx.date}: ${tx.type} $${(tx.amount || 0).toFixed(2)}`;
-                    transactionHistory.appendChild(li);
-                });
-                if (sortedTransactions.length === 0) {
-                    transactionHistory.innerHTML = '<li>No transactions yet.</li>';
-                }
-            }
+                // Name, balance, etc. (unchanged)
+                const userName = document.getElementById('user-name');
+                if (userName) userName.textContent = user.full_name || user.name || 'User';
 
-            // Past Vacations (unchanged)
-            const pastVacationsGrid = document.getElementById('past-vacations-grid');
-            if (pastVacationsGrid) {
-                pastVacationsGrid.innerHTML = '';
-                const completedVacations = completedList;
-                if (completedVacations.length === 0) {
-                    pastVacationsGrid.innerHTML = '<p>No past vacations yet.</p>';
-                } else {
-                    completedVacations.forEach((vacation, serverIndex) => {
-                        const card = document.createElement('div');
-                        card.classList.add('destination-card');
+                const userBalance = document.getElementById('user-balance');
+                if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
+
+                const userBonus = document.getElementById('user-bonus');
+                if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
+
+                const userDeposits = document.getElementById('user-deposits');
+                if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
+
+                // Pending Deposits Display - FIXED & SAFE
+                const pendingDepositsEl = document.getElementById('pending-deposits');
+                if (pendingDepositsEl) {
+                    const pendingDepositsList = user.pending_deposits || []; // snake_case from Supabase
+                    const totalPending = pendingDepositsList.reduce((sum, dep) => {
+                        return sum + (Number(dep?.amount) || 0);
+                    }, 0);
+                    pendingDepositsEl.textContent = totalPending.toFixed(2);
+             }  // ← No semicolon here; the blank line below separates statements 
+
+
+                const userEmail = document.getElementById('user-email');
+                if (userEmail) userEmail.textContent = user.email || 'Not set';
+
+                const userPhone = document.getElementById('user-phone');
+                if (userPhone) userPhone.textContent = user.phone || 'Not set';
+
+                const userAddress = document.getElementById('user-address');
+                if (userAddress) userAddress.textContent = user.address || 'Not set';
+
+                const userVerified = document.getElementById('user-verified');
+                if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
+
+                // Pending Vacations
+                const pendingVacations = document.getElementById('pending-vacations');
+                if (pendingVacations) {
+                    pendingVacations.innerHTML = '';
+                    pendingList.forEach(vacation => {
+                        if (!vacation || typeof vacation !== 'object') {
+                            console.warn('Invalid vacation object:', vacation);
+                            return;
+                        }
                         const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
-                        card.innerHTML = `
+                        const li = document.createElement('li');
+                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
+                        pendingVacations.appendChild(li);
+                    });
+                    if (pendingList.length === 0) {
+                        pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
+                    }
+                }
+
+                // Upcoming Vacations + Progress Bar (restored!)
+                const upcomingVacations = document.getElementById('upcoming-vacations');
+                if (upcomingVacations) {
+                    upcomingVacations.innerHTML = '';
+                    upcomingList.forEach(vacation => {
+                        const li = document.createElement('li');
+                        const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
+                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
+                        upcomingVacations.appendChild(li);
+                    });
+                    if (upcomingList.length === 0) {
+                        upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
+                    }
+
+                    // Restore progress bar
+                    const progressBarFill = document.querySelector('.progress-bar-fill');
+                    if (progressBarFill) {
+                        const progress = (upcomingList.length / 3) * 100; // max 3 vacations for progress
+                        progressBarFill.style.width = `${progress}%`;
+                        progressBarFill.textContent = `${progress.toFixed(0)}%`; // optional: show %
+                    }
+                }
+
+                // Transaction History
+                const transactionHistory = document.getElementById('transaction-history');
+                if (transactionHistory) {
+                    transactionHistory.innerHTML = '';
+                    const sortedTransactions = txList.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    sortedTransactions.forEach(tx => {
+                        const li = document.createElement('li');
+                        li.textContent = `${tx.date}: ${tx.type} $${(tx.amount || 0).toFixed(2)}`;
+                        transactionHistory.appendChild(li);
+                    });
+                    if (sortedTransactions.length === 0) {
+                        transactionHistory.innerHTML = '<li>No transactions yet.</li>';
+                    }
+                }
+
+                // Past Vacations (unchanged)
+                const pastVacationsGrid = document.getElementById('past-vacations-grid');
+                if (pastVacationsGrid) {
+                    pastVacationsGrid.innerHTML = '';
+                    const completedVacations = completedList;
+                    if (completedVacations.length === 0) {
+                        pastVacationsGrid.innerHTML = '<p>No past vacations yet.</p>';
+                    } else {
+                        completedVacations.forEach((vacation, serverIndex) => {
+                            const card = document.createElement('div');
+                            card.classList.add('destination-card');
+                            const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
+                            card.innerHTML = `
                             <img src="${vacation.image || 'images/default-pic.jpg'}" alt="${vacation.name || 'Unknown'}" loading="lazy">
                             <h3>${vacation.name || 'Unknown'}</h3>
                             <p>Completed: ${vacation.completedDate || 'N/A'}</p>
@@ -209,67 +215,72 @@ function loadUserData(username) {
                                 <button class="btn rate-trip" data-index="${serverIndex}">${vacation.rating ? 'Edit Rating' : 'Rate Trip'}</button>
                             </div>
                         `;
-                        pastVacationsGrid.appendChild(card);
+                            pastVacationsGrid.appendChild(card);
 
-                        const img = card.querySelector('img');
-                        img.addEventListener('error', function handler() {
-                            img.src = 'images/default-pic.jpg';
-                            img.removeEventListener('error', handler);
-                        });
+                            const img = card.querySelector('img');
+                            img.addEventListener('error', function handler() {
+                                img.src = 'images/default-pic.jpg';
+                                img.removeEventListener('error', handler);
+                            });
 
-                        card.querySelector('.learn-more').addEventListener('click', () => {
-                            const destMatch = destinationsData.find(d => d.deluxePackage.name === vacation.name);
-                            if (destMatch) showDeluxePackage(destMatch);
+                            card.querySelector('.learn-more').addEventListener('click', () => {
+                                const destMatch = destinationsData.find(d => d.deluxePackage.name === vacation.name);
+                                if (destMatch) showDeluxePackage(destMatch);
+                            });
+                            card.querySelector('.rebook-now').addEventListener('click', () => {
+                                showBookingConfirmationModal(username, destinationsData.find(d => d.deluxePackage.name === vacation.name));
+                            });
+                            card.querySelector('.rate-trip').addEventListener('click', () => {
+                                const index = parseInt(card.querySelector('.rate-trip').getAttribute('data-index'));
+                                showRateTripModal(username, index, vacation);
+                            });
                         });
-                        card.querySelector('.rebook-now').addEventListener('click', () => {
-                            showBookingConfirmationModal(username, destinationsData.find(d => d.deluxePackage.name === vacation.name));
-                        });
-                        card.querySelector('.rate-trip').addEventListener('click', () => {
-                            const index = parseInt(card.querySelector('.rate-trip').getAttribute('data-index'));
-                            showRateTripModal(username, index, vacation);
-                        });
-                    });
+                    }
                 }
-            }
 
-            // Rest of your code (welcome notification, last deposit modal, etc.)
-            if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
-                const storedTimestamp = localStorage.getItem('lastDepositTimestamp');
-                if (storedTimestamp !== user.lastDepositAccepted.timestamp) {
-                    lastDepositTimestamp = user.lastDepositAccepted.timestamp;
-                    localStorage.setItem('lastDepositTimestamp', lastDepositTimestamp);
-                    showDepositSuccessModal(user.lastDepositAccepted.amount);
+                // Rest of your code (welcome notification, last deposit modal, etc.)
+                if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
+                    const storedTimestamp = localStorage.getItem('lastDepositTimestamp');
+                    if (storedTimestamp !== user.lastDepositAccepted.timestamp) {
+                        lastDepositTimestamp = user.lastDepositAccepted.timestamp;
+                        localStorage.setItem('lastDepositTimestamp', lastDepositTimestamp);
+                        showDepositSuccessModal(user.lastDepositAccepted.amount);
+                    }
                 }
-            }
 
-            if (!localStorage.getItem('welcomeShown')) {
-                showNotification('Welcome to your dashboard!');
-                localStorage.setItem('welcomeShown', 'true');
-            }
+                  
 
-        })
-        .catch(error => {
-            console.error('Error loading user data:', error);
-            if (error.message === 'Session expired or unauthorized') {
-                showNotification('Session expired. Please log in again.');
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                window.location.href = 'login.html';
-            } else {
-                showNotification('Failed to load user data. Retrying...');
-            }
-        });
-    }
 
-    checkForDepositUpdates();
-    updateInterval = setInterval(checkForDepositUpdates, 5000);
-}
+                // Only **once** — remove the duplicate
+                if (!localStorage.getItem('welcomeShown')) {
+                    showNotification('Welcome to your dashboard!');
+                    localStorage.setItem('welcomeShown', 'true');
+                }
+
+            })  // ← this closes the .then(user => { ... })
+            .catch(error => {
+                console.error('Error loading user data:', error);
+                if (error.message === 'Session expired or unauthorized') {
+                    showNotification('Session expired. Please log in again.');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('username');
+                    window.location.href = 'login.html';
+                } else {
+                    showNotification('Failed to load user data. Retrying...');
+                }
+            });
+ }
+
+ checkForDepositUpdates();
+ updateInterval = setInterval(checkForDepositUpdates, 5000);
+*/
+
 
 function initLoginForm() {
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         console.log('Login form found');
-        loginForm.addEventListener('submit', function(e) {
+        loginForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
             // Use the correct ID from your HTML
@@ -293,38 +304,38 @@ function initLoginForm() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: emailOrUsername, password })
             })
-            .then(response => {
-                console.log('Login response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`Login failed with status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Login response data:', data);
-                if (data.success) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', emailOrUsername); // store what the user typed
-                    window.location.href = 'client.html';
-                } else {
+                .then(response => {
+                    console.log('Login response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`Login failed with status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Login response data:', data);
+                    if (data.success) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('username', emailOrUsername); // store what the user typed
+                        window.location.href = 'client.html';
+                    } else {
+                        const errorMessage = document.getElementById('error-message');
+                        if (errorMessage) {
+                            errorMessage.textContent = data.message || 'Invalid credentials';
+                            errorMessage.classList.remove('hidden');
+                        }
+                        loginForm.reset();
+                    }
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
                     const errorMessage = document.getElementById('error-message');
                     if (errorMessage) {
-                        errorMessage.textContent = data.message || 'Invalid credentials';
+                        errorMessage.textContent = error.message.includes('status: 401')
+                            ? 'Invalid username/email or password'
+                            : 'Login failed. Please try again or check your connection.';
                         errorMessage.classList.remove('hidden');
                     }
-                    loginForm.reset();
-                }
-            })
-            .catch(error => {
-                console.error('Login error:', error);
-                const errorMessage = document.getElementById('error-message');
-                if (errorMessage) {
-                    errorMessage.textContent = error.message.includes('status: 401') 
-                        ? 'Invalid username/email or password'
-                        : 'Login failed. Please try again or check your connection.';
-                    errorMessage.classList.remove('hidden');
-                }
-            });
+                });
         });
     } else {
         console.error('Login form not found on this page');
@@ -390,23 +401,23 @@ function initCreateAccountForm() {
 
     if (createAccountForm) {
         console.log('Create account form found');
-        createAccountForm.addEventListener('submit', async function(e) {
+        createAccountForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             // Add click handlers for info icons
-document.querySelectorAll('.info-icon').forEach(icon => {
-    icon.addEventListener('click', (e) => {
-        e.preventDefault();
-        const message = `
+            document.querySelectorAll('.info-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const message = `
             We kindly request your phone number and address for the following professional reasons:
             • To contact you directly regarding your booking confirmations, updates, or urgent travel changes.
             • To determine the closest international airport for better package recommendations and logistics.
             • To ensure secure and accurate processing of your travel arrangements and any future communications.
             Your information is kept strictly confidential and protected under our privacy policy.
         `;
-        showNotification(message);  // Reuses your existing notification system
-    });
-});
+                    showNotification(message);  // Reuses your existing notification system
+                });
+            });
 
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner"></span> Creating Account...';
@@ -415,23 +426,24 @@ document.querySelectorAll('.info-icon').forEach(icon => {
             errorMessage.classList.add('hidden');
 
             const name = document.getElementById('name')?.value?.trim() || '';
-const username = document.getElementById('username')?.value?.trim() || '';
-const email = document.getElementById('email')?.value?.trim() || '';
-const phone = document.getElementById('phone')?.value?.trim() || '';
-const password = document.getElementById('password')?.value || '';
-const confirmPassword = document.getElementById('confirm-password')?.value || '';
+            const username = document.getElementById('username')?.value?.trim() || '';
+            const email = document.getElementById('email')?.value?.trim() || '';
+            const phone = document.getElementById('phone')?.value?.trim() || '';
+            const address = document.getElementById('address')?.value?.trim() || '';
+            const password = document.getElementById('password')?.value || '';
+            const confirmPassword = document.getElementById('confirm-password')?.value || '';
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
             if (!name || !username || !email || !phone || !address || !password) {
-    errorMessage.textContent = 'All fields (including phone and address) are required.';
-    errorMessage.classList.remove('hidden');
-    submitButton.disabled = false;
-    submitButton.innerHTML = 'Create Account';
-    return;
-}
+                errorMessage.textContent = 'All fields (including phone and address) are required.';
+                errorMessage.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Create Account';
+                return;
+            }
 
             if (!emailRegex.test(email)) {
                 errorMessage.textContent = 'Invalid email format.';
@@ -770,7 +782,7 @@ async function bookVacation(username, cost, name) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 vacation: { cost, name, date: new Date().toISOString().split('T')[0] },
                 bonus: 500
             })
@@ -814,71 +826,71 @@ async function bookVacation(username, cost, name) {
 
 function initDepositForms(username) {
     // Bank Deposit Form Submission
-   document.getElementById('bank-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    document.getElementById('bank-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    const payerName = document.getElementById('payer-name')?.value?.trim() || '';
-    const amountInput = document.getElementById('bank-amount');
-    const amount = parseFloat(amountInput?.value || '0');
-    const token = localStorage.getItem('token');
-    const username = localStorage.getItem('username');
+        const payerName = document.getElementById('payer-name')?.value?.trim() || '';
+        const amountInput = document.getElementById('bank-amount');
+        const amount = parseFloat(amountInput?.value || '0');
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
 
-    if (!username || !token) {
-        showNotification('Please log in first.');
-        return;
-    }
-
-    if (isNaN(amount) || amount <= 0) {
-        showNotification('Please enter a valid amount greater than $0.');
-        return;
-    }
-
-    // Show spinner + disable button
-    const loading = document.getElementById('bank-loading');
-    const submitBtn = document.querySelector('#bank-form button[type="submit"]');
-
-    if (loading) loading.classList.remove('hidden');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Verifying...';
-    }
-
-    try {
-        console.log('Sending bank deposit request:', { username, amount, payerName, token: token.substring(0, 10) + '...' });
-
-        const response = await fetch('/api/deposit/bank', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ username, amount, payerName })
-        });
-
-        console.log('Bank response status:', response.status);
-
-        const data = await response.json();
-        console.log('Bank full response:', data);
-
-        if (data.success) {
-            showDepositSubmissionThankYouModal();
-            document.getElementById('bank-form').reset();
-            showNotification('Bank deposit submitted successfully — awaiting approval!');
-        } else {
-            showNotification(data.message || 'Deposit failed. Please check details.');
+        if (!username || !token) {
+            showNotification('Please log in first.');
+            return;
         }
-    } catch (error) {
-        console.error('Bank deposit network error:', error);
-        showNotification('Network error submitting deposit. Please check your connection.');
-    } finally {
-        // ALWAYS hide spinner and re-enable button
-        if (loading) loading.classList.add('hidden');
+
+        if (isNaN(amount) || amount <= 0) {
+            showNotification('Please enter a valid amount greater than $0.');
+            return;
+        }
+
+        // Show spinner + disable button
+        const loading = document.getElementById('bank-loading');
+        const submitBtn = document.querySelector('#bank-form button[type="submit"]');
+
+        if (loading) loading.classList.remove('hidden');
         if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Submit Bank Deposit';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Verifying...';
         }
-    }
-});
+
+        try {
+            console.log('Sending bank deposit request:', { username, amount, payerName, token: token.substring(0, 10) + '...' });
+
+            const response = await fetch('/api/deposit/bank', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ username, amount, payerName })
+            });
+
+            console.log('Bank response status:', response.status);
+
+            const data = await response.json();
+            console.log('Bank full response:', data);
+
+            if (data.success) {
+                showDepositSubmissionThankYouModal();
+                document.getElementById('bank-form').reset();
+                showNotification('Bank deposit submitted successfully — awaiting approval!');
+            } else {
+                showNotification(data.message || 'Deposit failed. Please check details.');
+            }
+        } catch (error) {
+            console.error('Bank deposit network error:', error);
+            showNotification('Network error submitting deposit. Please check your connection.');
+        } finally {
+            // ALWAYS hide spinner and re-enable button
+            if (loading) loading.classList.add('hidden');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Bank Deposit';
+            }
+        }
+    });
     // BTC Address Update Form (admin use — keep as is, just add logging)
     document.getElementById('btc-address-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -945,54 +957,54 @@ function initDepositForms(username) {
     }
 
     document.getElementById('generate-qr-btn')?.addEventListener('click', async () => {
-    const amount = parseFloat(document.getElementById('crypto-qr-amount')?.value || '0');
+        const amount = parseFloat(document.getElementById('crypto-qr-amount')?.value || '0');
 
-    if (isNaN(amount) || amount <= 0) {
-        showNotification('Please enter a valid amount greater than $0.');
-        return;
-    }
-
-    const loading = document.getElementById('qr-loading');
-    const qrDiv = document.getElementById('qrcode');
-
-    if (loading) loading.classList.remove('hidden');
-    if (qrDiv) {
-        qrDiv.classList.add('hidden');
-        qrDiv.innerHTML = '';
-    }
-
-    // Wait 4 seconds (professional delay)
-    await new Promise(resolve => setTimeout(resolve, 4000));
-
-    try {
-        const wallet = document.getElementById('btc-wallet-address')?.textContent || 'bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6';
-        const btcAmount = (amount / 60000).toFixed(8); // adjust rate
-
-        const qrData = `bitcoin:${wallet}?amount=${btcAmount}`;
-
-        if (loading) loading.classList.add('hidden');
-        if (qrDiv) {
-            qrDiv.classList.remove('hidden');
-
-            // Generate QR
-            QRCode.toCanvas(qrDiv, qrData, { width: 220 }, (err) => {
-                if (err) {
-                    console.error('QR generation failed:', err);
-                    showNotification('Failed to generate QR code.');
-                }
-            });
-
-            // Add professional message
-            const msg = document.createElement('p');
-            msg.textContent = 'Send only Bitcoin (BTC) to this address. Deposits confirmed in 10–60 minutes. Thank you for choosing ExploreWorld.';
-            qrDiv.appendChild(msg);
+        if (isNaN(amount) || amount <= 0) {
+            showNotification('Please enter a valid amount greater than $0.');
+            return;
         }
-    } catch (err) {
-        console.error('QR error:', err);
-        showNotification('Error preparing QR code.');
-        if (loading) loading.classList.add('hidden');
-    }
-});
+
+        const loading = document.getElementById('qr-loading');
+        const qrDiv = document.getElementById('qrcode');
+
+        if (loading) loading.classList.remove('hidden');
+        if (qrDiv) {
+            qrDiv.classList.add('hidden');
+            qrDiv.innerHTML = '';
+        }
+
+        // Wait 4 seconds (professional delay)
+        await new Promise(resolve => setTimeout(resolve, 4000));
+
+        try {
+            const wallet = document.getElementById('btc-wallet-address')?.textContent || 'bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6';
+            const btcAmount = (amount / 60000).toFixed(8); // adjust rate
+
+            const qrData = `bitcoin:${wallet}?amount=${btcAmount}`;
+
+            if (loading) loading.classList.add('hidden');
+            if (qrDiv) {
+                qrDiv.classList.remove('hidden');
+
+                // Generate QR
+                QRCode.toCanvas(qrDiv, qrData, { width: 220 }, (err) => {
+                    if (err) {
+                        console.error('QR generation failed:', err);
+                        showNotification('Failed to generate QR code.');
+                    }
+                });
+
+                // Add professional message
+                const msg = document.createElement('p');
+                msg.textContent = 'Send only Bitcoin (BTC) to this address. Deposits confirmed in 10–60 minutes. Thank you for choosing ExploreWorld.';
+                qrDiv.appendChild(msg);
+            }
+        } catch (err) {
+            console.error('QR error:', err);
+            showNotification('Error preparing QR code.');
+            if (loading) loading.classList.add('hidden');
+        }
+    });
 
     // Crypto Deposit Form Submission
     document.getElementById('crypto-qr-form').addEventListener('submit', async (e) => {
@@ -1133,19 +1145,19 @@ function toggleVerified(username, isVerified) {
         },
         body: JSON.stringify({ verified: isVerified })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification(`User ${username} verification status updated.`);
-            loadUsers();
-        } else {
-            showNotification(data.message || 'Failed to update verification status.');
-        }
-    })
-    .catch(error => {
-        console.error('Error toggling verification:', error);
-        showNotification('Failed to update verification status. Please try again.');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(`User ${username} verification status updated.`);
+                loadUsers();
+            } else {
+                showNotification(data.message || 'Failed to update verification status.');
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling verification:', error);
+            showNotification('Failed to update verification status. Please try again.');
+        });
 }
 
 function clearVacationHistory(username) {
@@ -1158,34 +1170,34 @@ function clearVacationHistory(username) {
                 'Authorization': `Bearer ${token}`
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('Session expired or unauthorized');
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Session expired or unauthorized');
+                    }
+                    throw new Error('Failed to clear vacation history');
                 }
-                throw new Error('Failed to clear vacation history');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert(`Vacation history cleared for ${username}`);
-                loadUsers();
-            } else {
-                alert(data.message || 'Failed to clear vacation history');
-            }
-        })
-        .catch(error => {
-            console.error('Error clearing vacation history:', error);
-            if (error.message === 'Session expired or unauthorized') {
-                showNotification('Admin session expired. Please log in again.');
-                localStorage.removeItem('adminToken');
-                document.getElementById('admin-panel').classList.add('hidden');
-                document.getElementById('admin-login').classList.remove('hidden');
-            } else {
-                showNotification('Failed to clear vacation history. Please try again.');
-            }
-        });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(`Vacation history cleared for ${username}`);
+                    loadUsers();
+                } else {
+                    alert(data.message || 'Failed to clear vacation history');
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing vacation history:', error);
+                if (error.message === 'Session expired or unauthorized') {
+                    showNotification('Admin session expired. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                    document.getElementById('admin-panel').classList.add('hidden');
+                    document.getElementById('admin-login').classList.remove('hidden');
+                } else {
+                    showNotification('Failed to clear vacation history. Please try again.');
+                }
+            });
     }
 }
 
@@ -1199,39 +1211,39 @@ function clearTransactions(username) {
                 'Authorization': `Bearer ${token}`
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('Session expired or unauthorized');
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Session expired or unauthorized');
+                    }
+                    throw new Error('Failed to clear transactions');
                 }
-                throw new Error('Failed to clear transactions');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert(`Transaction history cleared for ${username}`);
-                loadUsers();
-            } else {
-                alert(data.message || 'Failed to clear transactions');
-            }
-        })
-        .catch(error => {
-            console.error('Error clearing transactions:', error);
-            if (error.message === 'Session expired or unauthorized') {
-                showNotification('Admin session expired. Please log in again.');
-                localStorage.removeItem('adminToken');
-                document.getElementById('admin-panel').classList.add('hidden');
-                document.getElementById('admin-login').classList.remove('hidden');
-            } else {
-                showNotification('Failed to clear transactions. Please try again.');
-            }
-        });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(`Transaction history cleared for ${username}`);
+                    loadUsers();
+                } else {
+                    alert(data.message || 'Failed to clear transactions');
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing transactions:', error);
+                if (error.message === 'Session expired or unauthorized') {
+                    showNotification('Admin session expired. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                    document.getElementById('admin-panel').classList.add('hidden');
+                    document.getElementById('admin-login').classList.remove('hidden');
+                } else {
+                    showNotification('Failed to clear transactions. Please try again.');
+                }
+            });
     }
 }
-
 function loadUsers() {
     const token = localStorage.getItem('adminToken');
+
     fetch('/api/admin/users', {
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -1239,387 +1251,419 @@ function loadUsers() {
         },
         cache: 'no-store'
     })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                throw new Error('Session expired or unauthorized');
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    throw new Error('Session expired or unauthorized');
+                }
+                throw new Error('Failed to load users');
             }
-            throw new Error('Failed to load users');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Extract the users array from the response object
-        const users = data.users;
-        // Check if users is an array to avoid errors
-        if (!Array.isArray(users)) {
-            console.error('Expected an array for users, but got:', users);
-            showNotification('Failed to load users: Invalid data format.');
-            return;
-        }
-        const userList = document.getElementById('user-list');
-        if (!userList) return;
-        userList.innerHTML = '<button id="clear-users-btn" class="btn btn-danger">Clear All Users</button>';
-        users.forEach(user => {
-            const div = document.createElement('div');
-            div.innerHTML = `
-                <p><strong>${user.name}</strong> (${user.username}) - Verified: 
-                    <input type="checkbox" ${user.verified ? 'checked' : ''} class="verify-checkbox" data-username="${user.username}">
-                </p>
-                <form class="edit-user-form" data-username="${user.username}">
-                    <input type="text" name="name" value="${user.name}" placeholder="Name">
-                    <input type="number" name="balance" value="${user.balance || 0}" placeholder="Balance">
-                    <input type="number" name="bonus" value="${user.bonus || 0}" placeholder="Bonus">
-                    <input type="number" name="deposits" value="${user.deposits || 0}" placeholder="Deposits">
-                    <input type="text" name="email" value="${user.personalInfo?.email || user.email || ''}" placeholder="Email">
-                    <input type="text" name="phone" value="${user.personalInfo?.phone || user.phone || ''}" placeholder="Phone">
-                    <input type="text" name="address" value="${user.personalInfo?.address || ''}" placeholder="Address">
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </form>
-                <button class="btn btn-danger btn-clear-vacations" data-username="${user.username}">Clear Vacation History</button>
-                <button class="btn btn-danger btn-clear-transactions" data-username="${user.username}">Clear Transaction History</button>
-                <button class="btn btn-danger btn-clear-past-vacations" data-username="${user.username}">Clear Past Vacations</button>
-                <h3>Pending Deposits</h3>
-                <ul id="pending-deposits-${user.username}">
-                    ${(user.pendingDeposits || []).map((dep, i) => `
-                        <li>$${dep.amount} via ${dep.method} (${dep.date}) 
-                            <button class="btn btn-success accept-deposit" data-username="${user.username}" data-index="${i}">Accept</button>
-                        </li>
-                    `).join('')}
-                </ul>
-                <h3>Pending Vacations</h3>
-                <ul id="pending-${user.username}">
-                    ${(user.pendingVacations || []).map((v, i) => `
-                        <li>${v.name || 'Unknown'} ($${typeof v.cost === 'number' ? v.cost.toFixed(2) : 'N/A'} - ${v.date || 'N/A'})
-                            <button class="btn btn-success accept-vacation" data-username="${user.username}" data-index="${i}">Accept</button>
-                        </li>
-                    `).join('')}
-                </ul>
-                <h3>Upcoming Vacations</h3>
-                <ul id="upcoming-${user.username}">
-                    ${(user.upcomingVacations || []).map((v, i) => `
-                        <li>${v.name || 'Unknown'} ($${typeof v.cost === 'number' ? v.cost.toFixed(2) : 'N/A'} - ${v.date || 'N/A'})
-                            <button class="btn btn-primary complete-vacation" data-username="${user.username}" data-index="${i}">Mark as Completed</button>
-                        </li>
-                    `).join('')}
-                </ul>
-                <h3>Past Vacations</h3>
-                <ul id="past-${user.username}">
-                    ${(user.completedVacations || []).map((v, i) => `
-                        <li>${v.name || 'Unknown'} ($${typeof v.cost === 'number' ? v.cost.toFixed(2) : 'N/A'} - ${v.completedDate || 'N/A'})${v.rating ? ` - Rated: ${v.rating}/5` : ''}
-                            <button class="btn btn-primary edit-past-vacation" data-username="${user.username}" data-index="${i}">Edit</button>
-                        </li>
-                    `).join('')}
-                </ul>
-                <button class="btn btn-success add-past-vacation" data-username="${user.username}">Add Past Vacation</button>
-            `;
-            userList.appendChild(div);
+            return response.json();
+        })
+        .then(data => {
+            const users = data.users || [];
 
-            // Event listeners remain unchanged
-            div.querySelector('.edit-user-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = this.getAttribute('data-username');
-                const formData = new FormData(this);
-                const updates = {
-                    name: formData.get('name'),
-                    balance: parseFloat(formData.get('balance')),
-                    bonus: parseFloat(formData.get('bonus')),
-                    deposits: parseFloat(formData.get('deposits')),
-                    personalInfo: {
-                        email: formData.get('email'),
-                        phone: formData.get('phone'),
-                        address: formData.get('address')
-                    }
-                };
-              updateUser(username, updates);
+            if (!Array.isArray(users)) {
+                console.error('Expected an array for users, but got:', users);
+                showNotification('Failed to load users: Invalid data format.');
+                return;
+            }
+
+            const userList = document.getElementById('user-list');
+            if (!userList) return;
+
+            userList.innerHTML = '<button id="clear-users-btn" class="btn btn-danger">Clear All Users</button>';
+
+            users.forEach(user => {
+                const div = document.createElement('div');
+
+                // Build the HTML string safely with proper semicolons and closures
+                div.innerHTML = `
+                    <p>
+                        <strong>${user.name || 'Unknown'}</strong> (${user.username || 'N/A'}) - Verified: 
+                        <input type="checkbox" ${user.verified ? 'checked' : ''} class="verify-checkbox" data-username="${user.username}">
+                    </p>
+                    <form class="edit-user-form" data-username="${user.username}">
+                        <input type="text" name="name" value="${user.name || ''}" placeholder="Name">
+                        <input type="number" name="balance" value="${user.balance || 0}" placeholder="Balance">
+                        <input type="number" name="bonus" value="${user.bonus || 0}" placeholder="Bonus">
+                        <input type="number" name="deposits" value="${user.deposits || 0}" placeholder="Deposits">
+                        <input type="text" name="email" value="${user.personalInfo?.email || user.email || ''}" placeholder="Email">
+                        <input type="text" name="phone" value="${user.personalInfo?.phone || user.phone || ''}" placeholder="Phone">
+                        <input type="text" name="address" value="${user.personalInfo?.address || ''}" placeholder="Address">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                    <button class="btn btn-danger btn-clear-vacations" data-username="${user.username}">Clear Vacation History</button>
+                    <button class="btn btn-danger btn-clear-transactions" data-username="${user.username}">Clear Transaction History</button>
+                    <button class="btn btn-danger btn-clear-past-vacations" data-username="${user.username}">Clear Past Vacations</button>
+
+                    <h3>Pending Deposits</h3>
+                    <ul id="pending-deposits-${user.username}">
+                        ${(user.pending_deposits || []).map((dep, i) => `
+                            <li>$${dep.amount || 0} via ${dep.method || 'Unknown'} (${dep.date || 'N/A'}) 
+                                <button class="btn btn-success accept-deposit" data-username="${user.username}" data-index="${i}">Accept</button>
+                            </li>
+                        `).join('')}
+                    </ul>
+
+                    <h3>Pending Vacations</h3>
+                    <ul id="pending-${user.username}">
+                        ${(user.pendingVacations || []).map((v, i) => `
+                            <li>${v.name || 'Unknown'} ($${typeof v.cost === 'number' ? v.cost.toFixed(2) : 'N/A'} - ${v.date || 'N/A'})
+                                <button class="btn btn-success accept-vacation" data-username="${user.username}" data-index="${i}">Accept</button>
+                            </li>
+                        `).join('')}
+                    </ul>
+
+                    <h3>Upcoming Vacations</h3>
+                    <ul id="upcoming-${user.username}">
+                        ${(user.upcomingVacations || []).map((v, i) => `
+                            <li>${v.name || 'Unknown'} ($${typeof v.cost === 'number' ? v.cost.toFixed(2) : 'N/A'} - ${v.date || 'N/A'})
+                                <button class="btn btn-primary complete-vacation" data-username="${user.username}" data-index="${i}">Mark as Completed</button>
+                            </li>
+                        `).join('')}
+                    </ul>
+
+                    <h3>Past Vacations</h3>
+                    <ul id="past-${user.username}">
+                        ${(user.completedVacations || []).map((v, i) => `
+                            <li>${v.name || 'Unknown'} ($${typeof v.cost === 'number' ? v.cost.toFixed(2) : 'N/A'} - ${v.completedDate || 'N/A'})
+                                ${v.rating ? ` - Rated: ${v.rating}/5` : ''}
+                                <button class="btn btn-primary edit-past-vacation" data-username="${user.username}" data-index="${i}">Edit</button>
+                            </li>
+                        `).join('')}
+                    </ul>
+
+                    <button class="btn btn-success add-past-vacation" data-username="${user.username}">Add Past Vacation</button>
+                `;  // <--- IMPORTANT: semicolon here after the template literal
+
+                userList.appendChild(div);
+
+                // Attach event listeners
+                const form = div.querySelector('.edit-user-form');
+                if (form) {
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        const username = this.getAttribute('data-username');
+                        const formData = new FormData(this);
+                        const updates = {
+                            name: formData.get('name'),
+                            balance: parseFloat(formData.get('balance')),
+                            bonus: parseFloat(formData.get('bonus')),
+                            deposits: parseFloat(formData.get('deposits')),
+                            personalInfo: {
+                                email: formData.get('email'),
+                                phone: formData.get('phone'),
+                                address: formData.get('address')
+                            }
+                        };
+                        updateUser(username, updates);
+                    });
+                }
+
+                div.querySelectorAll('.verify-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function () {
+                        const username = this.getAttribute('data-username');
+                        toggleVerified(username, this.checked);
+                    });
+                });
+
+                div.querySelector('.btn-clear-vacations')?.addEventListener('click', () => clearVacationHistory(user.username));
+                div.querySelector('.btn-clear-transactions')?.addEventListener('click', () => clearTransactions(user.username));
+                div.querySelector('.btn-clear-past-vacations')?.addEventListener('click', () => clearPastVacations(user.username));
+
+                div.querySelectorAll('.accept-vacation').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const username = button.getAttribute('data-username');
+                        const index = parseInt(button.getAttribute('data-index'));
+                        acceptVacation(username, index);
+                    });
+                });
+
+                div.querySelectorAll('.complete-vacation').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const username = button.getAttribute('data-username');
+                        const index = parseInt(button.getAttribute('data-index'));
+                        completeVacation(username, index);
+                    });
+                });
+
+                div.querySelectorAll('.accept-deposit').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const username = button.getAttribute('data-username');
+                        const index = parseInt(button.getAttribute('data-index'));
+
+                        if (confirm(`Accept deposit #${index} for ${username}?`)) {
+                            try {
+                                const response = await fetch(`/api/admin/accept-deposit/${username}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                                    },
+                                    body: JSON.stringify({ depositIndex: index })
+                                });
+
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    showNotification(`Deposit accepted for ${username}`);
+                                    loadUsers(); // Refresh admin panel
+                                } else {
+                                    showNotification(data.message || 'Failed to accept deposit');
+                                }
+                            } catch (err) {
+                                console.error('Accept deposit error:', err);
+                                showNotification('Network error accepting deposit');
+                            }
+                        }
+                    });
+                });
             });
 
-            div.querySelectorAll('.verify-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const username = this.getAttribute('data-username');
-                    toggleVerified(username, this.checked);
-                });
+            // Clear all users button (attached once after all users are rendered)
+            document.getElementById('clear-users-btn')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to clear all users? This cannot be undone.')) {
+                    fetch('/api/admin/clear-users', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                if (response.status === 401 || response.status === 403) {
+                                    throw new Error('Session expired or unauthorized');
+                                }
+                                throw new Error('Failed to clear users');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                showNotification('All users cleared successfully.');
+                                loadUsers();
+                            } else {
+                                showNotification(data.message || 'Failed to clear users.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error clearing users:', error);
+                            if (error.message.includes('Session expired') || error.message.includes('unauthorized')) {
+                                showNotification('Admin session expired. Please log in again.');
+                                localStorage.removeItem('adminToken');
+                                document.getElementById('admin-panel').classList.add('hidden');
+                                document.getElementById('admin-login').classList.remove('hidden');
+                            } else {
+                                showNotification('Failed to clear users. Please try again.');
+                            }
+                        });
+                }
             });
-
-            div.querySelector('.btn-clear-vacations').addEventListener('click', () => clearVacationHistory(user.username));
-            div.querySelector('.btn-clear-transactions').addEventListener('click', () => clearTransactions(user.username));
-            div.querySelector('.btn-clear-past-vacations').addEventListener('click', () => clearPastVacations(user.username));
-            div.querySelectorAll('.accept-vacation').forEach(button => {
-                button.addEventListener('click', () => {
-                    const username = button.getAttribute('data-username');
-                    const index = parseInt(button.getAttribute('data-index'));
-                    acceptVacation(username, index);
-                });
-            });
-            div.querySelectorAll('.complete-vacation').forEach(button => {
-                button.addEventListener('click', () => {
-                    const username = button.getAttribute('data-username');
-                    const index = parseInt(button.getAttribute('data-index'));
-                    completeVacation(username, index);
-                });
-            });
-            div.querySelectorAll('.accept-deposit').forEach(button => {
-                button.addEventListener('click', () => {
-                    const username = button.getAttribute('data-username');
-                    const index = parseInt(button.getAttribute('data-index'));
-                    acceptDeposit(username, index);
-                });
-            });
-            div.querySelectorAll('.edit-past-vacation').forEach(button => {
-                button.addEventListener('click', () => {
-                    const username = button.getAttribute('data-username');
-                    const index = parseInt(button.getAttribute('data-index'));
-                    const vacation = user.completedVacations[index];
-                    showEditPastVacationModal(username, index, vacation);
-                });
-            });
-            div.querySelector('.add-past-vacation').addEventListener('click', () => {
-                showAddPastVacationModal(user.username);
-            });
+        })
+        .catch(error => {
+            console.error('Error loading users:', error);
+            if (error.message.includes('Session expired') || error.message.includes('unauthorized')) {
+                showNotification('Admin session expired. Please log in again.');
+                localStorage.removeItem('adminToken');
+                document.getElementById('admin-panel').classList.add('hidden');
+                document.getElementById('admin-login').classList.remove('hidden');
+            } else {
+                showNotification('Failed to load users. Please try again.');
+            }
         });
+}
 
-        document.getElementById('clear-users-btn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all users? This cannot be undone.')) {
-                fetch('/api/admin/clear-users', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                })
+if (window.location.pathname.split('/').pop() === 'admin.html' && localStorage.getItem('adminToken')) {
+        fetch('/api/admin/users', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('admin-login').classList.add('hidden');
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    loadUsers();
+                } else {
+                    localStorage.removeItem('adminToken');
+                    showNotification('Admin session expired. Please log in again.');
+                }
+            })
+            .catch(() => {
+                localStorage.removeItem('adminToken');
+                showNotification('Failed to verify admin session.');
+            });
+    }
+
+
+    function clearPastVacations(username) {
+        if (confirm(`Clear past vacations for ${username}?`)) {
+            const token = localStorage.getItem('adminToken');
+            fetch(`/api/admin/clear-past-vacations/${username}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            })
                 .then(response => {
                     if (!response.ok) {
                         if (response.status === 401 || response.status === 403) {
                             throw new Error('Session expired or unauthorized');
                         }
-                        throw new Error('Failed to clear users');
+                        throw new Error('Failed to clear past vacations');
                     }
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        showNotification('All users cleared successfully.');
+                        alert(`Past vacations cleared for ${username}`);
                         loadUsers();
                     } else {
-                        showNotification(data.message || 'Failed to clear users.');
+                        alert(data.message || 'Failed to clear past vacations');
                     }
                 })
                 .catch(error => {
-                    console.error('Error clearing users:', error);
+                    console.error('Error clearing past vacations:', error);
                     if (error.message === 'Session expired or unauthorized') {
                         showNotification('Admin session expired. Please log in again.');
                         localStorage.removeItem('adminToken');
                         document.getElementById('admin-panel').classList.add('hidden');
                         document.getElementById('admin-login').classList.remove('hidden');
                     } else {
-                        showNotification('Failed to clear users. Please try again.');
+                        showNotification('Failed to clear past vacations. Please try again.');
                     }
                 });
-            }
-        });
-    })
-    .catch(error => {
-        console.error('Error loading users:', error);
-        if (error.message === 'Session expired or unauthorized') {
-            showNotification('Admin session expired. Please log in again.');
-            localStorage.removeItem('adminToken');
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('admin-login').classList.remove('hidden');
-        } else {
-            showNotification('Failed to load users. Please try again.');
         }
-    });
-}
+    }
 
-if (window.location.pathname.split('/').pop() === 'admin.html' && localStorage.getItem('adminToken')) {
-    fetch('/api/admin/users', {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            document.getElementById('admin-login').classList.add('hidden');
-            document.getElementById('admin-panel').classList.remove('hidden');
-            loadUsers();
-        } else {
-            localStorage.removeItem('adminToken');
-            showNotification('Admin session expired. Please log in again.');
-        }
-    })
-    .catch(() => {
-        localStorage.removeItem('adminToken');
-        showNotification('Failed to verify admin session.');
-    });
-}
-
-
-function clearPastVacations(username) {
-    if (confirm(`Clear past vacations for ${username}?`)) {
+    function acceptVacation(username, vacationIndex) {
         const token = localStorage.getItem('adminToken');
-        fetch(`/api/admin/clear-past-vacations/${username}`, {
+        fetch(`/api/admin/accept-vacation/${username}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            }
+            },
+            body: JSON.stringify({ vacationIndex })
         })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('Session expired or unauthorized');
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Session expired or unauthorized');
+                    }
+                    throw new Error('Failed to accept vacation');
                 }
-                throw new Error('Failed to clear past vacations');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert(`Past vacations cleared for ${username}`);
-                loadUsers();
-            } else {
-                alert(data.message || 'Failed to clear past vacations');
-            }
-        })
-        .catch(error => {
-            console.error('Error clearing past vacations:', error);
-            if (error.message === 'Session expired or unauthorized') {
-                showNotification('Admin session expired. Please log in again.');
-                localStorage.removeItem('adminToken');
-                document.getElementById('admin-panel').classList.add('hidden');
-                document.getElementById('admin-login').classList.remove('hidden');
-            } else {
-                showNotification('Failed to clear past vacations. Please try again.');
-            }
-        });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(`Vacation accepted for ${username}`);
+                    loadUsers();
+                } else {
+                    alert(data.message || 'Failed to accept vacation');
+                }
+            })
+            .catch(error => {
+                console.error('Error accepting vacation:', error);
+                if (error.message === 'Session expired or unauthorized') {
+                    showNotification('Admin session expired. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                    document.getElementById('admin-panel').classList.add('hidden');
+                    document.getElementById('admin-login').classList.remove('hidden');
+                } else {
+                    showNotification('Failed to accept vacation. Please try again.');
+                }
+            });
     }
-}
 
-function acceptVacation(username, vacationIndex) {
-    const token = localStorage.getItem('adminToken');
-    fetch(`/api/admin/accept-vacation/${username}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ vacationIndex })
-    })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                throw new Error('Session expired or unauthorized');
-            }
-            throw new Error('Failed to accept vacation');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert(`Vacation accepted for ${username}`);
-            loadUsers();
-        } else {
-            alert(data.message || 'Failed to accept vacation');
-        }
-    })
-    .catch(error => {
-        console.error('Error accepting vacation:', error);
-        if (error.message === 'Session expired or unauthorized') {
-            showNotification('Admin session expired. Please log in again.');
-            localStorage.removeItem('adminToken');
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('admin-login').classList.remove('hidden');
-        } else {
-            showNotification('Failed to accept vacation. Please try again.');
-        }
-    });
-}
+    function completeVacation(username, vacationIndex) {
+        const token = localStorage.getItem('adminToken');
+        fetch(`/api/admin/complete-vacation/${username}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ vacationIndex })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Session expired or unauthorized');
+                    }
+                    throw new Error('Failed to complete vacation');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(`Vacation marked as completed for ${username}`);
+                    loadUsers();
+                } else {
+                    alert(data.message || 'Failed to complete vacation');
+                }
+            })
+            .catch(error => {
+                console.error('Error completing vacation:', error);
+                if (error.message === 'Session expired or unauthorized') {
+                    showNotification('Admin session expired. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                    document.getElementById('admin-panel').classList.add('hidden');
+                    document.getElementById('admin-login').classList.remove('hidden');
+                } else {
+                    showNotification('Failed to complete vacation. Please try again.');
+                }
+            });
+    }
 
-function completeVacation(username, vacationIndex) {
-    const token = localStorage.getItem('adminToken');
-    fetch(`/api/admin/complete-vacation/${username}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ vacationIndex })
-    })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                throw new Error('Session expired or unauthorized');
-            }
-            throw new Error('Failed to complete vacation');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert(`Vacation marked as completed for ${username}`);
-            loadUsers();
-        } else {
-            alert(data.message || 'Failed to complete vacation');
-        }
-    })
-    .catch(error => {
-        console.error('Error completing vacation:', error);
-        if (error.message === 'Session expired or unauthorized') {
-            showNotification('Admin session expired. Please log in again.');
-            localStorage.removeItem('adminToken');
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('admin-login').classList.remove('hidden');
-        } else {
-            showNotification('Failed to complete vacation. Please try again.');
-        }
-    });
-}
+    function acceptDeposit(username, depositIndex) {
+        const token = localStorage.getItem('adminToken');
+        fetch(`/api/admin/accept-deposit/${username}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ depositIndex })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error('Session expired or unauthorized');
+                    }
+                    throw new Error('Failed to accept deposit');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(`Deposit accepted for ${username}`);
+                    loadUsers();
+                } else {
+                    alert(data.message || 'Failed to accept deposit');
+                }
+            })
+            .catch(error => {
+                console.error('Error accepting deposit:', error);
+                if (error.message === 'Session expired or unauthorized') {
+                    showNotification('Admin session expired. Please log in again.');
+                    localStorage.removeItem('adminToken');
+                    document.getElementById('admin-panel').classList.add('hidden');
+                    document.getElementById('admin-login').classList.remove('hidden');
+                } else {
+                    showNotification('Failed to accept deposit. Please try again.');
+                }
+            });
+    }
 
-function acceptDeposit(username, depositIndex) {
-    const token = localStorage.getItem('adminToken');
-    fetch(`/api/admin/accept-deposit/${username}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ depositIndex })
-    })
-    .then(response => {
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                throw new Error('Session expired or unauthorized');
-            }
-            throw new Error('Failed to accept deposit');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert(`Deposit accepted for ${username}`);
-            loadUsers();
-        } else {
-            alert(data.message || 'Failed to accept deposit');
-        }
-    })
-    .catch(error => {
-        console.error('Error accepting deposit:', error);
-        if (error.message === 'Session expired or unauthorized') {
-            showNotification('Admin session expired. Please log in again.');
-            localStorage.removeItem('adminToken');
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('admin-login').classList.remove('hidden');
-        } else {
-            showNotification('Failed to accept deposit. Please try again.');
-        }
-    });
-}
-
-function showEditPastVacationModal(username, index, vacation) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
+    function showEditPastVacationModal(username, index, vacation) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
         <div class="modal-content">
             <h2>Edit Past Vacation</h2>
             <form id="edit-past-vacation-form">
@@ -1632,70 +1676,70 @@ function showEditPastVacationModal(username, index, vacation) {
             </form>
         </div>
     `;
-    document.body.appendChild(modal);
-    closeModalOnOutsideClick(modal);
+        document.body.appendChild(modal);
+        closeModalOnOutsideClick(modal);
 
-    document.getElementById('edit-past-vacation-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const updatedVacation = {
-            name: formData.get('name'),
-            cost: parseFloat(formData.get('cost')),
-            completedDate: formData.get('completedDate'),
-            image: formData.get('image') || undefined
-        };
-        if (vacation.rating) updatedVacation.rating = vacation.rating;
-        if (vacation.comment) updatedVacation.comment = vacation.comment;
+        document.getElementById('edit-past-vacation-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const updatedVacation = {
+                name: formData.get('name'),
+                cost: parseFloat(formData.get('cost')),
+                completedDate: formData.get('completedDate'),
+                image: formData.get('image') || undefined
+            };
+            if (vacation.rating) updatedVacation.rating = vacation.rating;
+            if (vacation.comment) updatedVacation.comment = vacation.comment;
 
-        const token = localStorage.getItem('adminToken');
-        fetch(`/api/admin/update-past-vacation/${username}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ index, ...updatedVacation })
-        })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('Session expired or unauthorized');
-                }
-                throw new Error('Failed to update past vacation');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert('Past vacation updated!');
-                loadUsers();
-                document.body.removeChild(modal);
-            } else {
-                alert(data.message || 'Failed to update past vacation');
-            }
-        })
-        .catch(error => {
-            console.error('Error updating past vacation:', error);
-            if (error.message === 'Session expired or unauthorized') {
-                showNotification('Admin session expired. Please log in again.');
-                localStorage.removeItem('adminToken');
-                document.getElementById('admin-panel').classList.add('hidden');
-                document.getElementById('admin-login').classList.remove('hidden');
-            } else {
-                showNotification('Failed to update past vacation. Please try again.');
-            }
+            const token = localStorage.getItem('adminToken');
+            fetch(`/api/admin/update-past-vacation/${username}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ index, ...updatedVacation })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401 || response.status === 403) {
+                            throw new Error('Session expired or unauthorized');
+                        }
+                        throw new Error('Failed to update past vacation');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Past vacation updated!');
+                        loadUsers();
+                        document.body.removeChild(modal);
+                    } else {
+                        alert(data.message || 'Failed to update past vacation');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating past vacation:', error);
+                    if (error.message === 'Session expired or unauthorized') {
+                        showNotification('Admin session expired. Please log in again.');
+                        localStorage.removeItem('adminToken');
+                        document.getElementById('admin-panel').classList.add('hidden');
+                        document.getElementById('admin-login').classList.remove('hidden');
+                    } else {
+                        showNotification('Failed to update past vacation. Please try again.');
+                    }
+                });
         });
-    });
 
-    document.getElementById('close-modal').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
-}
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+    }
 
-function showAddPastVacationModal(username) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
+    function showAddPastVacationModal(username) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
         <div class="modal-content">
             <h2>Add Past Vacation</h2>
             <form id="add-past-vacation-form">
@@ -1708,104 +1752,104 @@ function showAddPastVacationModal(username) {
             </form>
         </div>
     `;
-    document.body.appendChild(modal);
-    closeModalOnOutsideClick(modal);
+        document.body.appendChild(modal);
+        closeModalOnOutsideClick(modal);
 
-    document.getElementById('add-past-vacation-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const newVacation = {
-            name: formData.get('name'),
-            cost: parseFloat(formData.get('cost')),
-            completedDate: formData.get('completedDate'),
-            image: formData.get('image') || undefined
-        };
+        document.getElementById('add-past-vacation-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const newVacation = {
+                name: formData.get('name'),
+                cost: parseFloat(formData.get('cost')),
+                completedDate: formData.get('completedDate'),
+                image: formData.get('image') || undefined
+            };
 
-        const token = localStorage.getItem('adminToken');
-        fetch(`/api/admin/update-past-vacation/${username}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ add: newVacation })
-        })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('Session expired or unauthorized');
-                }
-                throw new Error('Failed to add past vacation');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert('Past vacation added!');
-                loadUsers();
-                document.body.removeChild(modal);
-            } else {
-                alert(data.message || 'Failed to add past vacation');
-            }
-        })
-        .catch(error => {
-            console.error('Error adding past vacation:', error);
-            if (error.message === 'Session expired or unauthorized') {
-                showNotification('Admin session expired. Please log in again.');
-                localStorage.removeItem('adminToken');
-                document.getElementById('admin-panel').classList.add('hidden');
-                document.getElementById('admin-login').classList.remove('hidden');
-            } else {
-                showNotification('Failed to add past vacation. Please try again.');
-            }
+            const token = localStorage.getItem('adminToken');
+            fetch(`/api/admin/update-past-vacation/${username}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ add: newVacation })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401 || response.status === 403) {
+                            throw new Error('Session expired or unauthorized');
+                        }
+                        throw new Error('Failed to add past vacation');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Past vacation added!');
+                        loadUsers();
+                        document.body.removeChild(modal);
+                    } else {
+                        alert(data.message || 'Failed to add past vacation');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding past vacation:', error);
+                    if (error.message === 'Session expired or unauthorized') {
+                        showNotification('Admin session expired. Please log in again.');
+                        localStorage.removeItem('adminToken');
+                        document.getElementById('admin-panel').classList.add('hidden');
+                        document.getElementById('admin-login').classList.remove('hidden');
+                    } else {
+                        showNotification('Failed to add past vacation. Please try again.');
+                    }
+                });
         });
-    }); 
 
-    document.getElementById('close-modal').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
-}
-
-async function showBookingConfirmationModal(username, destination) {
-    console.log('Showing modal for:', destination?.deluxePackage?.name || 'Unknown');
-
-    const token = localStorage.getItem('token');
-    let currentBalance = 0;
-    let userData = null;
-
-    if (!destination || !destination.deluxePackage) {
-        console.error('Invalid destination object:', destination);
-        showNotification('Error: Invalid booking data.');
-        return;
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
     }
 
-    if (token) {
-        try {
-            const response = await fetch(`/api/user/${username}`, {
-                headers: { 
-                    'Authorization': `Bearer ${token}`, 
-                    'Content-Type': 'application/json' 
-                }
-            });
-            if (!response.ok) {
-                throw new Error(`Fetch failed with status: ${response.status}`);
-            }
-            userData = await response.json();
-            console.log('User data fetched:', userData);
-            currentBalance = userData?.balance ?? 0;
-        } catch (error) {
-            console.error('Error fetching user data:', error.message);
-            showNotification('Could not fetch your balance. Assuming $0 for now.');
+    async function showBookingConfirmationModal(username, destination) {
+        console.log('Showing modal for:', destination?.deluxePackage?.name || 'Unknown');
+
+        const token = localStorage.getItem('token');
+        let currentBalance = 0;
+        let userData = null;
+
+        if (!destination || !destination.deluxePackage) {
+            console.error('Invalid destination object:', destination);
+            showNotification('Error: Invalid booking data.');
+            return;
         }
-    } else {
-        console.warn('No token found in localStorage');
-        showNotification('Please log in to see your balance.');
-    }
 
-    const bookingDate = new Date().toISOString().split('T')[0];
-    const modal = document.createElement('div');
-    modal.className = 'modal active';
-    modal.innerHTML = `
+        if (token) {
+            try {
+                const response = await fetch(`/api/user/${username}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`Fetch failed with status: ${response.status}`);
+                }
+                userData = await response.json();
+                console.log('User data fetched:', userData);
+                currentBalance = userData?.balance ?? 0;
+            } catch (error) {
+                console.error('Error fetching user data:', error.message);
+                showNotification('Could not fetch your balance. Assuming $0 for now.');
+            }
+        } else {
+            console.warn('No token found in localStorage');
+            showNotification('Please log in to see your balance.');
+        }
+
+        const bookingDate = new Date().toISOString().split('T')[0];
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
         <div class="modal-content">
             <h2>Confirm Booking</h2>
             <p><strong>Package:</strong> ${destination.deluxePackage.name}</p>
@@ -1817,28 +1861,28 @@ async function showBookingConfirmationModal(username, destination) {
             <button id="cancel-booking" class="btn btn-secondary">Cancel</button>
         </div>
     `;
-    document.body.appendChild(modal);
-    closeModalOnOutsideClick(modal);
+        document.body.appendChild(modal);
+        closeModalOnOutsideClick(modal);
 
-    document.getElementById('confirm-booking').addEventListener('click', async () => {
-    const success = await bookVacation(username, destination.deluxePackage.price, destination.deluxePackage.name);
-    if (success) {
-        showThankYouModal(destination);
-        document.body.removeChild(modal);
-        // Force reload user data to show pending vacation immediately
-        loadUserData(username);
+        document.getElementById('confirm-booking').addEventListener('click', async () => {
+            const success = await bookVacation(username, destination.deluxePackage.price, destination.deluxePackage.name);
+            if (success) {
+                showThankYouModal(destination);
+                document.body.removeChild(modal);
+                // Force reload user data to show pending vacation immediately
+                loadUserData(username);
+            }
+        });
+
+        document.getElementById('cancel-booking').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
     }
-});
 
-    document.getElementById('cancel-booking').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
-}
-
-function showThankYouModal(destination) {
-    const modal = document.createElement('div');
-    modal.className = 'modal active';
-    modal.innerHTML = `
+    function showThankYouModal(destination) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
         <div class="modal-content">
             <h2>Booking Confirmed!</h2>
             <p>Thank you for booking <strong>${destination.deluxePackage?.name || destination.name || 'this package'}</strong>!</p>
@@ -1847,41 +1891,41 @@ function showThankYouModal(destination) {
             <button id="close-thank-you-modal" class="btn btn-primary">OK</button>
         </div>
     `;
-    document.body.appendChild(modal);
-    closeModalOnOutsideClick(modal);
+        document.body.appendChild(modal);
+        closeModalOnOutsideClick(modal);
 
-    document.getElementById('close-thank-you-modal').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
+        document.getElementById('close-thank-you-modal').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
 
-    // Auto-close after 6 seconds (optional)
-    setTimeout(() => {
-        if (modal.parentNode) document.body.removeChild(modal);
-    }, 6000);
-}
+        // Auto-close after 6 seconds (optional)
+        setTimeout(() => {
+            if (modal.parentNode) document.body.removeChild(modal);
+        }, 6000);
+    }
 
-function showDepositSuccessModal(amount) {
-    const modal = document.createElement('div');
-    modal.className = 'modal active'; // Ensure consistency with "active" class
-    modal.innerHTML = `
+    function showDepositSuccessModal(amount) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active'; // Ensure consistency with "active" class
+        modal.innerHTML = `
         <div class="modal-content">
             <h2>Thank You!</h2>
             <p>Your deposit of $${amount.toFixed(2)} has been accepted and added to your balance. Thank you for your trust in ExploreWorld!</p>
             <button id="close-modal" class="btn btn-primary">OK</button>
         </div>
     `;
-    document.body.appendChild(modal);
-    closeModalOnOutsideClick(modal);
+        document.body.appendChild(modal);
+        closeModalOnOutsideClick(modal);
 
-    document.getElementById('close-modal').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
-}
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+    }
 
-function showRateTripModal(username, index, vacation) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
+    function showRateTripModal(username, index, vacation) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
         <div class="modal-content">
             <h2>Rate Your Trip to ${vacation.name}</h2>
             <form id="rate-trip-form">
@@ -1896,65 +1940,65 @@ function showRateTripModal(username, index, vacation) {
             </form>
         </div>
     `;
-    document.body.appendChild(modal);
-    closeModalOnOutsideClick(modal);
+        document.body.appendChild(modal);
+        closeModalOnOutsideClick(modal);
 
-    document.getElementById('rate-trip-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const rating = parseInt(formData.get('rating'));
-        const comment = formData.get('comment');
+        document.getElementById('rate-trip-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const rating = parseInt(formData.get('rating'));
+            const comment = formData.get('comment');
 
-        const token = localStorage.getItem('token');
-        fetch(`/api/user/${username}/rate-vacation`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ index, rating, comment })
-        })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error('Session expired or unauthorized');
-                }
-                throw new Error('Failed to submit rating');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert('Rating submitted!');
-                loadUserData(username);
-                document.body.removeChild(modal);
-            } else {
-                alert(data.message || 'Failed to submit rating');
-            }
-        })
-        .catch(error => {
-            console.error('Error submitting rating:', error);
-            if (error.message === 'Session expired or unauthorized') {
-                showNotification('Session expired. Please log in again.');
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                window.location.href = 'login.html';
-            } else {
-                showNotification('Failed to submit rating. Please try again.');
-            }
+            const token = localStorage.getItem('token');
+            fetch(`/api/user/${username}/rate-vacation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ index, rating, comment })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 401 || response.status === 403) {
+                            throw new Error('Session expired or unauthorized');
+                        }
+                        throw new Error('Failed to submit rating');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Rating submitted!');
+                        loadUserData(username);
+                        document.body.removeChild(modal);
+                    } else {
+                        alert(data.message || 'Failed to submit rating');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting rating:', error);
+                    if (error.message === 'Session expired or unauthorized') {
+                        showNotification('Session expired. Please log in again.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('username');
+                        window.location.href = 'login.html';
+                    } else {
+                        showNotification('Failed to submit rating. Please try again.');
+                    }
+                });
         });
-    });
 
-    document.getElementById('close-modal').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
-}
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const username = localStorage.getItem('username');
-    const navLinks = document.querySelector('.nav-links');
-    if (navLinks) {
-        navLinks.innerHTML = username ? `
+    document.addEventListener('DOMContentLoaded', () => {
+        const username = localStorage.getItem('username');
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks) {
+            navLinks.innerHTML = username ? `
             <li><a href="index.html">Home</a></li>
             <li><a href="index.html#destinations">Destinations</a></li>
             <li><a href="client.html" id="client-link">Client Area</a></li>
@@ -1968,260 +2012,260 @@ document.addEventListener('DOMContentLoaded', () => {
             <li><a href="login.html">Login</a></li>
             <li><a href="create-account.html">Create Account</a></li>
         `;
-    } else {
-        console.error('nav-links element not found');
-    }
+        } else {
+            console.error('nav-links element not found');
+        }
 
         // Auto-refresh dashboard when returning to the tab
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && window.location.pathname.endsWith('client.html')) {
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && window.location.pathname.endsWith('client.html')) {
+                const username = localStorage.getItem('username');
+                if (username) {
+                    loadUserData(username);
+                }
+            }
+        });
+
+
+        initMenu();
+        loadSocialMedia();
+        initTravelQuiz();
+        loadDestinations();
+        initHotDestinations();
+        if (window.location.pathname.split('/').pop() === 'client.html') {
             const username = localStorage.getItem('username');
             if (username) {
-                loadUserData(username);
+                loadUserData(username);  // This loads name, email, phone, verified, balance, etc.
+            } else {
+                showNotification('Please log in to view your dashboard.');
+                window.location.href = 'login.html';
+            }
+            loadCurrentDestinations();
+        }
+
+        if (window.location.pathname.split('/').pop() === 'login.html') {
+            initLoginForm();
+        }
+        if (window.location.pathname.includes('create-account.html')) {
+            initCreateAccountForm();
+        }
+
+        try {
+            initMap();
+        } catch (e) {
+            console.error('Map init failed:', e);
+        }
+
+        if (window.location.pathname.split('/').pop() === 'deposit.html') {
+            if (username) {
+                initDepositForms(username);
+            } else {
+                showNotification('Please log in to make a deposit.');
+                window.location.href = 'login.html';
             }
         }
-    });
 
-
-    initMenu();
-    loadSocialMedia();
-    initTravelQuiz();
-    loadDestinations();
-    initHotDestinations();
-     if (window.location.pathname.split('/').pop() === 'client.html') {
-        const username = localStorage.getItem('username');
-        if (username) {
-            loadUserData(username);  // This loads name, email, phone, verified, balance, etc.
+        const getStartedBtns = document.querySelectorAll('.get-started');
+        if (getStartedBtns.length > 0) {
+            console.log(`Found ${getStartedBtns.length} Get Started buttons`);
+            getStartedBtns.forEach((btn, index) => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Get Started clicked!');
+                    window.location.href = username ? 'client.html' : 'login.html';
+                });
+            });
         } else {
-            showNotification('Please log in to view your dashboard.');
-            window.location.href = 'login.html';
+            console.error('No Get Started buttons found with class .get-started');
         }
-        loadCurrentDestinations();
-    }
 
-    if (window.location.pathname.split('/').pop() === 'login.html') {
-        initLoginForm();
-    }
-    if (window.location.pathname.includes('create-account.html')) {
-        initCreateAccountForm();
-    }
-
-    try {
-        initMap();
-    } catch (e) {
-        console.error('Map init failed:', e);
-    }
-
-    if (window.location.pathname.split('/').pop() === 'deposit.html') {
-        if (username) {
-            initDepositForms(username);
-        } else {
-            showNotification('Please log in to make a deposit.');
-            window.location.href = 'login.html';
-        }
-    }
-
-    const getStartedBtns = document.querySelectorAll('.get-started');
-    if (getStartedBtns.length > 0) {
-        console.log(`Found ${getStartedBtns.length} Get Started buttons`);
-        getStartedBtns.forEach((btn, index) => {
-            btn.addEventListener('click', (e) => {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Get Started clicked!');
-                window.location.href = username ? 'client.html' : 'login.html';
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html';
             });
-        });
-    } else {
-        console.error('No Get Started buttons found with class .get-started');
-    }
+        }
 
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            window.location.href = 'index.html';
-        });
-    }
-
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = new FormData(contactForm);
-            fetch('/api/contact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: formData.get('name'),
-                    email: formData.get('email'),
-                    message: formData.get('message')
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(contactForm);
+                fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: formData.get('name'),
+                        email: formData.get('email'),
+                        message: formData.get('message')
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Message sent successfully!');
-                    contactForm.reset();
-                } else {
-                    showNotification('Failed to send message. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Contact form error:', error);
-                showNotification('Failed to send message due to a server error.');
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('Message sent successfully!');
+                            contactForm.reset();
+                        } else {
+                            showNotification('Failed to send message. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Contact form error:', error);
+                        showNotification('Failed to send message due to a server error.');
+                    });
+            });
+        }
+
+        const newsletterForm = document.querySelector('.newsletter');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = newsletterForm.querySelector('input[type="email"]').value;
+                fetch('/api/newsletter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('Subscribed successfully!');
+                            newsletterForm.reset();
+                        } else {
+                            showNotification('Subscription failed. Please try again.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Newsletter error:', error);
+                        showNotification('Subscription failed due to a server error.');
+                    });
+            });
+        }
+
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            item.querySelector('h3').addEventListener('click', () => {
+                item.classList.toggle('active');
             });
         });
-    }
 
-    const newsletterForm = document.querySelector('.newsletter');
-    if (newsletterForm) {
-        newsletterForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = newsletterForm.querySelector('input[type="email"]').value;
-            fetch('/api/newsletter', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Subscribed successfully!');
-                    newsletterForm.reset();
-                } else {
-                    showNotification('Subscription failed. Please try again.');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        if (adminLoginForm) {
+            adminLoginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('admin-username').value.trim();
+                const password = document.getElementById('admin-password').value;
+                if (!username || !password) {
+                    showNotification('Please enter both username and password.');
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Newsletter error:', error);
-                showNotification('Subscription failed due to a server error.');
+                fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: document.getElementById('email').value || username, password })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            localStorage.setItem('adminToken', data.token);
+                            document.getElementById('admin-login').classList.add('hidden');
+                            document.getElementById('admin-panel').classList.remove('hidden');
+                            loadUsers();
+                        } else {
+                            showNotification('Admin login failed. Invalid credentials.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Admin login error:', error);
+                        showNotification('Admin login failed due to a server error.');
+                    });
             });
-        });
-    }
+        }
 
-    const faqItems = document.querySelectorAll('.faq-item');
-    faqItems.forEach(item => {
-        item.querySelector('h3').addEventListener('click', () => {
-            item.classList.toggle('active');
-        });
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+        if (adminLogoutBtn) {
+            adminLogoutBtn.addEventListener('click', () => {
+                localStorage.removeItem('adminToken');
+                document.getElementById('admin-panel').classList.add('hidden');
+                document.getElementById('admin-login').classList.remove('hidden');
+            });
+        }
+
     });
 
-    const adminLoginForm = document.getElementById('admin-login-form');
-    if (adminLoginForm) {
-        adminLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('admin-username').value.trim();
-            const password = document.getElementById('admin-password').value;
-            if (!username || !password) {
-                showNotification('Please enter both username and password.');
-                return;
-            }
-            fetch('/api/admin/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: document.getElementById('email').value || username, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    localStorage.setItem('adminToken', data.token);
-                    document.getElementById('admin-login').classList.add('hidden');
-                    document.getElementById('admin-panel').classList.remove('hidden');
-                    loadUsers();
-                } else {
-                    showNotification('Admin login failed. Invalid credentials.');
+    function initHotDestinations() {
+        const slideshow = document.querySelector('.hot-destinations-slideshow');
+        if (!slideshow) {
+            console.error('Hot destinations slideshow element not found');
+            return;
+        }
+
+        fetch('/api/hot-destinations')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
+                return response.json();
             })
-            .catch(error => {
-                console.error('Admin login error:', error);
-                showNotification('Admin login failed due to a server error.');
-            });
-        });
-    }
+            .then(backendData => {
+                const hotDestinations = [
+                    {
+                        name: "Oslo, Norway",
+                        packageName: "Nordic Fjord Expedition",
+                        image: "images/oslo.jpg",
+                        booked: 120,
+                        date: "2025-08-15",
+                        deadline: "2025-07-10",
+                        bonus: "10% off for couples",
+                        cost: 28999
+                    },
+                    {
+                        name: "Athens, Greece",
+                        packageName: "Hellenic Isles Odyssey",
+                        image: "images/athens.jpg",
+                        booked: 85,
+                        date: "2024-01-20",
+                        deadline: "2023-12-20",
+                        bonus: "Free upgrade to deluxe package",
+                        cost: 27999
+                    },
+                    {
+                        name: "Kyoto, Japan",
+                        packageName: "Japanese Zen Journey",
+                        image: "images/kyoto.jpg",
+                        booked: 200,
+                        date: "2024-03-10",
+                        deadline: "2024-02-10",
+                        bonus: "Complimentary spa day",
+                        cost: 27999
+                    },
+                    {
+                        name: "Beijing, China",
+                        packageName: "Silk Road & Sea Adventure",
+                        image: "images/beijing.jpg",
+                        booked: 150,
+                        date: "2025-07-05",
+                        deadline: "2024-03-05",
+                        bonus: "Exclusive cultural tour",
+                        cost: 22999
+                    }
+                ].map(dest => {
+                    const backendDest = backendData.find(b => b.name === dest.name);
+                    return {
+                        ...dest,
+                        fullyBooked: backendDest ? backendDest.fullyBooked : false
+                    };
+                });
 
-    const adminLogoutBtn = document.getElementById('admin-logout-btn');
-    if (adminLogoutBtn) {
-        adminLogoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('adminToken');
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('admin-login').classList.remove('hidden');
-        });
-    }
+                slideshow.innerHTML = ''; // Clear existing slides
 
-});
-
-function initHotDestinations() {
-    const slideshow = document.querySelector('.hot-destinations-slideshow');
-    if (!slideshow) {
-        console.error('Hot destinations slideshow element not found');
-        return;
-    }
-
-    fetch('/api/hot-destinations')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(backendData => {
-            const hotDestinations = [
-                {
-                    name: "Oslo, Norway",
-                    packageName: "Nordic Fjord Expedition",
-                    image: "images/oslo.jpg",
-                    booked: 120,
-                    date: "2025-08-15",
-                    deadline: "2025-07-10",
-                    bonus: "10% off for couples",
-                    cost: 28999
-                },
-                {
-                    name: "Athens, Greece",
-                    packageName: "Hellenic Isles Odyssey",
-                    image: "images/athens.jpg",
-                    booked: 85,
-                    date: "2024-01-20",
-                    deadline: "2023-12-20",
-                    bonus: "Free upgrade to deluxe package",
-                    cost: 27999
-                },
-                {
-                    name: "Kyoto, Japan",
-                    packageName: "Japanese Zen Journey",
-                    image: "images/kyoto.jpg",
-                    booked: 200,
-                    date: "2024-03-10",
-                    deadline: "2024-02-10",
-                    bonus: "Complimentary spa day",
-                    cost: 27999
-                },
-                {
-                    name: "Beijing, China",
-                    packageName: "Silk Road & Sea Adventure",
-                    image: "images/beijing.jpg",
-                    booked: 150,
-                    date: "2025-07-05",
-                    deadline: "2024-03-05",
-                    bonus: "Exclusive cultural tour",
-                    cost: 22999
-                }
-            ].map(dest => {
-                const backendDest = backendData.find(b => b.name === dest.name);
-                return {
-                    ...dest,
-                    fullyBooked: backendDest ? backendDest.fullyBooked : false
-                };
-            });
-
-            slideshow.innerHTML = ''; // Clear existing slides
-
-            hotDestinations.forEach((dest, index) => {
-                const slide = document.createElement('div');
-                slide.className = `hot-slide ${index === 0 ? 'active' : ''} ${dest.fullyBooked ? 'fully-booked' : ''}`;
-                slide.innerHTML = `
+                hotDestinations.forEach((dest, index) => {
+                    const slide = document.createElement('div');
+                    slide.className = `hot-slide ${index === 0 ? 'active' : ''} ${dest.fullyBooked ? 'fully-booked' : ''}`;
+                    slide.innerHTML = `
                     <img src="${dest.image}" alt="${dest.name}">
                     ${dest.fullyBooked ? '<div class="fully-booked-stamp">Fully Booked - 700+ Travelers Booked This! Check Other Packages</div>' : ''}
                     <div class="hot-slide-content">
@@ -2233,38 +2277,38 @@ function initHotDestinations() {
                         ${dest.fullyBooked ? '' : `<button class="btn book-now-hot" data-package-name="${dest.packageName}" data-cost="${dest.cost}">Book Now</button>`}
                     </div>
                 `;
-                slideshow.appendChild(slide);
-            });
-
-            let currentSlide = 0;
-            const slides = document.querySelectorAll('.hot-slide');
-            function showNextSlide() {
-                slides[currentSlide].classList.remove('active');
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides[currentSlide].classList.add('active');
-            }
-            setInterval(showNextSlide, 10000);
-
-            // Modal handling
-            document.querySelectorAll('.book-now-hot').forEach(button => {
-                button.addEventListener('click', () => {
-                    const username = localStorage.getItem('username');
-                    if (!username) {
-                        alert('Please log in to book a vacation.');
-                        window.location.href = 'login.html';
-                        return;
-                    }
-
-                    const packageName = button.getAttribute('data-package-name');
-                    const cost = parseFloat(button.getAttribute('data-cost'));
-                    const dest = hotDestinations.find(d => d.packageName === packageName);
-
-                    if (dest) {
-                        showBookingModal(dest, username, cost);
-                    }
+                    slideshow.appendChild(slide);
                 });
-            });
-        })
+
+                let currentSlide = 0;
+                const slides = document.querySelectorAll('.hot-slide');
+                function showNextSlide() {
+                    slides[currentSlide].classList.remove('active');
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    slides[currentSlide].classList.add('active');
+                }
+                setInterval(showNextSlide, 10000);
+
+                // Modal handling
+                document.querySelectorAll('.book-now-hot').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const username = localStorage.getItem('username');
+                        if (!username) {
+                            alert('Please log in to book a vacation.');
+                            window.location.href = 'login.html';
+                            return;
+                        }
+
+                        const packageName = button.getAttribute('data-package-name');
+                        const cost = parseFloat(button.getAttribute('data-cost'));
+                        const dest = hotDestinations.find(d => d.packageName === packageName);
+
+                        if (dest) {
+                            showBookingModal(dest, username, cost);
+                        }
+                    });
+                });
+            })
 
         document.querySelectorAll('.collapsible-header').forEach(header => {
             header.addEventListener('click', () => {
@@ -2272,13 +2316,13 @@ function initHotDestinations() {
                 content.classList.toggle('hidden');
             });
         });
-}
+    }
 
-// Function to show the booking modal using your existing modal structure
-function showBookingModal(dest, username, cost) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
+    // Function to show the booking modal using your existing modal structure
+    function showBookingModal(dest, username, cost) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
         <div class="modal-content">
             <span class="modal-close">×</span>
             <div class="modal-inner">
@@ -2300,30 +2344,30 @@ function showBookingModal(dest, username, cost) {
             </div>
         </div>
     `;
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    setTimeout(() => modal.classList.add('active'), 10);
+        setTimeout(() => modal.classList.add('active'), 10);
 
-    const closeBtn = modal.querySelector('.modal-close');
-    const confirmBtn = modal.querySelector('.confirm-btn');
-    const cancelBtn = modal.querySelector('.cancel-btn');
+        const closeBtn = modal.querySelector('.modal-close');
+        const confirmBtn = modal.querySelector('.confirm-btn');
+        const cancelBtn = modal.querySelector('.cancel-btn');
 
-    closeBtn.addEventListener('click', () => modal.remove());
-    confirmBtn.addEventListener('click', async () => {
-    const success = await bookVacation(username, cost, dest.packageName);
-    if (success) {
-        // Show thank-you modal (same as regular destinations)
-        showThankYouModal({ deluxePackage: { name: dest.packageName } }); // fake object for name
-        modal.remove();
-        // Refresh dashboard data
-        loadUserData(username);
-    }
-});
-    cancelBtn.addEventListener('click', () => modal.remove());
+        closeBtn.addEventListener('click', () => modal.remove());
+        confirmBtn.addEventListener('click', async () => {
+            const success = await bookVacation(username, cost, dest.packageName);
+            if (success) {
+                // Show thank-you modal (same as regular destinations)
+                showThankYouModal({ deluxePackage: { name: dest.packageName } }); // fake object for name
+                modal.remove();
+                // Refresh dashboard data
+                loadUserData(username);
+            }
+        });
+        cancelBtn.addEventListener('click', () => modal.remove());
 
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
-}
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    } 

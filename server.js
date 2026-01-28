@@ -697,80 +697,96 @@ app.post('/api/admin/clear-past-vacations/:username', verifyToken, async (req, r
 
 app.post('/api/deposit/bank', verifyToken, async (req, res) => {
   const { username, amount, payerName } = req.body;
+
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
+  if (!amount || !payerName) {
+    return res.status(400).json({ success: false, message: 'Amount and payer name required' });
+  }
+
   try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (!user || user.name !== payerName) {
-      return res.json({ success: false, message: 'Payer name does not match or user not found' });
+    const { data: profile, error: fetchError } = await supabaseAdmin
+      .from('profiles')
+      .select('full_name, pending_deposits')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    if (fetchError || !profile) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    user.pendingDeposits.push({ amount, method: 'Bank', date: new Date().toISOString().split('T')[0], payerName });
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Pending Deposit $${amount} via Bank`,
-      cost: 0
-    });
-    await user.save();
+    if (profile.full_name?.toLowerCase().trim() !== payerName.toLowerCase().trim()) {
+      return res.status(400).json({ success: false, message: 'Payer name does not match account name' });
+    }
 
-    res.json({ success: true });
+    const newDeposit = {
+      amount: Number(amount),
+      method: 'bank',
+      payerName,
+      date: new Date().toISOString()
+    };
+
+    const current = profile.pending_deposits || [];
+    const updated = [...current, newDeposit];
+
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({ pending_deposits: updated })
+      .eq('username', username.toLowerCase().trim());
+
+    if (updateError) throw updateError;
+
+    res.json({ success: true, message: 'Bank deposit submitted — pending approval' });
   } catch (err) {
+    console.error('Bank deposit error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
 app.post('/api/deposit/crypto', verifyToken, async (req, res) => {
-  const { username, amount } = req.body;
+  const { username, amount, userBtcAddress } = req.body;
+
   if (req.user.username.toLowerCase() !== username.toLowerCase()) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
-  try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (!user) return res.json({ success: false, message: 'User not found' });
-
-    user.pendingDeposits.push({ amount, method: 'Crypto', date: new Date().toISOString().split('T')[0] });
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Pending Deposit $${amount} via Crypto`,
-      cost: 0
-    });
-    await user.save();
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-app.post('/api/deposit/agent', verifyToken, async (req, res) => {
-  const { username, amount, transactionId, paymentMethod } = req.body;
-  if (req.user.username.toLowerCase() !== username.toLowerCase()) {
-    return res.status(403).json({ success: false, message: 'Unauthorized' });
+  if (!amount || !userBtcAddress) {
+    return res.status(400).json({ success: false, message: 'Amount and BTC sender address required' });
   }
 
   try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (!user) return res.json({ success: false, message: 'User not found' });
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('pending_deposits')
+      .eq('username', username.toLowerCase().trim())
+      .single();
 
-    user.pendingDeposits.push({ 
-      amount, 
-      method: 'Agent', 
-      date: new Date().toISOString().split('T')[0], 
-      transactionId, 
-      paymentMethod 
-    });
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Pending Deposit $${amount} via Agent (${paymentMethod})`,
-      cost: 0
-    });
-    await user.save();
+    if (error || !profile) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
-    res.json({ success: true, message: 'Agent deposit submitted successfully' });
+    const newDeposit = {
+      amount: Number(amount),
+      method: 'crypto',
+      senderBtcAddress: userBtcAddress.trim(),
+      date: new Date().toISOString()
+    };
+
+    const current = profile.pending_deposits || [];
+    const updated = [...current, newDeposit];
+
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({ pending_deposits: updated })
+      .eq('username', username.toLowerCase().trim());
+
+    if (updateError) throw updateError;
+
+    res.json({ success: true, message: 'Crypto deposit submitted — awaiting confirmation' });
   } catch (err) {
+    console.error('Crypto deposit error:', err.message);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -778,37 +794,76 @@ app.post('/api/deposit/agent', verifyToken, async (req, res) => {
 
 // Accept Deposit (Admin)
 app.post('/api/admin/accept-deposit/:username', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized' });
+  }
+
   const { username } = req.params;
   const { depositIndex } = req.body;
 
+  if (depositIndex === undefined) {
+    return res.status(400).json({ success: false, message: 'depositIndex is required' });
+  }
+
   try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (!user || !user.pendingDeposits[depositIndex]) {
-      return res.status(404).json({ success: false, message: 'User or deposit not found' });
+    // 1. Fetch current profile
+    const { data: profile, error: fetchError } = await supabaseAdmin
+      .from('profiles')
+      .select('pending_deposits, balance, deposits')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    if (fetchError || !profile) {
+      console.error('Profile fetch error:', fetchError?.message);
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const deposit = user.pendingDeposits.splice(depositIndex, 1)[0];
-    user.balance += deposit.amount;
-    user.deposits += deposit.amount;
-    user.transactions.push({
-      date: new Date().toISOString().split('T')[0],
-      type: 'Deposit',
-      amount: deposit.amount
-    });
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Approved Deposit $${deposit.amount} via ${deposit.method}`,
-      cost: 0
-    });
-    user.lastDepositAccepted = { amount: deposit.amount, timestamp: new Date().toISOString() };
+    const pending = profile.pending_deposits || [];
+    if (!pending[depositIndex]) {
+      return res.status(404).json({ success: false, message: 'Deposit not found at that index' });
+    }
 
-    await user.save();
-    const userObj = user.toObject();
-    delete userObj.password;
-    res.json({ success: true, user: userObj });
+    const deposit = pending[depositIndex];
+
+    // 2. Remove from pending
+    pending.splice(depositIndex, 1);
+
+    // 3. Add to balance & deposits
+    const newBalance = (profile.balance || 0) + deposit.amount;
+    const newDeposits = (profile.deposits || 0) + deposit.amount;
+
+    // 4. Update profile
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        pending_deposits: pending,
+        balance: newBalance,
+        deposits: newDeposits,
+        lastDepositAccepted: {
+          amount: deposit.amount,
+          timestamp: new Date().toISOString(),
+          method: deposit.method
+        }
+      })
+      .eq('username', username.toLowerCase().trim());
+
+    if (updateError) {
+      console.error('Update error:', updateError.message);
+      throw updateError;
+    }
+
+    // 5. Return updated profile
+    const { data: updatedProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    res.json({ success: true, user: updatedProfile });
+
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Accept deposit error:', err.message, err.stack);
+    res.status(500).json({ success: false, message: 'Server error: ' + err.message });
   }
 });
 
