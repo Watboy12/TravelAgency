@@ -25,17 +25,18 @@
 
     <section class="client-area">
         <h1 data-i18n="welcomeMessage">Welcome, <span id="user-name">User</span></h1>      
-        <div class="profile-section">
-        <p><strong>Email:</strong> <span id="user-email">Not set</span></p>
-        <p><strong>Phone:</strong> <span id="user-phone">Not set</span></p>
-        <p><strong>Address:</strong> <span id="user-address">Not set</span></p>
-        <p><strong>Verified:</strong> <span id="user-verified">Not set</span></p>
-    </div>
+       <div class="profile-section">
+    <p><strong>Email:</strong> <span id="user-email">Not set</span></p>
+    <p><strong>Phone:</strong> <span id="user-phone">Not set</span></p>
+    <p><strong>Address:</strong> <span id="user-address">Not set</span></p>
+    <p><strong>Verified:</strong> <span id="user-verified">Not set</span></p>
+    <p><strong>Member Since:</strong> <span id="member-since">Not set</span></p>
+    <p><strong>Total Spent on Vacations:</strong> $<span id="total-spent">0.00</span></p>
+</div>
         <div class="account-balance-container">
             <div class="account-balance-card">
                 <div class="balance-header">
                     <h2 data-i18n="accountBalance">
-                    <h2>Account Balance</h2>
                     <a href="deposit.html" class="btn btn-primary">Deposit Funds</a>
                 </div>
                 <div class="balance-details">
@@ -59,6 +60,12 @@
                 <h2 class="collapsible-header">Pending Vacations</h2>
                 <ul id="pending-vacations" class="vacation-list collapsible-content"></ul>
             </div>
+            <div class="dashboard-card collapsible" data-section="notifications">
+    <h2 class="collapsible-header">Notifications & Promos</h2>
+    <ul id="user-notifications" class="vacation-list collapsible-content">
+        <li>No new notifications.</li>
+    </ul>
+</div>
             <div class="dashboard-card collapsible" data-section="upcoming-vacations">
                 <h2 class="collapsible-header">Upcoming Vacations</h2>
                 <ul id="upcoming-vacations" class="vacation-list collapsible-content"></ul>

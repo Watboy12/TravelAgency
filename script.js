@@ -217,6 +217,34 @@ function loadUserData(username) {
                     }
                 }
 
+                // Total Spent on Vacations (only completed/past)
+const totalSpentEl = document.getElementById('total-spent');
+if (totalSpentEl) {
+    const totalSpent = completedList.reduce((sum, v) => sum + (typeof v.cost === 'number' ? v.cost : 0), 0);
+    totalSpentEl.textContent = totalSpent.toFixed(2);
+}
+
+// Member Since
+const memberSinceEl = document.getElementById('member-since');
+if (memberSinceEl) {
+    memberSinceEl.textContent = user.registeredDate ? new Date(user.registeredDate).toLocaleDateString() : 'Not set';
+}
+
+// Notifications
+const notificationsList = document.getElementById('user-notifications');
+if (notificationsList && user.notifications && Array.isArray(user.notifications)) {
+    notificationsList.innerHTML = '';
+    if (user.notifications.length === 0) {
+        notificationsList.innerHTML = '<li>No new notifications.</li>';
+    } else {
+        user.notifications.forEach(notif => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${new Date(notif.date).toLocaleDateString()}:</strong> ${notif.message}`;
+            notificationsList.appendChild(li);
+        });
+    }
+}
+
                 // Deposit success modal & welcome
                 if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
                     if (localStorage.getItem('lastDepositTimestamp') !== user.lastDepositAccepted.timestamp) {
@@ -247,6 +275,26 @@ function loadUserData(username) {
     checkForDepositUpdates();
     updateInterval = setInterval(checkForDepositUpdates, 5000);
 }
+
+function initDestinationSearch() {
+    const searchInput = document.getElementById('destination-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.destination-card').forEach(card => {
+            const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+            const desc = card.querySelector('p')?.textContent.toLowerCase() || '';
+            card.style.display = title.includes(term) || desc.includes(term) ? '' : 'none';
+        });
+    });
+}
+
+// Call it in DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+    initDestinationSearch();
+});
 
 function initLoginForm() {
     const loginForm = document.getElementById('login-form');
@@ -863,6 +911,7 @@ function initDepositForms(username) {
             }
         }
     });
+
     // BTC Address Update Form (admin use — keep as is, just add logging)
     document.getElementById('btc-address-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -978,97 +1027,164 @@ function initDepositForms(username) {
         }
     });
 
-    // Crypto Deposit Form Submission
-    document.getElementById('crypto-qr-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const amountInput = document.getElementById('crypto-qr-amount');
-        const amount = parseFloat(amountInput.value);
-        const userBtcAddress = document.getElementById('btc-sender-address')?.value?.trim();
-        const token = localStorage.getItem('token');
+        // Crypto Deposit Form Submission - SAFE
+    const cryptoForm = document.getElementById('crypto-qr-form');
+    if (cryptoForm) {
+        cryptoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amountInput = document.getElementById('crypto-qr-amount');
+            if (!amountInput) return;
+            const amount = parseFloat(amountInput.value);
+            const userBtcAddress = document.getElementById('btc-sender-address')?.value?.trim();
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username'); // Fixed: was missing in old code
 
-        console.log('Submitting crypto deposit:', { username, amount, userBtcAddress });
+            console.log('Submitting crypto deposit:', { username, amount, userBtcAddress });
 
-        if (!amount || amount <= 0) {
-            showNotification('Please enter a valid amount greater than $0.');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/deposit/crypto', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ username, amount, userBtcAddress })
-            });
-
-            console.log('Crypto deposit response status:', response.status);
-
-            const data = await response.json();
-            console.log('Crypto deposit full response:', data);
-
-            if (data.success) {
-                showDepositSubmissionThankYouModal(); // This will now show
-                document.getElementById('crypto-qr-form').reset();
-                showNotification('Crypto deposit submitted successfully — awaiting confirmation!');
-            } else {
-                showNotification(data.message || 'Crypto deposit failed. Please try again.');
+            if (!amount || amount <= 0) {
+                showNotification('Please enter a valid amount greater than $0.');
+                return;
             }
-        } catch (error) {
-            console.error('Crypto deposit error:', error);
-            showNotification('An error occurred while submitting your crypto deposit.');
-        }
-    });
 
-    // Agent Deposit Form Submission
-    document.getElementById('agent-payment-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const amountInput = document.getElementById('agent-amount');
-        const amount = parseFloat(amountInput.value);
-        const transactionId = document.getElementById('transaction-id')?.value?.trim();
-        const paymentMethod = document.getElementById('agent-payment-method')?.value;
-        const token = localStorage.getItem('token');
+            try {
+                const response = await fetch('/api/deposit/crypto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ username, amount, userBtcAddress })
+                });
 
-        console.log('Submitting agent deposit:', { username, amount, transactionId, paymentMethod });
+                console.log('Crypto deposit response status:', response.status);
 
-        if (!amount || amount <= 0) {
-            showNotification('Please enter a valid amount greater than $0.');
-            return;
-        }
-        if (!transactionId) {
-            showNotification('Please provide a transaction ID.');
-            return;
-        }
+                const data = await response.json();
+                console.log('Crypto deposit full response:', data);
 
-        try {
-            const response = await fetch('/api/deposit/agent', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ username, amount, transactionId, paymentMethod })
-            });
-
-            console.log('Agent deposit response status:', response.status);
-
-            const data = await response.json();
-            console.log('Agent deposit full response:', data);
-
-            if (data.success) {
-                showDepositSubmissionThankYouModal(); // This will now show
-                document.getElementById('agent-payment-form').reset();
-                showNotification('Agent payment submitted successfully — awaiting approval!');
-            } else {
-                showNotification(data.message || 'Agent payment failed. Please try again.');
+                if (data.success) {
+                    showDepositSubmissionThankYouModal();
+                    cryptoForm.reset();
+                    showNotification('Crypto deposit submitted successfully — awaiting confirmation!');
+                } else {
+                    showNotification(data.message || 'Crypto deposit failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Crypto deposit error:', error);
+                showNotification('An error occurred while submitting your crypto deposit.');
             }
-        } catch (error) {
-            console.error('Agent deposit error:', error);
-            showNotification('An error occurred while submitting your agent payment.');
-        }
-    });
-}
+        });
+    }
+
+    // Generate QR button - SAFE (full original code preserved)
+    const generateQrBtn = document.getElementById('generate-qr-btn');
+    if (generateQrBtn) {
+        generateQrBtn.addEventListener('click', async () => {
+            const amountInput = document.getElementById('crypto-qr-amount');
+            if (!amountInput) return;
+            const amount = parseFloat(amountInput.value || '0');
+
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('Please enter a valid amount greater than $0.');
+                return;
+            }
+
+            const loading = document.getElementById('qr-loading');
+            const qrDiv = document.getElementById('qrcode');
+
+            if (loading) loading.classList.remove('hidden');
+            if (qrDiv) {
+                qrDiv.classList.add('hidden');
+                qrDiv.innerHTML = '';
+            }
+
+            // Wait 4 seconds (professional delay)
+            await new Promise(resolve => setTimeout(resolve, 4000));
+
+            try {
+                const wallet = document.getElementById('btc-wallet-address')?.textContent || 'bc1qrlm4wltn5te7r7k28pfvnmtzq9qaka0wrxjay6';
+                const btcAmount = (amount / 60000).toFixed(8); // adjust rate
+
+                const qrData = `bitcoin:${wallet}?amount=${btcAmount}`;
+
+                if (loading) loading.classList.add('hidden');
+                if (qrDiv) {
+                    qrDiv.classList.remove('hidden');
+
+                    // Generate QR
+                    QRCode.toCanvas(qrDiv, qrData, { width: 220 }, (err) => {
+                        if (err) {
+                            console.error('QR generation failed:', err);
+                            showNotification('Failed to generate QR code.');
+                        }
+                    });
+
+                    // Add professional message
+                    const msg = document.createElement('p');
+                    msg.textContent = 'Send only Bitcoin (BTC) to this address. Deposits confirmed in 10–60 minutes. Thank you for choosing ExploreWorld.';
+                    qrDiv.appendChild(msg);
+                }
+            } catch (err) {
+                console.error('QR error:', err);
+                showNotification('Error preparing QR code.');
+                if (loading) loading.classList.add('hidden');
+            }
+        });
+    }
+
+    // Agent Deposit Form Submission - SAFE
+    const agentForm = document.getElementById('agent-payment-form');
+    if (agentForm) {
+        agentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amountInput = document.getElementById('agent-amount');
+            if (!amountInput) return;
+            const amount = parseFloat(amountInput.value);
+            const transactionId = document.getElementById('transaction-id')?.value?.trim();
+            const paymentMethod = document.getElementById('agent-payment-method')?.value;
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+
+            console.log('Submitting agent deposit:', { username, amount, transactionId, paymentMethod });
+
+            if (!amount || amount <= 0) {
+                showNotification('Please enter a valid amount greater than $0.');
+                return;
+            }
+            if (!transactionId) {
+                showNotification('Please provide a transaction ID.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/deposit/agent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ username, amount, transactionId, paymentMethod })
+                });
+
+                console.log('Agent deposit response status:', response.status);
+
+                const data = await response.json();
+                console.log('Agent deposit full response:', data);
+
+                if (data.success) {
+                    showDepositSubmissionThankYouModal();
+                    agentForm.reset();
+                    showNotification('Agent payment submitted successfully — awaiting approval!');
+                } else {
+                    showNotification(data.message || 'Agent payment failed. Please try again.');
+                }
+                } catch (error) {
+        console.error('Agent deposit error:', error);
+        showNotification('An error occurred while submitting your agent payment.');
+    }
+});
+} // This closes the if (agentForm)
+
+} // ← ADD THIS LINE: closes the entire initDepositForms(username) function
 
 async function updateUser(username, updates) {
     const token = localStorage.getItem('adminToken');
@@ -1263,6 +1379,10 @@ function loadUsers() {
                         <input type="text" name="email" value="${user.personalInfo?.email || user.email || ''}" placeholder="Email">
                         <input type="text" name="phone" value="${user.personalInfo?.phone || user.phone || ''}" placeholder="Phone">
                         <input type="text" name="address" value="${user.personalInfo?.address || ''}" placeholder="Address">
+
+                        <input type="date" name="registeredDate" value="${user.registeredDate || ''}" placeholder="Member Since">
+                        <textarea name="newNotification" placeholder="Send new notification..."></textarea>
+                        <button type="button" class="btn send-notification" data-username="${user.username}">Send Notification</button>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </form>
                     <button class="btn btn-danger btn-clear-vacations" data-username="${user.username}">Clear Vacation History</button>
@@ -1392,7 +1512,26 @@ function loadUsers() {
                     });
                 });
             });
-
+            
+            div.querySelector('.send-notification')?.addEventListener('click', () => {
+    const message = div.querySelector('textarea[name="newNotification"]')?.value.trim();
+    if (!message) {
+        showNotification('Enter a message');
+        return;
+    }
+    const username = div.querySelector('.send-notification').dataset.username;
+    // Backend call to add notification
+    fetch(`/api/admin/send-notification/${username}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` },
+        body: JSON.stringify({ message })
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            showNotification('Notification sent');
+            div.querySelector('textarea[name="newNotification"]').value = '';
+        }
+    });
+});
             // Clear all users button (attached once after all users are rendered)
             document.getElementById('clear-users-btn')?.addEventListener('click', () => {
                 if (confirm('Are you sure you want to clear all users? This cannot be undone.')) {
@@ -2172,7 +2311,6 @@ function initHotDestinations() {
     const slideshow = document.querySelector('.hot-destinations-slideshow');
     if (!slideshow) return;
 
-    // Hardcoded hot destinations (you can keep your backend fetch if needed)
     const hotDestinations = [
         { name: "Oslo, Norway", packageName: "Nordic Fjord Expedition", image: "images/oslo.jpg", booked: 120, date: "2025-08-15", deadline: "2025-07-10", bonus: "10% off for couples", cost: 28999 },
         { name: "Athens, Greece", packageName: "Hellenic Isles Odyssey", image: "images/athens.jpg", booked: 85, date: "2024-01-20", deadline: "2023-12-20", bonus: "Free upgrade to deluxe package", cost: 27999 },
@@ -2194,7 +2332,7 @@ function initHotDestinations() {
 
     hotDestinations.forEach((dest, index) => {
         const slide = document.createElement('div');
-        slide.className = 'hot-slide' + (index === 0 ? ' active' : '');
+        slide.className = 'hot-slide';
         slide.innerHTML = `
             <img src="${dest.image}" alt="${dest.name}">
             <div class="hot-slide-content">
@@ -2203,7 +2341,7 @@ function initHotDestinations() {
                 <p>Vacation Date: ${dest.date}</p>
                 <p>Booking Deadline: ${dest.deadline}</p>
                 <p>Bonus: ${dest.bonus}</p>
-                <div style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;">
+                <div style="display: flex; gap: 15px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
                     <button class="btn learn-more-hot" data-name="${dest.name}">Learn More</button>
                     <button class="btn book-now-hot" data-index="${index}">Book Now</button>
                 </div>
@@ -2217,14 +2355,12 @@ function initHotDestinations() {
         dotsContainer.appendChild(dot);
     });
 
-    // Carousel logic (same as before)
     let currentSlide = 0;
     const totalSlides = hotDestinations.length;
-    const dots = dotsContainer.children;
 
     function updateCarousel() {
         container.style.transform = `translateX(-${currentSlide * 100}%)`;
-        Array.from(dots).forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+        slideshow.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
     }
 
     slideshow.querySelector('.carousel-next').addEventListener('click', () => {
@@ -2250,32 +2386,31 @@ function initHotDestinations() {
     }, 10000);
 
     slideshow.addEventListener('mouseenter', () => clearInterval(autoPlay));
-    slideshow.addEventListener('mouseleave', () => autoPlay = setInterval(() => {
-        currentSlide = (currentSlide + 1) % totalSlides;
-        updateCarousel();
-    }, 10000));
+    slideshow.addEventListener('mouseleave', () => {
+        autoPlay = setInterval(() => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateCarousel();
+        }, 10000);
+    });
 
     updateCarousel();
 
-    // Learn More button - finds matching destination in destinations.json
+    // Learn More
     document.querySelectorAll('.learn-more-hot').forEach(btn => {
         btn.addEventListener('click', () => {
             const name = btn.dataset.name;
-            const destMatch = destinationsData.find(d => d.name === name || (d.deluxePackage && d.deluxePackage.name === name));
-            if (destMatch) {
-                showDeluxePackage(destMatch);
-            } else {
-                showNotification('Full package details not available for this destination yet.');
-            }
+            const match = destinationsData.find(d => d.name === name || (d.deluxePackage && d.deluxePackage.name.includes(name)));
+            if (match) showDeluxePackage(match);
+            else showNotification('Full details not available yet.');
         });
     });
 
-    // Book Now button
+    // Book Now
     document.querySelectorAll('.book-now-hot').forEach(btn => {
         btn.addEventListener('click', () => {
             const username = localStorage.getItem('username');
             if (!username) {
-                alert('Please log in to book a vacation.');
+                alert('Please log in to book.');
                 window.location.href = 'login.html';
                 return;
             }
@@ -2285,8 +2420,7 @@ function initHotDestinations() {
         });
     });
 }
-
-    function showBookingModal(dest, username, cost) {
+function showBookingModal(dest, username, cost) {
     const modal = document.createElement('div');
     modal.className = 'modal active';
     modal.innerHTML = `
@@ -2300,7 +2434,7 @@ function initHotDestinations() {
                         <span class="highlight">Cost:</span> $${cost.toLocaleString()}<br>
                         <span class="highlight">Vacation Date:</span> ${dest.date}<br>
                         <span class="highlight">Booking Deadline:</span> ${dest.deadline}<br>
-                        <span class="highlight">Exclusive Bonus:</span> ${dest.bonus}
+                        <span class="highlight">Bonus:</span> ${dest.bonus}
                     </p>
                     <button class="btn learn-more-modal" style="margin: 20px auto; display: block;">View Full Package Details</button>
                 </div>
@@ -2313,29 +2447,24 @@ function initHotDestinations() {
     `;
     document.body.appendChild(modal);
 
-    // Close handlers
-    modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
-    modal.querySelector('.cancel-btn').addEventListener('click', () => modal.remove());
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    modal.querySelector('.modal-close').onclick = () => modal.remove();
+    modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 
-    // View Full Package Details button
-    modal.querySelector('.learn-more-modal').addEventListener('click', () => {
-        const destMatch = destinationsData.find(d => d.name === dest.name || (d.deluxePackage && d.deluxePackage.name === dest.packageName));
-        if (destMatch) {
+    modal.querySelector('.learn-more-modal').onclick = () => {
+        const match = destinationsData.find(d => d.name === dest.name || (d.deluxePackage && d.deluxePackage.name === dest.packageName));
+        if (match) {
             modal.remove();
-            showDeluxePackage(destMatch);
-        } else {
-            showNotification('Full package details not available.');
+            showDeluxePackage(match);
         }
-    });
+    };
 
-    // Confirm booking
-    modal.querySelector('#modal-action-btn').addEventListener('click', async () => {
+    modal.querySelector('#modal-action-btn').onclick = async () => {
         const success = await bookVacation(username, cost, dest.packageName);
         if (success) {
             showThankYouModal({ deluxePackage: { name: dest.packageName } });
             modal.remove();
             loadUserData(username);
         }
-    });
+    };
 }
