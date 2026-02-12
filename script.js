@@ -53,7 +53,7 @@ function loadSocialMedia() {
 let updateInterval;
 let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
 
-/*function loadUserData(username) {
+function loadUserData(username) {
     if (updateInterval) clearInterval(updateInterval);
 
     function checkForDepositUpdates() {
@@ -78,21 +78,17 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
                     throw new Error('User data fetch failed');
                 }
                 return response.json();
-            });
-            
+            })
             .then(user => {
                 console.log('User data:', user);
 
-                // Safe access to all array fields (handles snake_case or camelCase)
+                // Safe access to all array fields
                 const pendingList = user.pendingVacations || user.pending_vacations || [];
                 const upcomingList = user.upcomingVacations || user.upcoming_vacations || [];
                 const completedList = user.completedVacations || user.completed_vacations || [];
                 const txList = user.transactions || user.transactions || [];
-                const usageList = user.usageHistory || user.usage_history || [];
 
-                console.log('Pending vacations from Supabase:', pendingList);
-
-                // Name, balance, etc. (unchanged)
+                // Name, balance, etc.
                 const userName = document.getElementById('user-name');
                 if (userName) userName.textContent = user.full_name || user.name || 'User';
 
@@ -105,16 +101,13 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
                 const userDeposits = document.getElementById('user-deposits');
                 if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
 
-                // Pending Deposits Display - FIXED & SAFE
+                // Pending Deposits
                 const pendingDepositsEl = document.getElementById('pending-deposits');
                 if (pendingDepositsEl) {
-                    const pendingDepositsList = user.pending_deposits || []; // snake_case from Supabase
-                    const totalPending = pendingDepositsList.reduce((sum, dep) => {
-                        return sum + (Number(dep?.amount) || 0);
-                    }, 0);
+                    const pendingDepositsList = user.pending_deposits || [];
+                    const totalPending = pendingDepositsList.reduce((sum, dep) => sum + (Number(dep?.amount) || 0), 0);
                     pendingDepositsEl.textContent = totalPending.toFixed(2);
-             }  // ← No semicolon here; the blank line below separates statements 
-
+                }
 
                 const userEmail = document.getElementById('user-email');
                 if (userEmail) userEmail.textContent = user.email || 'Not set';
@@ -133,21 +126,16 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
                 if (pendingVacations) {
                     pendingVacations.innerHTML = '';
                     pendingList.forEach(vacation => {
-                        if (!vacation || typeof vacation !== 'object') {
-                            console.warn('Invalid vacation object:', vacation);
-                            return;
-                        }
+                        if (!vacation || typeof vacation !== 'object') return;
                         const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                         const li = document.createElement('li');
                         li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
                         pendingVacations.appendChild(li);
                     });
-                    if (pendingList.length === 0) {
-                        pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
-                    }
+                    if (pendingList.length === 0) pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
                 }
 
-                // Upcoming Vacations + Progress Bar (restored!)
+                // Upcoming Vacations + Progress Bar
                 const upcomingVacations = document.getElementById('upcoming-vacations');
                 if (upcomingVacations) {
                     upcomingVacations.innerHTML = '';
@@ -157,16 +145,13 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
                         li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
                         upcomingVacations.appendChild(li);
                     });
-                    if (upcomingList.length === 0) {
-                        upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
-                    }
+                    if (upcomingList.length === 0) upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
 
-                    // Restore progress bar
                     const progressBarFill = document.querySelector('.progress-bar-fill');
                     if (progressBarFill) {
-                        const progress = (upcomingList.length / 3) * 100; // max 3 vacations for progress
+                        const progress = (upcomingList.length / 3) * 100;
                         progressBarFill.style.width = `${progress}%`;
-                        progressBarFill.textContent = `${progress.toFixed(0)}%`; // optional: show %
+                        progressBarFill.textContent = `${progress.toFixed(0)}%`;
                     }
                 }
 
@@ -180,76 +165,72 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
                         li.textContent = `${tx.date}: ${tx.type} $${(tx.amount || 0).toFixed(2)}`;
                         transactionHistory.appendChild(li);
                     });
-                    if (sortedTransactions.length === 0) {
-                        transactionHistory.innerHTML = '<li>No transactions yet.</li>';
-                    }
+                    if (sortedTransactions.length === 0) transactionHistory.innerHTML = '<li>No transactions yet.</li>';
                 }
 
-                // Past Vacations (unchanged)
+                // Past Vacations (full original code restored)
                 const pastVacationsGrid = document.getElementById('past-vacations-grid');
                 if (pastVacationsGrid) {
                     pastVacationsGrid.innerHTML = '';
-                    const completedVacations = completedList;
-                    if (completedVacations.length === 0) {
+                    if (completedList.length === 0) {
                         pastVacationsGrid.innerHTML = '<p>No past vacations yet.</p>';
                     } else {
-                        completedVacations.forEach((vacation, serverIndex) => {
+                        completedList.forEach((vacation, serverIndex) => {
                             const card = document.createElement('div');
                             card.classList.add('destination-card');
                             const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                             card.innerHTML = `
-                            <img src="${vacation.image || 'images/default-pic.jpg'}" alt="${vacation.name || 'Unknown'}" loading="lazy">
-                            <h3>${vacation.name || 'Unknown'}</h3>
-                            <p>Completed: ${vacation.completedDate || 'N/A'}</p>
-                            <p>Cost: $${cost}</p>
-                            ${vacation.rating ? `<p>Rating: ${vacation.rating}/5 ${vacation.comment ? `- ${vacation.comment}` : ''}</p>` : ''}
-                            <div class="button-container">
-                                <button class="btn learn-more" data-name="${vacation.name || 'Unknown'}">Learn More</button>
-                                <button class="btn rebook-now">Rebook Now</button>
-                                <button class="btn rate-trip" data-index="${serverIndex}">${vacation.rating ? 'Edit Rating' : 'Rate Trip'}</button>
-                            </div>
-                        `;
+                                <img src="${vacation.image || 'images/default-pic.jpg'}" alt="${vacation.name || 'Unknown'}" loading="lazy">
+                                <h3>${vacation.name || 'Unknown'}</h3>
+                                <p>Completed: ${vacation.completedDate || 'N/A'}</p>
+                                <p>Cost: $${cost}</p>
+                                ${vacation.rating ? `<p>Rating: ${vacation.rating}/5 ${vacation.comment ? `- ${vacation.comment}` : ''}</p>` : ''}
+                                <div class="button-container">
+                                    <button class="btn learn-more" data-name="${vacation.name || 'Unknown'}">Learn More</button>
+                                    <button class="btn rebook-now">Rebook Now</button>
+                                    <button class="btn rate-trip" data-index="${serverIndex}">${vacation.rating ? 'Edit Rating' : 'Rate Trip'}</button>
+                                </div>
+                            `;
                             pastVacationsGrid.appendChild(card);
 
+                            // Image fallback
                             const img = card.querySelector('img');
                             img.addEventListener('error', function handler() {
                                 img.src = 'images/default-pic.jpg';
                                 img.removeEventListener('error', handler);
                             });
 
+                            // Learn More (from past vacations)
                             card.querySelector('.learn-more').addEventListener('click', () => {
                                 const destMatch = destinationsData.find(d => d.deluxePackage.name === vacation.name);
                                 if (destMatch) showDeluxePackage(destMatch);
                             });
+
+                            // Rebook & Rate (unchanged)
                             card.querySelector('.rebook-now').addEventListener('click', () => {
                                 showBookingConfirmationModal(username, destinationsData.find(d => d.deluxePackage.name === vacation.name));
                             });
                             card.querySelector('.rate-trip').addEventListener('click', () => {
-                                const index = parseInt(card.querySelector('.rate-trip').getAttribute('data-index'));
-                                showRateTripModal(username, index, vacation);
+                                showRateTripModal(username, serverIndex, vacation);
                             });
                         });
                     }
                 }
 
-                // Rest of your code (welcome notification, last deposit modal, etc.)
+                // Deposit success modal & welcome
                 if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
-                    const storedTimestamp = localStorage.getItem('lastDepositTimestamp');
-                    if (storedTimestamp !== user.lastDepositAccepted.timestamp) {
+                    if (localStorage.getItem('lastDepositTimestamp') !== user.lastDepositAccepted.timestamp) {
                         lastDepositTimestamp = user.lastDepositAccepted.timestamp;
                         localStorage.setItem('lastDepositTimestamp', lastDepositTimestamp);
                         showDepositSuccessModal(user.lastDepositAccepted.amount);
                     }
                 }
 
-                  
-                // Only **once** — remove the duplicate
                 if (!localStorage.getItem('welcomeShown')) {
                     showNotification('Welcome to your dashboard!');
                     localStorage.setItem('welcomeShown', 'true');
                 }
-
-            })  // ← this closes the .then(user => { ... })
+            })
             .catch(error => {
                 console.error('Error loading user data:', error);
                 if (error.message === 'Session expired or unauthorized') {
@@ -261,11 +242,11 @@ let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
                     showNotification('Failed to load user data. Retrying...');
                 }
             });
- }
+    }
 
- checkForDepositUpdates();
- updateInterval = setInterval(checkForDepositUpdates, 5000);
-*/
+    checkForDepositUpdates();
+    updateInterval = setInterval(checkForDepositUpdates, 5000);
+}
 
 function initLoginForm() {
     const loginForm = document.getElementById('login-form');
@@ -2187,127 +2168,123 @@ if (window.location.pathname.split('/').pop() === 'admin.html' && localStorage.g
 
     });
 
-    function initHotDestinations() {
-        const slideshow = document.querySelector('.hot-destinations-slideshow');
-        if (!slideshow) {
-            console.error('Hot destinations slideshow element not found');
-            return;
-        }
+function initHotDestinations() {
+    const slideshow = document.querySelector('.hot-destinations-slideshow');
+    if (!slideshow) return;
 
-        fetch('/api/hot-destinations')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(backendData => {
-                const hotDestinations = [
-                    {
-                        name: "Oslo, Norway",
-                        packageName: "Nordic Fjord Expedition",
-                        image: "images/oslo.jpg",
-                        booked: 120,
-                        date: "2025-08-15",
-                        deadline: "2025-07-10",
-                        bonus: "10% off for couples",
-                        cost: 28999
-                    },
-                    {
-                        name: "Athens, Greece",
-                        packageName: "Hellenic Isles Odyssey",
-                        image: "images/athens.jpg",
-                        booked: 85,
-                        date: "2024-01-20",
-                        deadline: "2023-12-20",
-                        bonus: "Free upgrade to deluxe package",
-                        cost: 27999
-                    },
-                    {
-                        name: "Kyoto, Japan",
-                        packageName: "Japanese Zen Journey",
-                        image: "images/kyoto.jpg",
-                        booked: 200,
-                        date: "2024-03-10",
-                        deadline: "2024-02-10",
-                        bonus: "Complimentary spa day",
-                        cost: 27999
-                    },
-                    {
-                        name: "Beijing, China",
-                        packageName: "Silk Road & Sea Adventure",
-                        image: "images/beijing.jpg",
-                        booked: 150,
-                        date: "2025-07-05",
-                        deadline: "2024-03-05",
-                        bonus: "Exclusive cultural tour",
-                        cost: 22999
-                    }
-                ].map(dest => {
-                    const backendDest = backendData.find(b => b.name === dest.name);
-                    return {
-                        ...dest,
-                        fullyBooked: backendDest ? backendDest.fullyBooked : false
-                    };
-                });
+    // Hardcoded hot destinations (you can keep your backend fetch if needed)
+    const hotDestinations = [
+        { name: "Oslo, Norway", packageName: "Nordic Fjord Expedition", image: "images/oslo.jpg", booked: 120, date: "2025-08-15", deadline: "2025-07-10", bonus: "10% off for couples", cost: 28999 },
+        { name: "Athens, Greece", packageName: "Hellenic Isles Odyssey", image: "images/athens.jpg", booked: 85, date: "2024-01-20", deadline: "2023-12-20", bonus: "Free upgrade to deluxe package", cost: 27999 },
+        { name: "Kyoto, Japan", packageName: "Japanese Zen Journey", image: "images/kyoto.jpg", booked: 200, date: "2024-03-10", deadline: "2024-02-10", bonus: "Complimentary spa day", cost: 27999 },
+        { name: "Beijing, China", packageName: "Silk Road & Sea Adventure", image: "images/beijing.jpg", booked: 150, date: "2025-07-05", deadline: "2024-03-05", bonus: "Exclusive cultural tour", cost: 22999 }
+    ];
 
-                slideshow.innerHTML = ''; // Clear existing slides
+    slideshow.innerHTML = `
+        <div class="hot-slides-container"></div>
+        <div class="carousel-controls">
+            <button class="carousel-prev">‹</button>
+            <button class="carousel-next">›</button>
+        </div>
+        <div class="carousel-dots"></div>
+    `;
 
-                hotDestinations.forEach((dest, index) => {
-                    const slide = document.createElement('div');
-                    slide.className = `hot-slide ${index === 0 ? 'active' : ''} ${dest.fullyBooked ? 'fully-booked' : ''}`;
-                    slide.innerHTML = `
-                    <img src="${dest.image}" alt="${dest.name}">
-                    ${dest.fullyBooked ? '<div class="fully-booked-stamp">Fully Booked - 700+ Travelers Booked This! Check Other Packages</div>' : ''}
-                    <div class="hot-slide-content">
-                        <h3>${dest.name}</h3>
-                        <p>Booked by ${dest.booked} travelers</p>
-                        <p>Vacation Date: ${dest.date}</p>
-                        <p>Booking Deadline: ${dest.deadline}</p>
-                        <p>Bonus: ${dest.bonus}</p>
-                        ${dest.fullyBooked ? '' : `<button class="btn book-now-hot" data-package-name="${dest.packageName}" data-cost="${dest.cost}">Book Now</button>`}
-                    </div>
-                `;
-                    slideshow.appendChild(slide);
-                });
+    const container = slideshow.querySelector('.hot-slides-container');
+    const dotsContainer = slideshow.querySelector('.carousel-dots');
 
-                let currentSlide = 0;
-                const slides = document.querySelectorAll('.hot-slide');
-                function showNextSlide() {
-                    slides[currentSlide].classList.remove('active');
-                    currentSlide = (currentSlide + 1) % slides.length;
-                    slides[currentSlide].classList.add('active');
-                }
-                setInterval(showNextSlide, 10000);
+    hotDestinations.forEach((dest, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'hot-slide' + (index === 0 ? ' active' : '');
+        slide.innerHTML = `
+            <img src="${dest.image}" alt="${dest.name}">
+            <div class="hot-slide-content">
+                <h3>${dest.name}</h3>
+                <p>Booked by ${dest.booked}+ travelers</p>
+                <p>Vacation Date: ${dest.date}</p>
+                <p>Booking Deadline: ${dest.deadline}</p>
+                <p>Bonus: ${dest.bonus}</p>
+                <div style="display: flex; gap: 15px; margin-top: 20px; justify-content: center;">
+                    <button class="btn learn-more-hot" data-name="${dest.name}">Learn More</button>
+                    <button class="btn book-now-hot" data-index="${index}">Book Now</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(slide);
 
-                // Modal handling
-                document.querySelectorAll('.book-now-hot').forEach(button => {
-                    button.addEventListener('click', () => {
-                        const username = localStorage.getItem('username');
-                        if (!username) {
-                            alert('Please log in to book a vacation.');
-                            window.location.href = 'login.html';
-                            return;
-                        }
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (index === 0 ? ' active' : '');
+        dot.dataset.index = index;
+        dotsContainer.appendChild(dot);
+    });
 
-                        const packageName = button.getAttribute('data-package-name');
-                        const cost = parseFloat(button.getAttribute('data-cost'));
-                        const dest = hotDestinations.find(d => d.packageName === packageName);
+    // Carousel logic (same as before)
+    let currentSlide = 0;
+    const totalSlides = hotDestinations.length;
+    const dots = dotsContainer.children;
 
-                        if (dest) {
-                            showBookingModal(dest, username, cost);
-                        }
-                    });
-                });
-            })
-
-        document.querySelectorAll('.collapsible-header').forEach(header => {
-            header.addEventListener('click', () => {
-                const content = header.nextElementSibling;
-                content.classList.toggle('hidden');
-            });
-        });
+    function updateCarousel() {
+        container.style.transform = `translateX(-${currentSlide * 100}%)`;
+        Array.from(dots).forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
     }
+
+    slideshow.querySelector('.carousel-next').addEventListener('click', () => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+    });
+
+    slideshow.querySelector('.carousel-prev').addEventListener('click', () => {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateCarousel();
+    });
+
+    dotsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('dot')) {
+            currentSlide = parseInt(e.target.dataset.index);
+            updateCarousel();
+        }
+    });
+
+    let autoPlay = setInterval(() => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+    }, 10000);
+
+    slideshow.addEventListener('mouseenter', () => clearInterval(autoPlay));
+    slideshow.addEventListener('mouseleave', () => autoPlay = setInterval(() => {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateCarousel();
+    }, 10000));
+
+    updateCarousel();
+
+    // Learn More button - finds matching destination in destinations.json
+    document.querySelectorAll('.learn-more-hot').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.dataset.name;
+            const destMatch = destinationsData.find(d => d.name === name || (d.deluxePackage && d.deluxePackage.name === name));
+            if (destMatch) {
+                showDeluxePackage(destMatch);
+            } else {
+                showNotification('Full package details not available for this destination yet.');
+            }
+        });
+    });
+
+    // Book Now button
+    document.querySelectorAll('.book-now-hot').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const username = localStorage.getItem('username');
+            if (!username) {
+                alert('Please log in to book a vacation.');
+                window.location.href = 'login.html';
+                return;
+            }
+            const index = parseInt(btn.dataset.index);
+            const dest = hotDestinations[index];
+            showBookingModal(dest, username, dest.cost);
+        });
+    });
+}
 
     // Function to show the booking modal using your existing modal structure
     function showBookingModal(dest, username, cost) {
