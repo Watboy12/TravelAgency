@@ -28,18 +28,11 @@ function loadSocialMedia() {
     // Manually set social media links and logos (no API call needed)
     console.log('Loading hardcoded social media links');
 
-    // Twitter / X
-    const twitterImg = document.getElementById('twitter-logo-img');
-    if (twitterImg) {
-        twitterImg.src = 'images/default-twitter.png';  // your fallback image
-        twitterImg.parentElement.href = 'https://twitter.com/yourhandle';  // ← CHANGE THIS TO YOUR REAL LINK
-    }
-
     // Facebook
     const facebookImg = document.getElementById('facebook-logo-img');
     if (facebookImg) {
         facebookImg.src = 'images/default-facebook.png';
-        facebookImg.parentElement.href = 'https://facebook.com/yourpage';  // ← CHANGE THIS TO YOUR REAL LINK
+        facebookImg.parentElement.href = 'https://www.facebook.com/share/19y78p9867/?mibextid=wwXIfr';  // ← CHANGE THIS TO YOUR REAL LINK
     }
 
     // Instagram
@@ -53,14 +46,14 @@ function loadSocialMedia() {
     const tiktokImg = document.getElementById('tiktok-logo-img');  // add this ID to your HTML if not there yet
     if (tiktokImg) {
         tiktokImg.src = 'images/tiktok-logo.png';  // ← add this image to your images/ folder
-        tiktokImg.parentElement.href = 'https://tiktok.com/@yourhandle';  // ← CHANGE THIS TO YOUR REAL LINK
+        tiktokImg.parentElement.href = 'https://www.tiktok.com/@exploreworldagency?_r=1&_t=ZS-93qD3m5QwtD';  // ← CHANGE THIS TO YOUR REAL LINK
     }
 }
 
 let updateInterval;
 let lastDepositTimestamp = localStorage.getItem('lastDepositTimestamp') || null;
 
-function loadUserData(username) {
+/*function loadUserData(username) {
     if (updateInterval) clearInterval(updateInterval);
 
     function checkForDepositUpdates() {
@@ -85,44 +78,65 @@ function loadUserData(username) {
                     throw new Error('User data fetch failed');
                 }
                 return response.json();
-            })
+            });
+            
             .then(user => {
                 console.log('User data:', user);
 
-                // Safe array fallbacks
+                // Safe access to all array fields (handles snake_case or camelCase)
                 const pendingList = user.pendingVacations || user.pending_vacations || [];
                 const upcomingList = user.upcomingVacations || user.upcoming_vacations || [];
                 const completedList = user.completedVacations || user.completed_vacations || [];
-                const txList = user.transactions || [];  // fixed duplicate
-                // usageList removed — was unused
+                const txList = user.transactions || user.transactions || [];
+                const usageList = user.usageHistory || user.usage_history || [];
 
                 console.log('Pending vacations from Supabase:', pendingList);
 
-                // Basic user info
-                document.getElementById('user-name')?.textContent = user.full_name || user.name || 'User';
-                document.getElementById('user-balance')?.textContent = (user.balance || 0).toFixed(2);
-                document.getElementById('user-bonus')?.textContent = (user.bonus || 0).toFixed(2);
-                document.getElementById('user-deposits')?.textContent = (user.deposits || 0).toFixed(2);
+                // Name, balance, etc. (unchanged)
+                const userName = document.getElementById('user-name');
+                if (userName) userName.textContent = user.full_name || user.name || 'User';
 
-                // Pending Deposits
+                const userBalance = document.getElementById('user-balance');
+                if (userBalance) userBalance.textContent = (user.balance || 0).toFixed(2);
+
+                const userBonus = document.getElementById('user-bonus');
+                if (userBonus) userBonus.textContent = (user.bonus || 0).toFixed(2);
+
+                const userDeposits = document.getElementById('user-deposits');
+                if (userDeposits) userDeposits.textContent = (user.deposits || 0).toFixed(2);
+
+                // Pending Deposits Display - FIXED & SAFE
                 const pendingDepositsEl = document.getElementById('pending-deposits');
                 if (pendingDepositsEl) {
-                    const pendingDepositsList = user.pending_deposits || [];
-                    const totalPending = pendingDepositsList.reduce((sum, dep) => sum + (Number(dep?.amount) || 0), 0);
+                    const pendingDepositsList = user.pending_deposits || []; // snake_case from Supabase
+                    const totalPending = pendingDepositsList.reduce((sum, dep) => {
+                        return sum + (Number(dep?.amount) || 0);
+                    }, 0);
                     pendingDepositsEl.textContent = totalPending.toFixed(2);
-                }
+             }  // ← No semicolon here; the blank line below separates statements 
 
-                document.getElementById('user-email')?.textContent = user.email || 'Not set';
-                document.getElementById('user-phone')?.textContent = user.phone || 'Not set';
-                document.getElementById('user-address')?.textContent = user.address || 'Not set';
-                document.getElementById('user-verified')?.textContent = user.verified ? 'Yes' : 'No';
+
+                const userEmail = document.getElementById('user-email');
+                if (userEmail) userEmail.textContent = user.email || 'Not set';
+
+                const userPhone = document.getElementById('user-phone');
+                if (userPhone) userPhone.textContent = user.phone || 'Not set';
+
+                const userAddress = document.getElementById('user-address');
+                if (userAddress) userAddress.textContent = user.address || 'Not set';
+
+                const userVerified = document.getElementById('user-verified');
+                if (userVerified) userVerified.textContent = user.verified ? 'Yes' : 'No';
 
                 // Pending Vacations
                 const pendingVacations = document.getElementById('pending-vacations');
                 if (pendingVacations) {
                     pendingVacations.innerHTML = '';
                     pendingList.forEach(vacation => {
-                        if (!vacation || typeof vacation !== 'object') return;
+                        if (!vacation || typeof vacation !== 'object') {
+                            console.warn('Invalid vacation object:', vacation);
+                            return;
+                        }
                         const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                         const li = document.createElement('li');
                         li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
@@ -133,13 +147,13 @@ function loadUserData(username) {
                     }
                 }
 
-                // Upcoming Vacations + Progress Bar
+                // Upcoming Vacations + Progress Bar (restored!)
                 const upcomingVacations = document.getElementById('upcoming-vacations');
                 if (upcomingVacations) {
                     upcomingVacations.innerHTML = '';
                     upcomingList.forEach(vacation => {
-                        const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                         const li = document.createElement('li');
+                        const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                         li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
                         upcomingVacations.appendChild(li);
                     });
@@ -147,11 +161,12 @@ function loadUserData(username) {
                         upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
                     }
 
+                    // Restore progress bar
                     const progressBarFill = document.querySelector('.progress-bar-fill');
                     if (progressBarFill) {
-                        const progress = (upcomingList.length / 3) * 100;
+                        const progress = (upcomingList.length / 3) * 100; // max 3 vacations for progress
                         progressBarFill.style.width = `${progress}%`;
-                        progressBarFill.textContent = `${progress.toFixed(0)}%`;
+                        progressBarFill.textContent = `${progress.toFixed(0)}%`; // optional: show %
                     }
                 }
 
@@ -159,12 +174,10 @@ function loadUserData(username) {
                 const transactionHistory = document.getElementById('transaction-history');
                 if (transactionHistory) {
                     transactionHistory.innerHTML = '';
-                    const sortedTransactions = txList.sort((a, b) => 
-                        new Date(b?.date || 0) - new Date(a?.date || 0)
-                    );
+                    const sortedTransactions = txList.sort((a, b) => new Date(b.date) - new Date(a.date));
                     sortedTransactions.forEach(tx => {
                         const li = document.createElement('li');
-                        li.textContent = `${tx.date || 'N/A'}: ${tx.type || 'Unknown'} $${(tx.amount || 0).toFixed(2)}`;
+                        li.textContent = `${tx.date}: ${tx.type} $${(tx.amount || 0).toFixed(2)}`;
                         transactionHistory.appendChild(li);
                     });
                     if (sortedTransactions.length === 0) {
@@ -172,7 +185,7 @@ function loadUserData(username) {
                     }
                 }
 
-                // Past Vacations
+                // Past Vacations (unchanged)
                 const pastVacationsGrid = document.getElementById('past-vacations-grid');
                 if (pastVacationsGrid) {
                     pastVacationsGrid.innerHTML = '';
@@ -185,17 +198,17 @@ function loadUserData(username) {
                             card.classList.add('destination-card');
                             const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                             card.innerHTML = `
-                                <img src="${vacation.image || 'images/default-pic.jpg'}" alt="${vacation.name || 'Unknown'}" loading="lazy">
-                                <h3>${vacation.name || 'Unknown'}</h3>
-                                <p>Completed: ${vacation.completedDate || 'N/A'}</p>
-                                <p>Cost: $${cost}</p>
-                                ${vacation.rating ? `<p>Rating: ${vacation.rating}/5 ${vacation.comment ? `- ${vacation.comment}` : ''}</p>` : ''}
-                                <div class="button-container">
-                                    <button class="btn learn-more" data-name="${vacation.name || 'Unknown'}">Learn More</button>
-                                    <button class="btn rebook-now">Rebook Now</button>
-                                    <button class="btn rate-trip" data-index="${serverIndex}">${vacation.rating ? 'Edit Rating' : 'Rate Trip'}</button>
-                                </div>
-                            `;
+                            <img src="${vacation.image || 'images/default-pic.jpg'}" alt="${vacation.name || 'Unknown'}" loading="lazy">
+                            <h3>${vacation.name || 'Unknown'}</h3>
+                            <p>Completed: ${vacation.completedDate || 'N/A'}</p>
+                            <p>Cost: $${cost}</p>
+                            ${vacation.rating ? `<p>Rating: ${vacation.rating}/5 ${vacation.comment ? `- ${vacation.comment}` : ''}</p>` : ''}
+                            <div class="button-container">
+                                <button class="btn learn-more" data-name="${vacation.name || 'Unknown'}">Learn More</button>
+                                <button class="btn rebook-now">Rebook Now</button>
+                                <button class="btn rate-trip" data-index="${serverIndex}">${vacation.rating ? 'Edit Rating' : 'Rate Trip'}</button>
+                            </div>
+                        `;
                             pastVacationsGrid.appendChild(card);
 
                             const img = card.querySelector('img');
@@ -205,15 +218,12 @@ function loadUserData(username) {
                             });
 
                             card.querySelector('.learn-more').addEventListener('click', () => {
-                                const destMatch = destinationsData?.find(d => d.deluxePackage?.name === vacation.name);
+                                const destMatch = destinationsData.find(d => d.deluxePackage.name === vacation.name);
                                 if (destMatch) showDeluxePackage(destMatch);
                             });
-
                             card.querySelector('.rebook-now').addEventListener('click', () => {
-                                const destMatch = destinationsData?.find(d => d.deluxePackage?.name === vacation.name);
-                                if (destMatch) showBookingConfirmationModal(username, destMatch);
+                                showBookingConfirmationModal(username, destinationsData.find(d => d.deluxePackage.name === vacation.name));
                             });
-
                             card.querySelector('.rate-trip').addEventListener('click', () => {
                                 const index = parseInt(card.querySelector('.rate-trip').getAttribute('data-index'));
                                 showRateTripModal(username, index, vacation);
@@ -222,7 +232,7 @@ function loadUserData(username) {
                     }
                 }
 
-                // Last deposit success modal
+                // Rest of your code (welcome notification, last deposit modal, etc.)
                 if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
                     const storedTimestamp = localStorage.getItem('lastDepositTimestamp');
                     if (storedTimestamp !== user.lastDepositAccepted.timestamp) {
@@ -232,15 +242,17 @@ function loadUserData(username) {
                     }
                 }
 
-                // Welcome notification (only once)
+                  
+                // Only **once** — remove the duplicate
                 if (!localStorage.getItem('welcomeShown')) {
                     showNotification('Welcome to your dashboard!');
                     localStorage.setItem('welcomeShown', 'true');
                 }
-            })
+
+            })  // ← this closes the .then(user => { ... })
             .catch(error => {
                 console.error('Error loading user data:', error);
-                if (error.message.includes('Session expired') || error.message.includes('unauthorized')) {
+                if (error.message === 'Session expired or unauthorized') {
                     showNotification('Session expired. Please log in again.');
                     localStorage.removeItem('token');
                     localStorage.removeItem('username');
@@ -249,11 +261,11 @@ function loadUserData(username) {
                     showNotification('Failed to load user data. Retrying...');
                 }
             });
-    }
+ }
 
-    checkForDepositUpdates();
-    updateInterval = setInterval(checkForDepositUpdates, 5000);
-}
+ checkForDepositUpdates();
+ updateInterval = setInterval(checkForDepositUpdates, 5000);
+*/
 
 function initLoginForm() {
     const loginForm = document.getElementById('login-form');
