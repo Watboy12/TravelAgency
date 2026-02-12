@@ -2286,56 +2286,56 @@ function initHotDestinations() {
     });
 }
 
-    // Function to show the booking modal using your existing modal structure
     function showBookingModal(dest, username, cost) {
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
         <div class="modal-content">
             <span class="modal-close">×</span>
             <div class="modal-inner">
                 <div class="modal-info">
-                    <h2 id="modal-title">Booking Details</h2>
-                    <p id="modal-description">
-                        <span class="highlight">Package:</span> ${dest.packageName}<br>
+                    <h2>Confirm Booking: ${dest.packageName}</h2>
+                    <p>
                         <span class="highlight">Destination:</span> ${dest.name}<br>
                         <span class="highlight">Cost:</span> $${cost.toLocaleString()}<br>
                         <span class="highlight">Vacation Date:</span> ${dest.date}<br>
                         <span class="highlight">Booking Deadline:</span> ${dest.deadline}<br>
-                        <span class="highlight">Bonus:</span> ${dest.bonus}
+                        <span class="highlight">Exclusive Bonus:</span> ${dest.bonus}
                     </p>
+                    <button class="btn learn-more-modal" style="margin: 20px auto; display: block;">View Full Package Details</button>
                 </div>
                 <div class="modal-action">
-                    <button class="btn confirm-btn" id="modal-action-btn">Confirm</button>
+                    <button class="btn confirm-btn" id="modal-action-btn">Confirm Booking</button>
                     <button class="btn cancel-btn">Cancel</button>
                 </div>
             </div>
         </div>
     `;
-        document.body.appendChild(modal);
+    document.body.appendChild(modal);
 
-        setTimeout(() => modal.classList.add('active'), 10);
+    // Close handlers
+    modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+    modal.querySelector('.cancel-btn').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 
-        const closeBtn = modal.querySelector('.modal-close');
-        const confirmBtn = modal.querySelector('.confirm-btn');
-        const cancelBtn = modal.querySelector('.cancel-btn');
+    // View Full Package Details button
+    modal.querySelector('.learn-more-modal').addEventListener('click', () => {
+        const destMatch = destinationsData.find(d => d.name === dest.name || (d.deluxePackage && d.deluxePackage.name === dest.packageName));
+        if (destMatch) {
+            modal.remove();
+            showDeluxePackage(destMatch);
+        } else {
+            showNotification('Full package details not available.');
+        }
+    });
 
-        closeBtn.addEventListener('click', () => modal.remove());
-        confirmBtn.addEventListener('click', async () => {
-            const success = await bookVacation(username, cost, dest.packageName);
-            if (success) {
-                // Show thank-you modal (same as regular destinations)
-                showThankYouModal({ deluxePackage: { name: dest.packageName } }); // fake object for name
-                modal.remove();
-                // Refresh dashboard data
-                loadUserData(username);
-            }
-        });
-        cancelBtn.addEventListener('click', () => modal.remove());
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
-        });
-    } 
+    // Confirm booking
+    modal.querySelector('#modal-action-btn').addEventListener('click', async () => {
+        const success = await bookVacation(username, cost, dest.packageName);
+        if (success) {
+            showThankYouModal({ deluxePackage: { name: dest.packageName } });
+            modal.remove();
+            loadUserData(username);
+        }
+    });
+}
