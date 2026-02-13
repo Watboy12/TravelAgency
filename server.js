@@ -436,19 +436,18 @@ app.post('/api/admin/login', async (req, res) => {
   return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
 });
 
-// Get All Users (Admin)
 app.get('/api/admin/users', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Unauthorized access' });
-  }
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 20;
-  const skip = (page - 1) * limit;
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false });
 
   try {
-    const users = await User.find().skip(skip).limit(limit).select('-password');
-    const total = await User.countDocuments();
-    res.json({ users, total, page, pages: Math.ceil(total / limit) });
+    const { data: users, error } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({ users: users || [], total: users?.length || 0 });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -560,31 +559,65 @@ app.post('/api/admin/clear-transactions/:username', verifyToken, async (req, res
   }
 });
 
-// Accept Vacation (Admin)
 app.post('/api/admin/accept-vacation/:username', verifyToken, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Unauthorized' });
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false });
+
   const { username } = req.params;
   const { vacationIndex } = req.body;
 
   try {
-    const user = await User.findOne({ username: username.toLowerCase() });
-    if (!user || !user.pendingVacations[vacationIndex]) {
-      return res.status(404).json({ success: false, message: 'Not found' });
-    }
-    const vacation = user.pendingVacations.splice(vacationIndex, 1)[0];
-    user.upcomingVacations.push(vacation);
-    user.usageHistory.push({
-      date: new Date().toISOString().split('T')[0],
-      action: `Approved ${vacation.name}`,
-      cost: vacation.cost
-    });
-    await user.save();
-    const userObj = user.toObject();
-    delete userObj.password;
-    res.json({ success: true, user: userObj });
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('pending_vacations, upcoming_vacations')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    const pending = profile.pending_vacations || [];
+    if (vacationIndex >= pending.length) return res.status(404).json({ success: false });
+
+    const vacation = pending.splice(vacationIndex, 1)[0];
+    const upcoming = profile.upcoming_vacations || [];
+    upcoming.push(vacation);
+
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update({ pending_vacations: pending, upcoming_vacations: upcoming })
+      .eq('username', username.toLowerCase().trim());
+
+    if (error) throw error;
+
+    res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false });
   }
+});
+
+// Route
+app.post('/api/admin/create-user', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ success: false });
+
+  const { email, password, username, name } = req.body;
+
+  // Create auth user
+  const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true
+  });
+
+  if (error) return res.status(500).json({ success: false, message: error.message });
+
+  // Create profile
+  await supabaseAdmin.from('profiles').insert({
+    id: data.user.id,
+    username,
+    full_name: name,
+    email,
+    balance: 0,
+    // other defaults
+  });
+
+  res.json({ success: true });
 });
 
 // Complete Vacation (Admin)
@@ -686,6 +719,45 @@ app.post('/api/admin/clear-past-vacations/:username', verifyToken, async (req, r
     delete userObj.password;
     res.json({ success: true, user: userObj });
   } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.post('/api/admin/send-notification/:username', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const { username } = req.params;
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ success: false, message: 'Message required' });
+  }
+
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('notifications')
+      .eq('username', username.toLowerCase().trim())
+      .single();
+
+    const current = profile?.notifications || [];
+    const newNotif = {
+      date: new Date().toISOString(),
+      message
+    };
+
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update({ notifications: [...current, newNotif] })
+      .eq('username', username.toLowerCase().trim());
+
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Send notification error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
