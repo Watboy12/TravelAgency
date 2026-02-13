@@ -128,7 +128,7 @@ function loadUserData(username) {
                         if (!vacation || typeof vacation !== 'object') return;
                         const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
                         const li = document.createElement('li');
-                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Requested: ${vacation.date || 'N/A'}) - Pending Approval`;
+                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - ${vacation.date || 'N/A'} at All Day)`;
                         pendingVacations.appendChild(li);
                     });
                     if (pendingList.length === 0) pendingVacations.innerHTML = '<li>No pending vacations yet.</li>';
@@ -141,7 +141,7 @@ function loadUserData(username) {
                     upcomingList.forEach(vacation => {
                         const li = document.createElement('li');
                         const cost = typeof vacation.cost === 'number' ? vacation.cost.toFixed(2) : 'N/A';
-                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - Scheduled: ${vacation.date || 'N/A'})`;
+                        li.textContent = `${vacation.name || 'Unknown'} ($${cost} - ${vacation.date || 'N/A'} at All Day)`;
                         upcomingVacations.appendChild(li);
                     });
                     if (upcomingList.length === 0) upcomingVacations.innerHTML = '<li>No upcoming vacations yet.</li>';
@@ -2281,38 +2281,49 @@ if (window.location.pathname.split('/').pop() === 'admin.html' && localStorage.g
             });
         });
 
-        const adminLoginForm = document.getElementById('admin-login-form');
-        if (adminLoginForm) {
-            adminLoginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const username = document.getElementById('admin-username').value.trim();
-                const password = document.getElementById('admin-password').value;
-                if (!username || !password) {
-                    showNotification('Please enter both username and password.');
-                    return;
-                }
-                fetch('/api/admin/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: document.getElementById('email').value || username, password })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            localStorage.setItem('adminToken', data.token);
-                            document.getElementById('admin-login').classList.add('hidden');
-                            document.getElementById('admin-panel').classList.remove('hidden');
-                            loadUsers();
-                        } else {
-                            showNotification('Admin login failed. Invalid credentials.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Admin login error:', error);
-                        showNotification('Admin login failed due to a server error.');
-                    });
-            });
+       const adminLoginForm = document.getElementById('admin-login-form');
+if (adminLoginForm) {
+    adminLoginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const usernameEl = document.getElementById('admin-username');
+        const passwordEl = document.getElementById('admin-password');
+        
+        if (!usernameEl || !passwordEl) {
+            showNotification('Login form error — please refresh page.');
+            return;
         }
+        
+        const username = usernameEl.value.trim();
+        const password = passwordEl.value;
+        
+        if (!username || !password) {
+            showNotification('Please enter both username and password.');
+            return;
+        }
+
+        fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })  // ← Fixed: use the correct username variable
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem('adminToken', data.token);
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadUsers();
+            } else {
+                showNotification('Admin login failed. Invalid credentials.');
+            }
+        })
+        .catch(error => {
+            console.error('Admin login error:', error);
+            showNotification('Admin login failed due to a server error.');
+        });
+    });
+}
 
         const adminLogoutBtn = document.getElementById('admin-logout-btn');
         if (adminLogoutBtn) {
