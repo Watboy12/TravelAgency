@@ -80,7 +80,6 @@ function loadUserData(username) {
                 return response.json();
             })
             .then(user => {
-                console.log('User data:', user);
 
                 // Safe access to all array fields
                 const pendingList = user.pendingVacations || user.pending_vacations || [];
@@ -244,6 +243,25 @@ if (notificationsList && user.notifications && Array.isArray(user.notifications)
         });
     }
 }
+
+// Update notification & upcoming counts + dropdown toggle
+const notifCount = document.getElementById('notification-count');
+const upcomingCount = document.getElementById('upcoming-count');
+if (notifCount) notifCount.textContent = user.notifications?.length || 0;
+if (upcomingCount) upcomingCount.textContent = upcomingList.length;
+
+// Click to toggle dropdown
+document.querySelectorAll('.icon-summary').forEach(summary => {
+    summary.addEventListener('click', (e) => {
+        e.stopPropagation();
+        summary.querySelector('.dropdown-content').classList.toggle('hidden');
+    });
+});
+
+// Close dropdowns when clicking elsewhere
+document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-content').forEach(d => d.classList.add('hidden'));
+});
 
                 // Deposit success modal & welcome
                 if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
@@ -2151,7 +2169,7 @@ if (window.location.pathname.split('/').pop() === 'admin.html' && localStorage.g
                 showNotification('Please log in to view your dashboard.');
                 window.location.href = 'login.html';
             }
-            loadCurrentDestinations();
+         
         }
 
         if (window.location.pathname.split('/').pop() === 'login.html') {
@@ -2468,3 +2486,72 @@ function showBookingModal(dest, username, cost) {
         }
     };
 }
+
+li.textContent = `${vacation.name || 'Unknown'} ($${cost} - ${vacation.date || 'N/A'} at All Day)`;
+
+function initGlobalSearch() {
+    const openBtn = document.getElementById('open-search-modal');
+    const modal = document.getElementById('search-modal');
+    const closeBtn = document.getElementById('close-search-modal');
+    const input = document.getElementById('global-search-input');
+    const resultsDiv = document.getElementById('search-results');
+
+    if (!openBtn || !modal) return;
+
+    openBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        input.focus();
+    });
+    closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+    input.addEventListener('input', () => {
+        const term = input.value.trim().toLowerCase();
+        resultsDiv.innerHTML = '';
+
+        if (!term) {
+            resultsDiv.innerHTML = '<p class="no-results">Start typing to search destinations...</p>';
+            return;
+        }
+
+        const matches = destinationsData.filter(dest => 
+            dest.name.toLowerCase().includes(term) || 
+            dest.description.toLowerCase().includes(term)
+        );
+
+        if (matches.length === 0) {
+            resultsDiv.innerHTML = `
+                <div class="no-results">
+                    <p>This destination is not covered by us yet.</p>
+                    <p>But don't worry — contact us and we can arrange a private trip just for you!</p>
+                    <a href="index.html#contact" class="btn btn-primary">Contact Us Now</a>
+                </div>
+            `;
+            return;
+        }
+
+        matches.forEach(dest => {
+            const card = document.createElement('div');
+            card.className = 'search-result-card';
+            card.innerHTML = `
+                <img src="${dest.image}" alt="${dest.name}" loading="lazy">
+                <h3>${dest.name}</h3>
+                <p>${dest.description.substring(0, 100)}……</p>
+                <button class="btn learn-more" data-index="${destinationsData.indexOf(dest)}">Learn More</button>
+            `;
+            resultsDiv.appendChild(card);
+        });
+
+        // Re-attach learn-more buttons
+        resultsDiv.querySelectorAll('.learn-more').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index);
+                showDeluxePackage(destinationsData[index]);
+                modal.classList.add('hidden');
+            });
+        });
+    });
+}
+
+// In DOMContentLoaded:
+initGlobalSearch();

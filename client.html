@@ -21,7 +21,31 @@
                 <span></span>
             </div>
         </div>
+        <div class="header-search">
+    <img src="https://www.clipartmax.com/png/middle/477-4779460_search-magnifier-tool-vector-transparent-background-magnifying-glass-icon.png" 
+         alt="Search" id="open-search-modal" class="search-icon">
+</div>
     </nav>
+
+    <div class="top-dashboard-icons">
+    <div class="icon-summary notifications-summary">
+        <img src="https://www.pngkey.com/png/detail/112-1120149_svg-png-transparent-background-notification-icon.png" alt="Notifications" class="dashboard-icon">
+        <span id="notification-count" class="badge">0</span>
+        <div class="dropdown-content hidden">
+            <h3>Notifications & Promos</h3>
+            <ul id="user-notifications"><li>No new notifications.</li></ul>
+        </div>
+    </div>
+
+    <div class="icon-summary upcoming-summary">
+        <img src="https://www.clipartmax.com/png/middle/253-2530688_airplane-take-off-comments-airplane-icon-png-free.png" alt="Upcoming Vacations" class="dashboard-icon">
+        <span id="upcoming-count" class="badge">0</span>
+        <div class="dropdown-content hidden">
+            <h3>Upcoming Vacations</h3>
+            <ul id="upcoming-vacations"><li>No upcoming vacations yet.</li></ul>
+        </div>
+    </div>
+</div>
 
     <section class="client-area">
         <h1 data-i18n="welcomeMessage">Welcome, <span id="user-name">User</span></h1>      
@@ -56,9 +80,9 @@
             <!-- Other collapsible cards here -->
         </div>
     </section>
-            <div class="dashboard-card collapsible" data-section="pending-vacations">
+            
                 <h2 class="collapsible-header">Pending Vacations</h2>
-                <ul id="pending-vacations" class="vacation-list collapsible-content"></ul>
+                
             </div>
             <div class="dashboard-card collapsible" data-section="notifications">
     <h2 class="collapsible-header">Notifications & Promos</h2>
@@ -99,6 +123,15 @@
             <button id="verification-modal-ok" class="btn btn-success">OK</button>
         </div>
     </div>
+
+    <div id="search-modal" class="modal hidden">
+    <div class="modal-content search-modal-content">
+        <span class="modal-close" id="close-search-modal">×</span>
+        <h2>Search Destinations</h2>
+        <input type="text" id="global-search-input" placeholder="Type destination name (e.g., Paris, Bali)...">
+        <div id="search-results" class="search-results-grid"></div>
+    </div>
+</div>
 
     <div id="destination-modal" class="modal hidden">
         <div class="modal-content">

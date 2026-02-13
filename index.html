@@ -23,7 +23,20 @@
                     <span></span>
                 </div>
             </div>
+            <div class="header-search">
+    <img src="https://www.clipartmax.com/png/middle/477-4779460_search-magnifier-tool-vector-transparent-background-magnifying-glass-icon.png" 
+         alt="Search" id="open-search-modal" class="search-icon">
+</div>
         </nav>   
+
+        <div id="search-modal" class="modal hidden">
+    <div class="modal-content search-modal-content">
+        <span class="modal-close" id="close-search-modal">×</span>
+        <h2>Search Destinations</h2>
+        <input type="text" id="global-search-input" placeholder="Type destination name (e.g., Paris, Bali)...">
+        <div id="search-results" class="search-results-grid"></div>
+    </div>
+</div>
 
         <section class="hero parallax">
             <video autoplay muted loop class="hero-video">
