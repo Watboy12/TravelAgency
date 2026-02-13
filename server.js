@@ -423,22 +423,17 @@ updates.transactions = [...(profile.transactions || []), newBookingTx];
 
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body;
-  try {
-    const user = await User.findOne({ username: username.toLowerCase(), role: 'admin' });
-    if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
-      const token = jwt.sign({ username: user.username, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
-      res.json({ success: true, token });
-    } else {
-      res.json({ success: false, message: 'Invalid admin credentials' });
-    }
-  } catch (err) {
-    console.error('Error during admin login:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+
+  // Hardcoded admin credentials (CHANGE THESE!)
+  const ADMIN_USERNAME = 'admin';
+  const ADMIN_PASSWORD = 'exploreworld2026';  // ← your new password
+
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    const token = jwt.sign({ username: 'admin', role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
+    return res.json({ success: true, token });
   }
+
+  return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
 });
 
 // Get All Users (Admin)

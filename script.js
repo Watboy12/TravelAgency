@@ -2341,7 +2341,7 @@ function initHotDestinations() {
     if (!slideshow) return;
 
     const hotDestinations = [
-        { name: "Oslo, Norway", packageName: "Nordic Fjord Expedition", image: "images/oslo.jpg", booked: 120, date: "2025-08-15", deadline: "2025-07-10", bonus: "10% off for couples", cost: 28999 },
+        { name: "Oslo, Norway", packageMame: "Nordic Fjord Expedition", image: "images/oslo.jpg", booked: 120, date: "2025-08-15", deadline: "2025-07-10", bonus: "10% off for couples", cost: 28999 },
         { name: "Athens, Greece", packageName: "Hellenic Isles Odyssey", image: "images/athens.jpg", booked: 85, date: "2024-01-20", deadline: "2023-12-20", bonus: "Free upgrade to deluxe package", cost: 27999 },
         { name: "Kyoto, Japan", packageName: "Japanese Zen Journey", image: "images/kyoto.jpg", booked: 200, date: "2024-03-10", deadline: "2024-02-10", bonus: "Complimentary spa day", cost: 27999 },
         { name: "Beijing, China", packageName: "Silk Road & Sea Adventure", image: "images/beijing.jpg", booked: 150, date: "2025-07-05", deadline: "2024-03-05", bonus: "Exclusive cultural tour", cost: 22999 }

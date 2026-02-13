@@ -761,6 +761,7 @@ nav {
 
 /* Client Area */
 .client-area {
+    padding-top: 20px;
     padding: 80px 20px 60px;
     min-height: 100vh;
     background: linear-gradient(rgba(13, 27, 42, 0.8), rgba(13, 27, 42, 0.8)), 
@@ -2809,7 +2810,7 @@ nav {
 .no-results { text-align: center; font-size: 18px; color: #666; padding: 40px; }
 
 
-.top-dashboard-icons { display: flex; justify-content: space-between; margin: 20px 0; }
+.top-dashboard-icons { display: flex; justify-content: space-between; padding: 0 20px; margin-bottom: 40px; margin: 20px 0; }
 .icon-summary { position: relative; cursor: pointer; text-align: center; }
 .dashboard-icon { width: 60px; height: 60px; }
 .badge { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 5px 8px; font-size: 12px; }
