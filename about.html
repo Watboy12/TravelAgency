@@ -1,43 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
-    <title>About Us - ExploreWorld</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — ExploreWorld</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles-enhanced.css">
 </head>
 <body>
-        <nav>
-            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
-            <div class="nav-container">
-                <ul class="nav-links"></ul>
-                <div class="hamburger" aria-label="Toggle navigation">                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </nav>
 
-    <section class="about">
-        <div class="container">
-            <h1>About Us</h1>
-            <img src="images/about-image.jpg" alt="About ExploreWorld" class="about-image">
-            <div class="about-writeup">
-                <p>At ExploreWorld, we’re passionate about travel. Our mission is to help you discover amazing destinations and create memories that last a lifetime. Whether it’s a relaxing beach trip or an exciting city adventure, we’ve got you covered.</p>
-                <p>Our team is dedicated to making your travel experience seamless and enjoyable. Let us take you on a journey around the world!</p>
-            </div>
-        </div>
-    </section>
+<div id="page-loader">
+  <div class="loader-logo">ExploreWorld</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <p>© 2020 ExploreWorld Travel Agency. All rights reserved.</p>
+<nav id="main-nav">
+  <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld" class="header-logo"></a></div>
+  <div class="nav-container">
+    <ul class="nav-links"></ul>
+    <div class="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<section class="about">
+  <div class="container">
+    <span style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);display:block;text-align:center;margin-bottom:16px;">Our Story</span>
+    <h1>About ExploreWorld</h1>
+
+    <img src="images/about-image.jpg" alt="About ExploreWorld" class="about-image" onerror="this.style.background='linear-gradient(135deg,var(--deep),var(--panel))';this.style.height='380px'">
+
+    <div class="about-writeup">
+      <p>At ExploreWorld, we believe travel is the single greatest investment you can make in yourself. With over 20 years of industry expertise, we've curated thousands of journeys for travelers who demand the extraordinary — not just a destination, but an experience that reshapes how they see the world.</p>
+      <p>Our team of passionate travel architects works tirelessly to craft bespoke itineraries that match your vision. From hidden beach retreats to exclusive mountain lodges, from vibrant city adventures to tranquil island escapes — we handle every detail so you can be fully present for every moment.</p>
+      <p>We are more than a travel agency. We are your partner in discovery, your guide through the unfamiliar, and your advocate when things don't go as planned. Trust, transparency, and transformative travel — that's the ExploreWorld promise.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;text-align:center;">
+        <div style="padding:28px;background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--gold);line-height:1;">20+</div>
+          <div style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;">Years Experience</div>
         </div>
-    </footer>
-    
-    <script src="script.js"></script>
+        <div style="padding:28px;background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--gold);line-height:1;">12k+</div>
+          <div style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;">Happy Travelers</div>
+        </div>
+        <div style="padding:28px;background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--gold);line-height:1;">80+</div>
+          <div style="font-size:0.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:8px;">Destinations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div class="contact-info">
+      <p>Executive Services</p>
+      <p>ExploreWorld, Inc</p>
+      <p>+1 (718) 635-2839</p>
+      <p>info@exploreworld.com</p>
+      <p>800 Connecticut Ave, Norwalk, CT 06854</p>
+    </div>
+    <div class="social-icons">
+      <a href="https://facebook.com/exploreworld" target="_blank"><img src="images/default-facebook.png" alt="Facebook"></a>
+      <a href="https://instagram.com/exploreworld" target="_blank"><img src="images/default-instagram.png" alt="Instagram"></a>
+    </div>
+    <div class="newsletter">
+      <input type="email" placeholder="Your email address">
+      <button class="btn btn-primary">Subscribe</button>
+    </div>
+    <div class="footer-links">
+      <div class="footer-row">
+        <a href="partners.html" class="footer-btn">Partners</a>
+        <a href="terms.html" class="footer-btn">Terms</a>
+        <a href="privacy-policy.html" class="footer-btn">Privacy</a>
+        <a href="about.html" class="footer-btn">About</a>
+        <a href="blog.html" class="footer-btn">Blog</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div id="notifications"></div>
+<script>
+  window.addEventListener('load', () => { setTimeout(() => document.getElementById('page-loader')?.classList.add('hidden'), 1800); });
+  window.addEventListener('scroll', () => { document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40); });
+</script>
+<script src="script.js"></script>
 </body>
 </html>

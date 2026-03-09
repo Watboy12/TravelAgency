@@ -1,71 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Travel tips and stories from ExploreWorld">
-    <title>Blog - ExploreWorld</title>
-    <link rel="icon" href="images/favicon.ico">
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Blog — ExploreWorld</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles-enhanced.css">
 </head>
 <body>
- 
-        <nav>
-            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
-            <div class="nav-container">
-                <ul class="nav-links"></ul>
-                <div class="hamburger" aria-label="Toggle navigation">                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </nav>
-    
-    <section class="blog-page">
-        <h1>Travel Tips & Stories</h1>
-        <article id="tokyo">
-            <h2>Top 10 Hidden Gems in Tokyo</h2>
-            <p>Explore secret spots in Tokyo, from quiet shrines to cozy cafes...</p>
-            <a href="#" class="btn">Read More</a>
-        </article>
-        <article id="bali">
-            <h2>Bali on a Budget</h2>
-            <p>Tips for an affordable tropical getaway, including cheap eats and stays...</p>
-            <a href="#" class="btn">Read More</a>
-        </article>
-    </section>
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="contact-info">
-                <p>Executive Services</p>
-                <p>ExploreWorld, Inc</p>
-                <p>Phone: +1 (555) 123-4567</p>
-                <p>Email: info@exploreworld.com</p>
-                <p>800 Connecticut Avenue, Norwalk, CT 06854</p>
-            </div>
-            <div class="social-icons">
-                <a href="https://facebook.com/exploreworld" target="_blank"><img src="images/default-facebook.png" alt="Facebook" loading="lazy"></a>
-                <a href="https://instagram.com/exploreworld" target="_blank"><img src="images/default-instagram.png" alt="Instagram" loading="lazy"></a>
-            </div>
-            <div class="newsletter">
-                <input type="email" placeholder="Your Email">
-                <button class="btn btn-primary">Subscribe</button>
-            </div>
-            <div class="footer-links">
-                <div class="footer-row">
-                    <a href="partners.html" class="footer-btn">Partners</a>
-                    <a href="terms.html" class="footer-btn">Terms and Conditions</a>
-                    <a href="about.html" class="footer-btn">About Us</a>
-                    <a href="/privacy-policy.html" class="footer-btn">Privacy Policy</a>
-                    <a href="blog.html" class="footer-btn">Blog</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <div class="chat-widget">
-        <a href="#contact">Need Help? Chat with Us</a>
+
+<div id="page-loader">
+  <div class="loader-logo">ExploreWorld</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<nav id="main-nav">
+  <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld" class="header-logo"></a></div>
+  <div class="nav-container">
+    <ul class="nav-links"></ul>
+    <div class="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<section class="blog-page">
+  <span style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:16px;">Stories & Inspiration</span>
+  <h1>Travel Tips &amp; Stories</h1>
+
+  <article id="tokyo">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+      <span style="background:var(--teal-dim);border:1px solid rgba(0,229,204,0.2);border-radius:100px;padding:4px 12px;font-size:0.72rem;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;">Asia</span>
+      <span style="font-size:0.78rem;color:var(--muted);">5 min read</span>
     </div>
-    <script src="script.js"></script>
+    <h2>Top 10 Hidden Gems in Tokyo</h2>
+    <p>Beyond the neon-lit boulevards and famous shrines, Tokyo holds a quieter soul — one found in century-old kissaten coffee shops, unmarked ramen counters that only seat eight, and temple gardens that see almost no tourists. Our Tokyo specialist reveals the spots only locals know.</p>
+    <a href="#" class="btn btn-ghost" style="margin-top:8px;">Read More →</a>
+  </article>
+
+  <article id="bali">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+      <span style="background:var(--gold-glow);border:1px solid rgba(201,168,76,0.25);border-radius:100px;padding:4px 12px;font-size:0.72rem;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;">Southeast Asia</span>
+      <span style="font-size:0.78rem;color:var(--muted);">7 min read</span>
+    </div>
+    <h2>Bali on a Budget</h2>
+    <p>Bali's reputation as an expensive playground is a myth waiting to be busted. From $8 warung meals that will make you weep with joy, to $30-a-night family guesthouses with rice paddy views, we break down exactly how to experience Bali's magic without breaking the bank.</p>
+    <a href="#" class="btn btn-ghost" style="margin-top:8px;">Read More →</a>
+  </article>
+
+  <article>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+      <span style="background:var(--rose-dim);border:1px solid rgba(255,61,107,0.2);border-radius:100px;padding:4px 12px;font-size:0.72rem;color:#ff8fa8;letter-spacing:0.1em;text-transform:uppercase;">Europe</span>
+      <span style="font-size:0.78rem;color:var(--muted);">4 min read</span>
+    </div>
+    <h2>The Perfect 10 Days in Paris</h2>
+    <p>Paris is not a city you visit once and feel you've conquered. It's a city you return to, each time finding a new corner, a new café, a new way to fall in love with it. Here's our definitive 10-day itinerary, balancing the iconic with the intimate.</p>
+    <a href="#" class="btn btn-ghost" style="margin-top:8px;">Read More →</a>
+  </article>
+
+  <article>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+      <span style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:100px;padding:4px 12px;font-size:0.72rem;color:#4ade80;letter-spacing:0.1em;text-transform:uppercase;">Africa</span>
+      <span style="font-size:0.78rem;color:var(--muted);">6 min read</span>
+    </div>
+    <h2>Cape Town: Where Mountains Meet the Sea</h2>
+    <p>Few cities on Earth can match Cape Town's dramatic geography. With Table Mountain as a backdrop, pristine beaches at its feet, and the Cape Winelands just an hour away, this city offers a lifetime of discovery. Here's how to experience its best.</p>
+    <a href="#" class="btn btn-ghost" style="margin-top:8px;">Read More →</a>
+  </article>
+</section>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div class="contact-info">
+      <p>Executive Services</p>
+      <p>ExploreWorld, Inc</p>
+      <p>+1 (718) 635-2839</p>
+      <p>info@exploreworld.com</p>
+      <p>800 Connecticut Ave, Norwalk, CT 06854</p>
+    </div>
+    <div class="social-icons">
+      <a href="https://facebook.com/exploreworld" target="_blank"><img src="images/default-facebook.png" alt="Facebook"></a>
+      <a href="https://instagram.com/exploreworld" target="_blank"><img src="images/default-instagram.png" alt="Instagram"></a>
+    </div>
+    <div class="newsletter">
+      <input type="email" placeholder="Your email address">
+      <button class="btn btn-primary">Subscribe</button>
+    </div>
+    <div class="footer-links">
+      <div class="footer-row">
+        <a href="partners.html" class="footer-btn">Partners</a>
+        <a href="terms.html" class="footer-btn">Terms</a>
+        <a href="about.html" class="footer-btn">About</a>
+        <a href="privacy-policy.html" class="footer-btn">Privacy</a>
+        <a href="blog.html" class="footer-btn">Blog</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="chat-widget"><a href="index.html#contact">Need Help? Chat →</a></div>
+<div id="notifications"></div>
+<script>
+  window.addEventListener('load', () => { setTimeout(() => document.getElementById('page-loader')?.classList.add('hidden'), 1800); });
+  window.addEventListener('scroll', () => { document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40); });
+</script>
+<script src="script.js"></script>
 </body>
 </html>

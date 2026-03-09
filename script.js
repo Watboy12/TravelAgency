@@ -244,24 +244,25 @@ if (notificationsList && user.notifications && Array.isArray(user.notifications)
     }
 }
 
-// Update notification & upcoming counts + dropdown toggle
+// Notification & Upcoming icon dropdowns (runs once)
+document.querySelectorAll('.icon-summary').forEach(summary => {
+    summary.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dropdown = summary.querySelector('.dropdown-content');
+        if (dropdown) dropdown.classList.toggle('hidden');
+    });
+});
+
+// Close all dropdowns when clicking anywhere else
+document.addEventListener('click', () => {
+    document.querySelectorAll('.dropdown-content').forEach(d => d.classList.add('hidden'));
+});
+
+// Update counts when user data loads (keep inside loadUserData)
 const notifCount = document.getElementById('notification-count');
 const upcomingCount = document.getElementById('upcoming-count');
 if (notifCount) notifCount.textContent = user.notifications?.length || 0;
 if (upcomingCount) upcomingCount.textContent = upcomingList.length;
-
-// Click to toggle dropdown
-document.querySelectorAll('.icon-summary').forEach(summary => {
-    summary.addEventListener('click', (e) => {
-        e.stopPropagation();
-        summary.querySelector('.dropdown-content').classList.toggle('hidden');
-    });
-});
-
-// Close dropdowns when clicking elsewhere
-document.addEventListener('click', () => {
-    document.querySelectorAll('.dropdown-content').forEach(d => d.classList.add('hidden'));
-});
 
                 // Deposit success modal & welcome
                 if (user.lastDepositAccepted && user.lastDepositAccepted.timestamp !== lastDepositTimestamp) {
@@ -2161,6 +2162,7 @@ if (window.location.pathname.split('/').pop() === 'admin.html' && localStorage.g
         initTravelQuiz();
         loadDestinations();
         initHotDestinations();
+        initGlobalSearch();
         if (window.location.pathname.split('/').pop() === 'client.html') {
             const username = localStorage.getItem('username');
             if (username) {
@@ -2341,10 +2343,10 @@ function initHotDestinations() {
     if (!slideshow) return;
 
     const hotDestinations = [
-        { name: "Oslo, Norway", packageMame: "Nordic Fjord Expedition", image: "images/oslo.jpg", booked: 120, date: "2025-08-15", deadline: "2025-07-10", bonus: "10% off for couples", cost: 28999 },
-        { name: "Athens, Greece", packageName: "Hellenic Isles Odyssey", image: "images/athens.jpg", booked: 85, date: "2024-01-20", deadline: "2023-12-20", bonus: "Free upgrade to deluxe package", cost: 27999 },
-        { name: "Kyoto, Japan", packageName: "Japanese Zen Journey", image: "images/kyoto.jpg", booked: 200, date: "2024-03-10", deadline: "2024-02-10", bonus: "Complimentary spa day", cost: 27999 },
-        { name: "Beijing, China", packageName: "Silk Road & Sea Adventure", image: "images/beijing.jpg", booked: 150, date: "2025-07-05", deadline: "2024-03-05", bonus: "Exclusive cultural tour", cost: 22999 }
+        { name: "Oslo, Norway", package_name: "Nordic Fjord Expedition", image: "images/oslo.jpg", booked: 120, date: "2025-08-15", deadline: "2025-07-10", bonus: "10% off for couples", cost: 28999 },
+        { name: "Athens, Greece", package_name: "Hellenic Isles Odyssey", image: "images/athens.jpg", booked: 85, date: "2024-01-20", deadline: "2023-12-20", bonus: "Free upgrade to deluxe package", cost: 27999 },
+        { name: "Kyoto, Japan", package_name: "Japanese Zen Journey", image: "images/kyoto.jpg", booked: 200, date: "2024-03-10", deadline: "2024-02-10", bonus: "Complimentary spa day", cost: 27999 },
+        { name: "Beijing, China", package_name: "Silk Road & Sea Adventure", image: "images/beijing.jpg", booked: 150, date: "2025-07-05", deadline: "2024-03-05", bonus: "Exclusive cultural tour", cost: 22999 }
     ];
 
     slideshow.innerHTML = `
@@ -2499,6 +2501,8 @@ function showBookingModal(dest, username, cost) {
 }
 
 li.textContent = `${vacation.name || 'Unknown'} ($${cost} - ${vacation.date || 'N/A'} at All Day)`;
+
+console.log('Global search initialized, destinations loaded:', destinationsData.length);
 
 function initGlobalSearch() {
     const openBtn = document.getElementById('open-search-modal');

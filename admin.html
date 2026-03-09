@@ -1,69 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
-    <title>Admin - ExploreWorld</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self';">
+  <title>Admin — ExploreWorld</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles-enhanced.css">
 </head>
 <body>
-    <nav>
-        <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
-        <div class="nav-container">
-            <ul class="nav-links"></ul>
-            <div class="hamburger" aria-label="Toggle navigation">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </nav>
 
-    <section id="admin-login" class="admin-login">
-        <h1>Admin Login</h1>
-        <form id="admin-login-form" class="login-form">
-            <input type="text" id="admin-username" name="username" placeholder="Username" required autocomplete="username">
-            <input type="password" id="admin-password" name="password" placeholder="Password" required autocomplete="current-password">
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-    </section>
+<nav id="main-nav">
+  <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld" class="header-logo"></a></div>
+  <div class="nav-container">
+    <ul class="nav-links"></ul>
+    <div class="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></div>
+  </div>
+</nav>
 
-    <section id="admin-panel" class="admin-panel hidden">
-        <h1>Admin Panel</h1>
-        <button id="admin-logout" class="btn btn-danger">Logout</button>
-        <div id="user-list" class="user-list"></div>
+<section id="admin-login" class="admin-login">
+  <span style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);display:block;text-align:center;margin-bottom:20px;">Secure Access</span>
+  <h1>Admin Portal</h1>
+  <form id="admin-login-form" class="login-form">
+    <input type="text" id="admin-username" name="username" placeholder="Admin username" required autocomplete="username">
+    <input type="password" id="admin-password" name="password" placeholder="Password" required autocomplete="current-password">
+    <button type="submit" class="btn btn-primary">Access Dashboard</button>
+  </form>
+</section>
 
-        <div class="btc-address-management">
-            <h2>Manage BTC Wallet Address</h2>
-            <form id="btc-address-form">
-                <input type="text" id="btc-address" name="btcAddress" placeholder="Enter BTC Wallet Address" required>
-                <button type="submit" class="btn btn-primary">Update BTC Address</button>
-            </form>
-        </div>
-        
-        <div class="social-media-management">
-            <h2>Manage Social Media Links</h2>
-            <form id="social-media-form" enctype="multipart/form-data">
-             
-                <div class="social-input">
-                    <label for="facebook-logo">Facebook Logo:</label>
-                    <input type="file" id="facebook-logo" name="facebookLogo" accept="image/*">
-                    <input type="url" name="facebookUrl" placeholder="Facebook URL">
-                </div>
-                <div class="social-input">
-                    <label for="instagram-logo">Instagram Logo:</label>
-                    <input type="file" id="instagram-logo" name="instagramLogo" accept="image/*">
-                    <input type="url" name="instagramUrl" placeholder="Instagram URL">
-                </div>
-                <button type="submit" class="btn btn-primary">Update Social Media</button>
-            </form>
-        </div>
-    </section>
+<section id="admin-panel" class="admin-panel hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto 32px;">
+    <h1 style="margin-bottom:0;">Admin Dashboard</h1>
+    <button id="admin-logout-btn" class="btn btn-danger" style="min-width:auto;">Logout</button>
+  </div>
 
-    <div id="notifications"></div>
-    <script src="script.js?v=20251219"></script>
+  <!-- Quick stats bar -->
+  <div style="max-width:1100px;margin:0 auto 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--gold);" id="stat-users">—</div>
+      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Total Users</div>
+    </div>
+    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--teal);" id="stat-pending-dep">—</div>
+      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Pending Deposits</div>
+    </div>
+    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:#4ade80;" id="stat-upcoming">—</div>
+      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Upcoming Trips</div>
+    </div>
+    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--rose);" id="stat-pending-vac">—</div>
+      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Pending Bookings</div>
+    </div>
+  </div>
+
+  <div id="user-list" class="user-list"></div>
+
+  <div class="btc-address-management" style="margin-top:40px;">
+    <h2>Bitcoin Wallet Address</h2>
+    <form id="btc-address-form">
+      <input type="text" id="btc-address" name="btcAddress" placeholder="bc1q... (new BTC wallet address)" required>
+      <button type="submit" class="btn btn-primary" style="margin-top:8px;">Update BTC Address</button>
+    </form>
+  </div>
+
+  <div class="social-media-management">
+    <h2>Social Media Links</h2>
+    <form id="social-media-form" enctype="multipart/form-data">
+      <div class="social-input">
+        <label for="facebook-logo">Facebook</label>
+        <input type="file" id="facebook-logo" name="facebookLogo" accept="image/*">
+        <input type="url" name="facebookUrl" placeholder="https://facebook.com/yourpage">
+      </div>
+      <div class="social-input">
+        <label for="instagram-logo">Instagram</label>
+        <input type="file" id="instagram-logo" name="instagramLogo" accept="image/*">
+        <input type="url" name="instagramUrl" placeholder="https://instagram.com/yourhandle">
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:8px;">Update Social Media</button>
+    </form>
+  </div>
+</section>
+
+<div id="notifications"></div>
+<script>
+  window.addEventListener('scroll', () => { document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40); });
+  
+  // After users load, update stats
+  const origLoadUsers = window.loadUsers;
+  function updateStats(users) {
+    if (!users) return;
+    document.getElementById('stat-users').textContent = users.length;
+    document.getElementById('stat-pending-dep').textContent = users.reduce((s,u) => s + (u.pending_deposits?.length||0), 0);
+    document.getElementById('stat-upcoming').textContent = users.reduce((s,u) => s + (u.upcomingVacations?.length||0), 0);
+    document.getElementById('stat-pending-vac').textContent = users.reduce((s,u) => s + (u.pendingVacations?.length||0), 0);
+  }
+  document.addEventListener('usersLoaded', e => updateStats(e.detail));
+</script>
+<script src="script.js?v=20251219"></script>
 </body>
 </html>

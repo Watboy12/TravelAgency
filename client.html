@@ -1,156 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
-    <title>Client Area - ExploreWorld</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://www.google.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org https://www.clipartmax.com https://www.pngkey.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
+  <title>My Dashboard — ExploreWorld</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles-enhanced.css">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body class="dashboard">
-    <nav>
-        <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
-        <div class="nav-container">
-            <ul class="nav-links"></ul>
-            <div class="hamburger" aria-label="Toggle navigation">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-        <div class="header-search">
-    <img src="https://www.clipartmax.com/png/middle/477-4779460_search-magnifier-tool-vector-transparent-background-magnifying-glass-icon.png" 
+
+<nav id="main-nav">
+  <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld" class="header-logo"></a></div>
+  <div class="nav-container">
+    <ul class="nav-links"></ul>
+    <div class="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></div>
+  </div>
+  <div class="header-search">
+    <img src="https://www.clipartmax.com/png/middle/477-4779460_search-magnifier-tool-vector-transparent-background-magnifying-glass-icon.png"
          alt="Search" id="open-search-modal" class="search-icon">
-</div>
-    </nav>
+  </div>
+</nav>
 
-    <div class="top-dashboard-icons">
-    <div class="icon-summary notifications-summary">
-        <img src="https://www.pngkey.com/png/detail/112-1120149_svg-png-transparent-background-notification-icon.png" alt="Notifications" class="dashboard-icon">
-        <span id="notification-count" class="badge">0</span>
-        <div class="dropdown-content hidden">
-            <h3>Notifications & Promos</h3>
-            <ul id="user-notifications"><li>No new notifications.</li></ul>
+<!-- Icon bar -->
+<div class="top-dashboard-icons" style="display:flex;padding-top:calc(var(--nav-h) + 20px);">
+  <div class="icon-summary notifications-summary">
+    <img src="https://www.pngkey.com/png/detail/112-1120149_svg-png-transparent-background-notification-icon.png" alt="Notifications" class="dashboard-icon">
+    <span id="notification-count" class="badge">0</span>
+    <div class="dropdown-content hidden">
+      <h3>Notifications</h3>
+      <ul id="user-notifications"><li style="font-size:0.84rem;color:var(--muted);">No new notifications.</li></ul>
+    </div>
+  </div>
+  <div class="icon-summary upcoming-summary">
+    <img src="https://www.clipartmax.com/png/middle/253-2530688_airplane-take-off-comments-airplane-icon-png-free.png" alt="Upcoming Vacations" class="dashboard-icon">
+    <span id="upcoming-count" class="badge">0</span>
+    <div class="dropdown-content hidden">
+      <h3>Upcoming Trips</h3>
+      <ul id="upcoming-vacations-dropdown"><li style="font-size:0.84rem;color:var(--muted);">No upcoming vacations yet.</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- Main dashboard -->
+<section class="client-area" style="padding-top:24px;">
+  <span style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:8px;">Client Area</span>
+  <h1>Welcome, <span id="user-name">Traveler</span></h1>
+
+  <div class="profile-section">
+    <p><strong>Email:</strong> <span id="user-email">—</span></p>
+    <p><strong>Phone:</strong> <span id="user-phone">—</span></p>
+    <p><strong>Address:</strong> <span id="user-address">—</span></p>
+    <p><strong>Verified:</strong> <span id="user-verified">—</span></p>
+    <p><strong>Member Since:</strong> <span id="member-since">—</span></p>
+    <p><strong>Total Spent:</strong> $<span id="total-spent">0.00</span></p>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="account-balance-container">
+    <div class="account-balance-card">
+      <div class="balance-header">
+        <h2>Account Balance</h2>
+        <a href="deposit.html" class="btn btn-primary" style="min-width:auto;padding:10px 20px;font-size:0.78rem;">+ Deposit Funds</a>
+      </div>
+      <div class="balance-details">
+        <div class="balance-main">
+          <span class="balance-label">$</span>
+          <span id="user-balance" class="balance-amount">0.00</span>
         </div>
+        <div class="balance-sub">
+          <p><span class="sub-label">Bonus</span>$<span id="user-bonus">0.00</span></p>
+          <p><span class="sub-label">Total Deposits</span>$<span id="user-deposits">0.00</span></p>
+          <p><span class="sub-label">Pending</span>$<span id="pending-deposits">0.00</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard cards -->
+  <div class="dashboard-grid" style="max-width:1200px;margin:0 auto;">
+    <div class="dashboard-card collapsible open" data-section="pending-vacations">
+      <h2 class="collapsible-header">Pending Bookings</h2>
+      <ul id="pending-vacations" class="vacation-list collapsible-content"></ul>
     </div>
 
-    <div class="icon-summary upcoming-summary">
-        <img src="https://www.clipartmax.com/png/middle/253-2530688_airplane-take-off-comments-airplane-icon-png-free.png" alt="Upcoming Vacations" class="dashboard-icon">
-        <span id="upcoming-count" class="badge">0</span>
-        <div class="dropdown-content hidden">
-            <h3>Upcoming Vacations</h3>
-            <ul id="upcoming-vacations"><li>No upcoming vacations yet.</li></ul>
-        </div>
-    </div>
-</div>
-
-    <section class="client-area">
-        <h1 data-i18n="welcomeMessage">Welcome, <span id="user-name">User</span></h1>      
-       <div class="profile-section">
-    <p><strong>Email:</strong> <span id="user-email">Not set</span></p>
-    <p><strong>Phone:</strong> <span id="user-phone">Not set</span></p>
-    <p><strong>Address:</strong> <span id="user-address">Not set</span></p>
-    <p><strong>Verified:</strong> <span id="user-verified">Not set</span></p>
-    <p><strong>Member Since:</strong> <span id="member-since">Not set</span></p>
-    <p><strong>Total Spent on Vacations:</strong> $<span id="total-spent">0.00</span></p>
-</div>
-        <div class="account-balance-container">
-            <div class="account-balance-card">
-                <div class="balance-header">
-                    <h2 data-i18n="accountBalance">
-                    <a href="deposit.html" class="btn btn-primary">Deposit Funds</a>
-                </div>
-                <div class="balance-details">
-                    <div class="balance-main">
-                        <span class="balance-label">Available Balance:</span>
-                        <span id="user-balance" class="balance-amount">$0.00</span>
-                    </div>
-                    <div class="balance-sub">
-                        <p><span class="sub-label">Bonus:</span> $<span id="user-bonus">0.00</span></p>
-                        <p><span class="sub-label">Total Deposits:</span> $<span id="user-deposits">0.00</span></p>
-                        <p><span class="sub-label">Pending Deposits:</span> $<span id="pending-deposits">0.00</span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="dashboard-grid">
-            <!-- Other collapsible cards here -->
-        </div>
-    </section>
-            
-              <div class="dashboard-card collapsible" data-section="pending-vacations">
-    <h2 class="collapsible-header">Pending Vacations</h2>
-    <ul id="pending-vacations" class="vacation-list collapsible-content"></ul>
-</div>
-            <div class="dashboard-card collapsible" data-section="notifications">
-    <h2 class="collapsible-header">Notifications & Promos</h2>
-    <ul id="user-notifications" class="vacation-list collapsible-content">
+    <div class="dashboard-card collapsible" data-section="notifications">
+      <h2 class="collapsible-header">Notifications & Promos</h2>
+      <ul id="user-notifications" class="vacation-list collapsible-content">
         <li>No new notifications.</li>
-    </ul>
-</div>
-            <div class="dashboard-card collapsible" data-section="upcoming-vacations">
-                <h2 class="collapsible-header">Upcoming Vacations</h2>
-                <ul id="upcoming-vacations" class="vacation-list collapsible-content"></ul>
-            </div>
-            <div class="dashboard-card collapsible" data-section="transaction-history">
-                <h2 class="collapsible-header">Transaction History</h2>
-                <ul id="transaction-history" class="vacation-list collapsible-content"></ul>
-            </div>
-        </div>
-    </section>
-
-    <section id="hot-destinations" class="hot-destinations">
-        <h2>Hot Destinations</h2>
-        <p class="hot-destinations-subtitle">Exclusive Travel Packages Currently in High Demand</p>
-        <div class="hot-destinations-slideshow"></div>
-    </section>
-
-    <section class="past-vacations collapsible" data-section="past-vacations">
-        <div class="past-vacations-header collapsible-header">
-            <h2>Relive Your Epic Journeys</h2>
-            <button id="rate-trip-btn" class="btn btn-primary">Rate Your Trip</button>
-        </div>
-        <div class="destination-grid collapsible-content" id="past-vacations-grid"></div>
-    </section>
-
-    <div id="verification-modal" class="deposit-success-modal hidden">
-        <div class="modal-content">
-            <span id="verification-modal-close" class="modal-close">×</span>
-            <h2>Verification Status</h2>
-            <p id="verification-message"></p>
-            <button id="verification-modal-ok" class="btn btn-success">OK</button>
-        </div>
+      </ul>
     </div>
 
-    <div id="search-modal" class="modal hidden">
-    <div class="modal-content search-modal-content">
-        <span class="modal-close" id="close-search-modal">×</span>
-        <h2>Search Destinations</h2>
-        <input type="text" id="global-search-input" placeholder="Type destination name (e.g., Paris, Bali)...">
-        <div id="search-results" class="search-results-grid"></div>
+    <div class="dashboard-card collapsible" data-section="upcoming-vacations">
+      <h2 class="collapsible-header">Upcoming Vacations</h2>
+      <ul id="upcoming-vacations" class="vacation-list collapsible-content"></ul>
     </div>
+
+    <div class="dashboard-card collapsible" data-section="transaction-history">
+      <h2 class="collapsible-header">Transaction History</h2>
+      <ul id="transaction-history" class="vacation-list collapsible-content"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- Hot destinations on dashboard -->
+<section id="hot-destinations" class="hot-destinations" style="margin-top:40px;">
+  <div class="hot-destinations-label">Exclusive Offers</div>
+  <h2>Hot Destinations</h2>
+  <p class="hot-destinations-subtitle">Exclusive Travel Packages Currently in High Demand</p>
+  <div class="hot-destinations-slideshow"></div>
+</section>
+
+<!-- Past Vacations -->
+<section class="past-vacations collapsible" data-section="past-vacations" style="padding:60px 32px;">
+  <div class="past-vacations-header collapsible-header">
+    <h2>Relive Your Epic Journeys</h2>
+    <button id="rate-trip-btn" class="btn btn-ghost" style="min-width:auto;">Rate a Trip</button>
+  </div>
+  <div class="destination-grid collapsible-content" id="past-vacations-grid" style="margin-top:24px;"></div>
+</section>
+
+<!-- Verification Modal -->
+<div id="verification-modal" class="deposit-success-modal hidden">
+  <div class="modal-content">
+    <span id="verification-modal-close" class="modal-close">×</span>
+    <h2>Verification Status</h2>
+    <p id="verification-message" style="color:var(--muted);"></p>
+    <button id="verification-modal-ok" class="btn btn-primary" style="margin-top:16px;">OK</button>
+  </div>
 </div>
 
-    <div id="destination-modal" class="modal hidden">
-        <div class="modal-content">
-            <span id="modal-close" class="modal-close">×</span>
-            <div class="modal-inner">
-                <div class="modal-info">
-                    <h2 id="modal-title"></h2>
-                    <p id="modal-description"></p>
-                    <div id="modal-package"></div>
-                </div>
-                <div class="modal-action">
-                    <button id="modal-action-btn" class="btn btn-success"></button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Search Modal -->
+<div id="search-modal" class="modal hidden">
+  <div class="modal-content search-modal-content">
+    <span class="modal-close" id="close-search-modal">×</span>
+    <h2>Search Destinations</h2>
+    <input type="text" id="global-search-input" placeholder="Type a destination — Paris, Bali, Tokyo…">
+    <div id="search-results" class="search-results-grid"></div>
+  </div>
+</div>
 
-    <div id="notifications"></div>
-   <script src="script.js?v=20251219"></script>
+<!-- Destination Modal -->
+<div id="destination-modal" class="modal hidden">
+  <div class="modal-content">
+    <span id="modal-close" class="modal-close">×</span>
+    <div class="modal-inner">
+      <div class="modal-info">
+        <h2 id="modal-title"></h2>
+        <p id="modal-description"></p>
+        <div id="modal-package"></div>
+      </div>
+      <div class="modal-action">
+        <button id="modal-action-btn" class="btn btn-primary"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notifications"></div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40);
+  });
+  // Collapsible cards
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.collapsible-header').forEach(h => {
+      h.addEventListener('click', () => h.closest('.collapsible')?.classList.toggle('open'));
+    });
+  });
+</script>
+<script src="script.js?v=20251219"></script>
 </body>
 </html>
