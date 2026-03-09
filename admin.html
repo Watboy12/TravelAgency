@@ -3,21 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://travelagency-swart.vercel.app;">
   <title>Admin — ExploreWorld</title>
   <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="styles-enhanced.css">
+  <style>
+    .admin-wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 40px; }
+    .stat-card { background: var(--panel); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 24px 20px; text-align: center; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; line-height: 1; margin-bottom: 6px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .section-card { background: var(--panel); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 32px; margin-bottom: 28px; }
+    .section-card h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; color: var(--text); margin-bottom: 24px; }
+    .social-links-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .social-link-item { display: flex; align-items: center; gap: 10px; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 20px; text-decoration: none; color: var(--text); font-size: 0.88rem; transition: all 0.2s; }
+    .social-link-item:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+    .error-banner { background: rgba(255,61,107,0.12); border: 1px solid rgba(255,61,107,0.3); border-radius: 10px; padding: 14px 20px; color: #ff6b6b; font-size: 0.85rem; margin-bottom: 20px; display: none; }
+    .success-banner { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); border-radius: 10px; padding: 14px 20px; color: #4ade80; font-size: 0.85rem; margin-bottom: 20px; display: none; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+  </style>
 </head>
 <body>
 
 <nav id="main-nav">
   <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld" class="header-logo"></a></div>
-  <div class="nav-container">
-    <ul class="nav-links"></ul>
-    <div class="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></div>
-  </div>
+  <div class="nav-container"><ul class="nav-links"></ul></div>
 </nav>
 
+<!-- Admin Login -->
 <section id="admin-login" class="admin-login">
   <span style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);display:block;text-align:center;margin-bottom:20px;">Secure Access</span>
   <h1>Admin Portal</h1>
@@ -28,74 +42,127 @@
   </form>
 </section>
 
-<section id="admin-panel" class="admin-panel hidden">
-  <div style="display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto 32px;">
-    <h1 style="margin-bottom:0;">Admin Dashboard</h1>
-    <button id="admin-logout-btn" class="btn btn-danger" style="min-width:auto;">Logout</button>
-  </div>
+<!-- Admin Panel -->
+<section id="admin-panel" class="admin-panel hidden" style="padding-top:calc(var(--nav-h) + 40px);">
+  <div class="admin-wrap">
 
-  <!-- Quick stats bar -->
-  <div style="max-width:1100px;margin:0 auto 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
-    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--gold);" id="stat-users">—</div>
-      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Total Users</div>
-    </div>
-    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--teal);" id="stat-pending-dep">—</div>
-      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Pending Deposits</div>
-    </div>
-    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:#4ade80;" id="stat-upcoming">—</div>
-      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Upcoming Trips</div>
-    </div>
-    <div style="background:var(--panel);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;text-align:center;">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--rose);" id="stat-pending-vac">—</div>
-      <div style="font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">Pending Bookings</div>
-    </div>
-  </div>
-
-  <div id="user-list" class="user-list"></div>
-
-  <div class="btc-address-management" style="margin-top:40px;">
-    <h2>Bitcoin Wallet Address</h2>
-    <form id="btc-address-form">
-      <input type="text" id="btc-address" name="btcAddress" placeholder="bc1q... (new BTC wallet address)" required>
-      <button type="submit" class="btn btn-primary" style="margin-top:8px;">Update BTC Address</button>
-    </form>
-  </div>
-
-  <div class="social-media-management">
-    <h2>Social Media Links</h2>
-    <form id="social-media-form" enctype="multipart/form-data">
-      <div class="social-input">
-        <label for="facebook-logo">Facebook</label>
-        <input type="file" id="facebook-logo" name="facebookLogo" accept="image/*">
-        <input type="url" name="facebookUrl" placeholder="https://facebook.com/yourpage">
+    <div class="admin-header">
+      <div>
+        <span style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);">Control Center</span>
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--text);margin:4px 0 0;">Admin Dashboard</h1>
       </div>
-      <div class="social-input">
-        <label for="instagram-logo">Instagram</label>
-        <input type="file" id="instagram-logo" name="instagramLogo" accept="image/*">
-        <input type="url" name="instagramUrl" placeholder="https://instagram.com/yourhandle">
+      <button id="admin-logout" class="btn btn-danger" style="min-width:auto;">Logout</button>
+    </div>
+
+    <div id="admin-error-banner" class="error-banner"></div>
+    <div id="admin-success-banner" class="success-banner"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--gold);" id="stat-users">—</div>
+        <div class="stat-label">Total Users</div>
       </div>
-      <button type="submit" class="btn btn-primary" style="margin-top:8px;">Update Social Media</button>
-    </form>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--teal);" id="stat-pending-dep">—</div>
+        <div class="stat-label">Pending Deposits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#4ade80;" id="stat-upcoming">—</div>
+        <div class="stat-label">Upcoming Trips</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--rose);" id="stat-pending-vac">—</div>
+        <div class="stat-label">Pending Bookings</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h2>User Management</h2>
+      <div id="user-list"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Our Social Channels</h2>
+      <div class="social-links-bar">
+        <a href="https://www.facebook.com/share/19y78p9867/?mibextid=wwXIfr" target="_blank" class="social-link-item">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+          Facebook
+        </a>
+        <a href="https://instagram.com/exploreworld" target="_blank" class="social-link-item">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <defs><radialGradient id="ig" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#ffd600"/><stop offset="50%" stop-color="#ff7a00"/><stop offset="100%" stop-color="#c21975"/></radialGradient></defs>
+            <rect width="24" height="24" rx="6" fill="url(#ig)"/>
+            <circle cx="12" cy="12" r="4.2" stroke="#fff" stroke-width="2" fill="none"/>
+            <circle cx="17.5" cy="6.5" r="1.2" fill="#fff"/>
+          </svg>
+          Instagram
+        </a>
+        <a href="https://www.tiktok.com/@exploreworldagency?_r=1&_t=ZS-93qD3m5QwtD" target="_blank" class="social-link-item">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.27 8.27 0 0 0 4.84 1.56V6.82a4.85 4.85 0 0 1-1.07-.13z"/></svg>
+          TikTok
+        </a>
+      </div>
+    </div>
+
+    <!-- Required hidden forms for script.js compatibility -->
+    <form id="btc-address-form" style="display:none;"><input type="text" id="btc-address" name="btcAddress"><button type="submit"></button></form>
+    <form id="social-media-form" style="display:none;"><button type="submit"></button></form>
+
   </div>
 </section>
 
 <div id="notifications"></div>
+
 <script>
-  window.addEventListener('scroll', () => { document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40); });
-  
-  // After users load, update stats
-  const origLoadUsers = window.loadUsers;
-  function updateStats(users) {
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Update stats when script.js fires usersLoaded event
+  document.addEventListener('usersLoaded', e => {
+    const users = e.detail;
     if (!users) return;
     document.getElementById('stat-users').textContent = users.length;
     document.getElementById('stat-pending-dep').textContent = users.reduce((s,u) => s + (u.pending_deposits?.length||0), 0);
     document.getElementById('stat-upcoming').textContent = users.reduce((s,u) => s + (u.upcomingVacations?.length||0), 0);
     document.getElementById('stat-pending-vac').textContent = users.reduce((s,u) => s + (u.pendingVacations?.length||0), 0);
+  });
+
+  function showAdminError(msg) {
+    const el = document.getElementById('admin-error-banner');
+    if (!el) return;
+    el.textContent = msg; el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 7000);
   }
-  document.addEventListener('usersLoaded', e => updateStats(e.detail));
+  function showAdminSuccess(msg) {
+    const el = document.getElementById('admin-success-banner');
+    if (!el) return;
+    el.textContent = msg; el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+
+  // Intercept fetch to gracefully handle accept-deposit errors
+  const _origFetch = window.fetch.bind(window);
+  window.fetch = async function(url, opts) {
+    try {
+      const res = await _origFetch(url, opts);
+      const urlStr = typeof url === 'string' ? url : (url?.url || '');
+      if (!res.ok && urlStr.includes('accept-deposit')) {
+        const status = res.status;
+        if (status === 500) showAdminError('Server error (500): Deposit endpoint is temporarily unavailable. Please retry or contact support.');
+        else if (status === 403) showAdminError('Access denied (403). Please log in again.');
+        else if (status === 404) showAdminError('User or deposit not found (404). Please refresh the user list.');
+        else showAdminError('Request failed (' + status + '). Please try again.');
+      } else if (res.ok && typeof url === 'string' && url.includes('accept-deposit')) {
+        showAdminSuccess('Deposit accepted successfully.');
+      }
+      return res;
+    } catch (err) {
+      const urlStr = typeof url === 'string' ? url : '';
+      if (urlStr.includes('accept-deposit')) showAdminError('Network error while processing deposit. Check your connection.');
+      throw err;
+    }
+  };
 </script>
 <script src="script.js?v=20251219"></script>
 </body>

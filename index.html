@@ -3,13 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org https://www.clipartmax.com https://www.pngkey.com https://www.clipartmax.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com; media-src 'self' data:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org https://www.clipartmax.com https://www.pngkey.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com; media-src 'self' data:;">
   <meta name="description" content="Book your dream vacation with ExploreWorld — 20 years of extraordinary travel.">
   <title>ExploreWorld — Extraordinary Journeys</title>
   <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="styles-enhanced.css">
   <link rel="stylesheet" href="leaflet.css">
   <script src="https://cdn.jsdelivr.net/npm/i18next@21.6.14/dist/umd/i18next.min.js"></script>
+  <style>
+    /* LOGO SIZE */
+    .header-logo { height: 52px !important; width: auto !important; }
+
+    /* TRAVEL QUIZ — two separate groups */
+    .quiz-group { margin-bottom: 14px; }
+    .quiz-group-label {
+      font-family: 'Space Mono', monospace; font-size: 0.62rem;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 8px; display: block;
+    }
+    .quiz-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .quiz-pill { display: none; }
+    .quiz-pill + label {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border: 1px solid rgba(201,168,76,0.35);
+      border-radius: 100px; font-size: 0.82rem; color: var(--muted);
+      cursor: pointer; transition: all 0.2s; user-select: none;
+      background: rgba(255,255,255,0.03);
+    }
+    .quiz-pill:checked + label { background: var(--gold); border-color: var(--gold); color: var(--deep); font-weight: 600; }
+    .quiz-pill + label:hover { border-color: var(--gold); color: var(--text); }
+
+    /* HOT LABEL — urgency */
+    .hot-destinations-label {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: linear-gradient(135deg, #ff3d6b 0%, #ff6b35 100%);
+      color: #fff; font-family: 'Space Mono', monospace;
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; padding: 6px 14px; border-radius: 100px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 20px rgba(255,61,107,0.6), 0 0 50px rgba(255,61,107,0.2);
+      animation: pulseBadge 1.6s ease-in-out infinite;
+    }
+    .hot-destinations-label::before {
+      content: ''; width: 7px; height: 7px; background: #fff;
+      border-radius: 50%; animation: blinkDot 1.2s ease-in-out infinite; flex-shrink: 0;
+    }
+    @keyframes pulseBadge {
+      0%,100% { box-shadow: 0 0 20px rgba(255,61,107,0.6), 0 0 50px rgba(255,61,107,0.2); }
+      50% { box-shadow: 0 0 35px rgba(255,61,107,0.9), 0 0 70px rgba(255,61,107,0.35); }
+    }
+    @keyframes blinkDot { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+    .hot-urgency-line {
+      font-size: 0.75rem; color: #ff8c5a;
+      font-family: 'Space Mono', monospace; letter-spacing: 0.06em;
+      margin: 0 0 8px; animation: fadeFlicker 3s ease-in-out infinite;
+    }
+    @keyframes fadeFlicker { 0%,100%{opacity:1;} 45%{opacity:0.5;} 50%{opacity:1;} }
+
+    /* MAP TOGGLE */
+    #map-toggle-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.35);
+      color: var(--gold); font-family: 'Space Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 10px 20px; border-radius: 8px; cursor: pointer;
+      margin: 0 auto 24px; transition: all 0.25s;
+    }
+    #map-toggle-btn:hover { background: rgba(201,168,76,0.2); }
+    #destination-map {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s, margin 0.4s;
+      opacity: 0; border-radius: 12px; margin-bottom: 0;
+    }
+    #destination-map.visible { max-height: 520px; opacity: 1; margin-bottom: 32px; }
+
+    /* TESTIMONIALS — bigger avatar + better verified */
+    .testimonial-avatar {
+      width: 76px !important; height: 76px !important; min-width: 76px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--gold); display: block; margin: 0 auto 14px;
+    }
+    .testimonial-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .testimonial-name { font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
+    .verified-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(0,229,204,0.12); border: 1px solid rgba(0,229,204,0.4);
+      border-radius: 100px; padding: 4px 12px 4px 8px;
+      font-size: 0.72rem; color: var(--teal); font-weight: 600;
+      font-family: 'Space Mono', monospace; letter-spacing: 0.05em;
+    }
+    .verified-pill svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* TRUSTED BY — full color */
+    .trusted-by-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+    .trusted-by-item {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 22px 28px; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09); border-radius: 14px;
+      transition: border-color 0.2s, background 0.2s; min-width: 110px;
+    }
+    .trusted-by-item:hover { background: rgba(255,255,255,0.07); border-color: rgba(201,168,76,0.3); }
+    .trusted-by-item span { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.05em; text-align: center; }
+
+    /* WIDGETS */
+    .hero-widgets { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 4px; }
+    .widget-pill {
+      background: rgba(8,12,16,0.8); border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 12px; padding: 12px 16px; backdrop-filter: blur(10px);
+      flex: 1 1 140px; min-width: 130px;
+    }
+    .w-label { font-family:'Space Mono',monospace; font-size:0.58rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .w-val { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:300; color:var(--teal); line-height:1; }
+    .w-sub { font-size:0.68rem; color:var(--muted); margin-top:3px; }
+    #btc-copy-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.35);
+      border-radius: 8px; color: var(--gold); font-size: 0.72rem;
+      padding: 7px 12px; cursor: pointer; margin-top: 6px;
+      font-family: 'Space Mono', monospace; letter-spacing: 0.05em;
+      transition: all 0.2s; width: 100%; justify-content: center;
+    }
+    #btc-copy-btn:hover { background: rgba(201,168,76,0.22); }
+    #btc-copy-btn.copied { background: rgba(0,229,204,0.15); border-color: var(--teal); color: var(--teal); }
+    select, input[type="number"] {
+      background: rgba(255,255,255,0.07) !important;
+      border: 1px solid rgba(255,255,255,0.14) !important;
+      border-radius: 6px !important; color: var(--text) !important;
+      padding: 4px 8px !important; font-size: 0.78rem !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -52,19 +174,80 @@
     <span class="hero-eyebrow">20 Years of Extraordinary Travel</span>
     <h1>Explore the World<br><em>Your Way</em></h1>
     <p>Handcrafted journeys for those who demand more than a holiday. Discover destinations that redefine what travel means.</p>
+
+    <!-- Widgets Row -->
+    <div class="hero-widgets">
+      <!-- Live Balance (shown only when logged in) -->
+      <div class="widget-pill" id="balance-widget" style="display:none;">
+        <div class="w-label">Your Balance</div>
+        <div class="w-val">$<span id="hero-balance">—</span></div>
+        <div class="w-sub">Live account balance</div>
+      </div>
+
+      <!-- Trip Countdown (shown only when logged in & trip exists) -->
+      <div class="widget-pill" id="countdown-widget" style="display:none;">
+        <div class="w-label">Next Trip In</div>
+        <div class="w-val" id="hero-countdown">—</div>
+        <div class="w-sub" id="hero-countdown-dest">days to departure</div>
+      </div>
+
+      <!-- Currency Converter -->
+      <div class="widget-pill" style="flex:1 1 210px;">
+        <div class="w-label">Quick Converter</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          <input id="curr-amount" type="number" value="100" min="0" step="any" style="width:68px;">
+          <select id="curr-from">
+            <option>USD</option><option>EUR</option><option>GBP</option>
+            <option>JPY</option><option>AUD</option><option>CAD</option>
+          </select>
+          <span style="color:var(--muted);">→</span>
+          <select id="curr-to">
+            <option>EUR</option><option>USD</option><option>GBP</option>
+            <option>JPY</option><option>AUD</option><option>CAD</option>
+          </select>
+        </div>
+        <div class="w-val" id="curr-result" style="font-size:1.15rem;margin-top:6px;">€93.00</div>
+        <div class="w-sub">Approximate rate</div>
+      </div>
+
+      <!-- BTC Address Copy -->
+      <div class="widget-pill" style="flex:1 1 160px;">
+        <div class="w-label">Deposit BTC</div>
+        <div style="font-size:0.63rem;color:var(--muted);word-break:break-all;line-height:1.5;margin-top:4px;" id="btc-addr-display">—</div>
+        <button id="btc-copy-btn" onclick="copyBtcAddress()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Address
+        </button>
+      </div>
+    </div>
+
+    <!-- Travel Quiz — two clearly separated groups -->
     <div class="travel-quiz">
       <h3>Find Your Perfect Destination</h3>
       <form id="travel-quiz-form">
-        <div class="quiz-options">
-          <label><input type="radio" name="type" value="beach"> 🌊 Beach</label>
-          <label><input type="radio" name="type" value="mountain"> ⛰️ Mountain</label>
-          <label><input type="radio" name="travel" value="solo"> 🧳 Solo</label>
-          <label><input type="radio" name="travel" value="group"> 👥 Group</label>
+        <div class="quiz-group">
+          <span class="quiz-group-label">① Destination Type</span>
+          <div class="quiz-row">
+            <input class="quiz-pill" type="radio" name="type" id="q-beach" value="beach">
+            <label for="q-beach">🌊 Beach</label>
+            <input class="quiz-pill" type="radio" name="type" id="q-mountain" value="mountain">
+            <label for="q-mountain">⛰️ Mountain</label>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;">Get Suggestion</button>
+        <div class="quiz-group">
+          <span class="quiz-group-label">② Travel Style</span>
+          <div class="quiz-row">
+            <input class="quiz-pill" type="radio" name="travel" id="q-solo" value="solo">
+            <label for="q-solo">🧳 Solo</label>
+            <input class="quiz-pill" type="radio" name="travel" id="q-group" value="group">
+            <label for="q-group">👥 Group</label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">Get Suggestion →</button>
       </form>
       <p id="quiz-result"></p>
     </div>
+
     <div class="hero-actions" style="margin-top:24px;">
       <a href="login.html" class="btn btn-primary get-started">Begin Your Journey</a>
       <a href="#destinations" class="btn btn-ghost">Explore Destinations</a>
@@ -74,12 +257,13 @@
 
 <!-- Hot Destinations -->
 <section id="hot-destinations" class="hot-destinations">
-  <div class="hot-destinations-label">Live High Demand</div>
+  <div style="text-align:center;">
+    <div class="hot-destinations-label">🔥 Live High Demand</div>
+    <p class="hot-urgency-line">⚡ Spots filling fast — only a few packages left</p>
+  </div>
   <h2>Hot Destinations</h2>
   <p class="hot-destinations-subtitle">Exclusive travel packages with limited availability — book before they're gone.</p>
-  <div class="hot-destinations-slideshow">
-    <!-- Slides injected by JS -->
-  </div>
+  <div class="hot-destinations-slideshow"></div>
 </section>
 
 <!-- Popular Destinations -->
@@ -87,6 +271,13 @@
   <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:300;color:var(--text);text-align:center;margin-bottom:48px;">Popular Destinations</h2>
   <div class="destination-search-wrap">
     <input type="text" id="destination-search" placeholder="Search destinations…">
+  </div>
+  <div style="text-align:center;">
+    <button id="map-toggle-btn" onclick="toggleMap(this)" aria-expanded="false">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+      Show Map
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
   </div>
   <div id="destination-map"></div>
   <div class="destination-grid"></div>
@@ -97,34 +288,58 @@
   <h2>What Our Travelers Say</h2>
   <div class="testimonial-grid">
     <div class="testimonial-card">
-      <img src="images/avatar1.jpg" alt="Emily R." class="testimonial-avatar" loading="lazy" onerror="this.style.display='none'">
-      <p>Our trip to Paris was nothing short of magical. The ExploreWorld team handled every detail — from booking flights to arranging a private Louvre tour. Their personal touch made it truly unforgettable.</p>
-      <span>Emily R. <img src="images/verified.png" alt="Verified" class="verified-badge" onerror="this.style.display='none'"></span>
+      <img src="images/avatar1.jpg" alt="Emily R." class="testimonial-avatar" loading="lazy" onerror="this.src='https://via.placeholder.com/76/c9a84c/080c10?text=E'">
+      <p><em>"Our trip to Paris was nothing short of magical. The ExploreWorld team handled every detail — from booking flights to arranging a private Louvre tour. Truly unforgettable."</em></p>
+      <div class="testimonial-name">Emily R.</div>
+      <div class="verified-pill">
+        <svg viewBox="0 0 24 24" fill="var(--teal)" stroke="none"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Verified Traveler
+      </div>
     </div>
     <div class="testimonial-card">
-      <img src="images/avatar2.jpg" alt="Michael T." class="testimonial-avatar" loading="lazy" onerror="this.style.display='none'">
-      <p>ExploreWorld stands out from every agency I've used. Our New York adventure included Broadway tickets and a rooftop dinner — everything was seamless and the bonus was a lovely surprise!</p>
-      <span>Michael T. <img src="images/verified.png" alt="Verified" class="verified-badge" onerror="this.style.display='none'"></span>
+      <img src="images/avatar2.jpg" alt="Michael T." class="testimonial-avatar" loading="lazy" onerror="this.src='https://via.placeholder.com/76/c9a84c/080c10?text=M'">
+      <p><em>"ExploreWorld stands out from every agency I've used. Our New York adventure included Broadway tickets and a rooftop dinner — everything was seamless and the bonus was lovely!"</em></p>
+      <div class="testimonial-name">Michael T.</div>
+      <div class="verified-pill">
+        <svg viewBox="0 0 24 24" fill="var(--teal)" stroke="none"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Verified Traveler
+      </div>
     </div>
     <div class="testimonial-card">
-      <img src="images/avatar3.jpg" alt="Sophia L." class="testimonial-avatar" loading="lazy" onerror="this.style.display='none'">
-      <p>Tokyo was a dream come true thanks to ExploreWorld. They recommended hidden gems we'd never have found alone. The booking process was effortless and support was always there when needed.</p>
-      <span>Sophia L. <img src="images/verified.png" alt="Verified" class="verified-badge" onerror="this.style.display='none'"></span>
+      <img src="images/avatar3.jpg" alt="Sophia L." class="testimonial-avatar" loading="lazy" onerror="this.src='https://via.placeholder.com/76/c9a84c/080c10?text=S'">
+      <p><em>"Tokyo was a dream come true. They recommended hidden gems we'd never have found alone. The booking process was effortless and support was always there when needed."</em></p>
+      <div class="testimonial-name">Sophia L.</div>
+      <div class="verified-pill">
+        <svg viewBox="0 0 24 24" fill="var(--teal)" stroke="none"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Verified Traveler
+      </div>
     </div>
     <div class="testimonial-card">
-      <img src="images/avatar4.jpg" alt="James P." class="testimonial-avatar" loading="lazy" onerror="this.style.display='none'">
-      <p>Bali with ExploreWorld was pure bliss. From the moment we signed up, they took care of everything — flights, villa, even a cooking class. The dashboard made tracking deposits a breeze.</p>
-      <span>James P. <img src="images/verified.png" alt="Verified" class="verified-badge" onerror="this.style.display='none'"></span>
+      <img src="images/avatar4.jpg" alt="James P." class="testimonial-avatar" loading="lazy" onerror="this.src='https://via.placeholder.com/76/c9a84c/080c10?text=J'">
+      <p><em>"Bali with ExploreWorld was pure bliss. They took care of everything — flights, villa, even a cooking class. The dashboard made tracking deposits a breeze."</em></p>
+      <div class="testimonial-name">James P.</div>
+      <div class="verified-pill">
+        <svg viewBox="0 0 24 24" fill="var(--teal)" stroke="none"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Verified Traveler
+      </div>
     </div>
     <div class="testimonial-card">
-      <img src="images/avatar5.jpg" alt="Olivia M." class="testimonial-avatar" loading="lazy" onerror="this.style.display='none'">
-      <p>Cape Town was breathtaking, and ExploreWorld made it stress-free. Their deluxe package included a safari that was out of this world. Totally transparent about costs — I loved it.</p>
-      <span>Olivia M. <img src="images/verified.png" alt="Verified" class="verified-badge" onerror="this.style.display='none'"></span>
+      <img src="images/avatar5.jpg" alt="Olivia M." class="testimonial-avatar" loading="lazy" onerror="this.src='https://via.placeholder.com/76/c9a84c/080c10?text=O'">
+      <p><em>"Cape Town was breathtaking, and ExploreWorld made it stress-free. Their deluxe package included a safari that was out of this world. Totally transparent about costs — loved it."</em></p>
+      <div class="testimonial-name">Olivia M.</div>
+      <div class="verified-pill">
+        <svg viewBox="0 0 24 24" fill="var(--teal)" stroke="none"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Verified Traveler
+      </div>
     </div>
     <div class="testimonial-card">
-      <img src="images/avatar6.jpg" alt="David K." class="testimonial-avatar" loading="lazy" onerror="this.style.display='none'">
-      <p>Sydney was our family's best vacation yet. ExploreWorld tailored everything to our kids' interests and admin support was top-notch whenever we had payment questions. Highly recommend!</p>
-      <span>David K. <img src="images/verified.png" alt="Verified" class="verified-badge" onerror="this.style.display='none'"></span>
+      <img src="images/avatar6.jpg" alt="David K." class="testimonial-avatar" loading="lazy" onerror="this.src='https://via.placeholder.com/76/c9a84c/080c10?text=D'">
+      <p><em>"Sydney was our family's best vacation yet. ExploreWorld tailored everything to our kids' interests and support was top-notch whenever we had payment questions. Highly recommend!"</em></p>
+      <div class="testimonial-name">David K.</div>
+      <div class="verified-pill">
+        <svg viewBox="0 0 24 24" fill="var(--teal)" stroke="none"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Verified Traveler
+      </div>
     </div>
   </div>
 </section>
@@ -147,7 +362,7 @@
     </div>
     <div class="faq-item">
       <h3>Can I cancel or change my trip?</h3>
-      <p>Yes, cancellations or changes are possible up to 30 days before departure, subject to our terms. Contact our support team to discuss your options. Refer to our Terms & Conditions for the full refund schedule.</p>
+      <p>Yes, cancellations or changes are possible up to 30 days before departure, subject to our terms. Contact our support team to discuss your options. Refer to our Terms &amp; Conditions for the full refund schedule.</p>
     </div>
     <div class="faq-item">
       <h3>What's included in the deluxe packages?</h3>
@@ -160,9 +375,50 @@
 <section class="trusted-by">
   <h2>Trusted By Industry Leaders</h2>
   <div class="trusted-by-grid">
-    <img src="images/travel-association-logo.png" alt="Travel Association" class="trusted-by-logo" loading="lazy" onerror="this.style.display='none'">
-    <img src="images/partner2-logo.png" alt="Partner 2" class="trusted-by-logo" loading="lazy" onerror="this.style.display='none'">
-    <img src="images/partner3-logo.png" alt="Partner 3" class="trusted-by-logo" loading="lazy" onerror="this.style.display='none'">
+    <div class="trusted-by-item">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="26" fill="#003580"/>
+        <text x="26" y="30" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">IATA</text>
+      </svg>
+      <span>IATA Member</span>
+    </div>
+    <div class="trusted-by-item">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <rect width="52" height="52" rx="10" fill="#E8451E"/>
+        <text x="26" y="30" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">ASTA</text>
+      </svg>
+      <span>ASTA Certified</span>
+    </div>
+    <div class="trusted-by-item">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="26" fill="#009B55"/>
+        <text x="26" y="27" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial">UNWTO</text>
+        <text x="26" y="38" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="7" font-family="Arial">Partner</text>
+      </svg>
+      <span>UNWTO Partner</span>
+    </div>
+    <div class="trusted-by-item">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <rect width="52" height="52" rx="10" fill="#1a1a2e"/>
+        <text x="26" y="30" text-anchor="middle" fill="#c9a84c" font-size="13" font-weight="bold" font-family="Georgia, serif">Forbes</text>
+      </svg>
+      <span>Forbes Featured</span>
+    </div>
+    <div class="trusted-by-item">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <rect width="52" height="52" rx="10" fill="#C5A028"/>
+        <text x="26" y="25" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">LUXURY</text>
+        <text x="26" y="36" text-anchor="middle" fill="white" font-size="8" font-family="Arial">TRAVEL</text>
+      </svg>
+      <span>Luxury Travel</span>
+    </div>
+    <div class="trusted-by-item">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="26" fill="#0057A8"/>
+        <text x="26" y="30" text-anchor="middle" fill="white" font-size="12" font-weight="bold" font-family="Arial">BBB</text>
+      </svg>
+      <span>BBB Accredited</span>
+    </div>
   </div>
 </section>
 
@@ -193,13 +449,26 @@
       <p>Executive Services</p>
       <p>ExploreWorld, Inc</p>
       <p>+1 (718) 635-2839</p>
-      <p>info@exploreworld.com</p>
+      <p><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d8b1b6beb798bda0a8b4b7aabdafb7aab4bcf6bbb7b5">[email&#160;protected]</a></p>
       <p>800 Connecticut Ave, Norwalk, CT 06854</p>
     </div>
     <div class="social-icons">
-      <a href="https://www.facebook.com/share/19y78p9867/?mibextid=wwXIfr" target="_blank"><img src="images/default-facebook.png" alt="Facebook" loading="lazy"></a>
-      <a href="https://instagram.com/exploreworld" target="_blank"><img src="images/default-instagram.png" alt="Instagram" loading="lazy"></a>
-      <a href="https://www.tiktok.com/@exploreworldagency?_r=1&_t=ZS-93qD3m5QwtD" target="_blank"><img src="images/default-tiktok.png" alt="TikTok" loading="lazy"></a>
+      <!-- Real SVG social icons in brand colors -->
+      <a href="https://www.facebook.com/share/19y78p9867/?mibextid=wwXIfr" target="_blank" rel="noopener" title="Facebook">
+        <svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="white" d="M16.5 8H14c-.3 0-.5.2-.5.5V10h3l-.5 2.5h-2.5V18h-2.5v-5.5H9V10h2.5V8.5C11.5 6.6 12.9 5.5 14.7 5.5c.8 0 1.8.1 1.8.1V8z"/></svg>
+      </a>
+      <a href="https://instagram.com/exploreworld" target="_blank" rel="noopener" title="Instagram">
+        <svg width="30" height="30" viewBox="0 0 24 24">
+          <defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fd5949"/><stop offset="50%" stop-color="#d6249f"/><stop offset="100%" stop-color="#285AEB"/></linearGradient></defs>
+          <circle cx="12" cy="12" r="12" fill="url(#ig)"/>
+          <rect x="7" y="7" width="10" height="10" rx="3" fill="none" stroke="white" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="2.5" fill="none" stroke="white" stroke-width="1.5"/>
+          <circle cx="15.5" cy="8.5" r="0.75" fill="white"/>
+        </svg>
+      </a>
+      <a href="https://www.tiktok.com/@exploreworldagency?_r=1&_t=ZS-93qD3m5QwtD" target="_blank" rel="noopener" title="TikTok">
+        <svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#010101"/><path fill="white" d="M16.6 8.2a3.8 3.8 0 01-2.9-3.2V4h-2.6v10.5a2.2 2.2 0 01-2.2 1.9 2.2 2.2 0 01-2.2-2.2 2.2 2.2 0 012.2-2.2c.2 0 .4 0 .6.1V9.4a4.8 4.8 0 00-.6 0 4.9 4.9 0 00-4.9 4.9 4.9 4.9 0 004.9 4.9 4.9 4.9 0 004.8-4.9V9.6a6.2 6.2 0 003.6 1.2V8.2a3.8 3.8 0 01-.7 0z"/></svg>
+      </a>
     </div>
     <div class="newsletter">
       <input type="email" placeholder="Your email address">
@@ -227,33 +496,99 @@
 
 <div id="notifications"></div>
 
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script>
   // Page loader
   window.addEventListener('load', () => {
     setTimeout(() => document.getElementById('page-loader')?.classList.add('hidden'), 1800);
   });
-  // Nav scroll effect
+
+  // Nav scroll
   window.addEventListener('scroll', () => {
     document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 60);
   });
-  // Intersection observer for fade-in sections
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
-        observer.unobserve(e.target);
-      }
+
+  // Map toggle — hidden on load, reveal on click
+  function toggleMap(btn) {
+    const map = document.getElementById('destination-map');
+    const isOpen = map.classList.toggle('visible');
+    btn.setAttribute('aria-expanded', isOpen);
+    btn.innerHTML = isOpen
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> Hide Map <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> Show Map <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
+    if (isOpen && window._leafletMap) setTimeout(() => window._leafletMap.invalidateSize(), 350);
+  }
+
+  // BTC copy
+  function copyBtcAddress() {
+    const addr = document.getElementById('btc-addr-display')?.textContent?.trim();
+    if (!addr || addr === '—') return;
+    navigator.clipboard.writeText(addr).then(() => {
+      const btn = document.getElementById('btc-copy-btn');
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Address`;
+      }, 2500);
     });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.testimonial-card, .faq-item, .destination-card').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(24px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(el);
+  }
+
+  // Populate widgets on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', () => {
+    // BTC address (script.js sets window.btcWalletAddress)
+    const btcAddr = window.btcWalletAddress || localStorage.getItem('btcAddress') || '—';
+    const btcEl = document.getElementById('btc-addr-display');
+    if (btcEl) btcEl.textContent = btcAddr;
+
+    // Balance + countdown (only if logged in)
+    const token = localStorage.getItem('token') || localStorage.getItem('jwt');
+    if (token) {
+      const bal = localStorage.getItem('userBalance');
+      if (bal) {
+        document.getElementById('hero-balance').textContent = parseFloat(bal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+        document.getElementById('balance-widget').style.display = 'block';
+      }
+      const nextDate = localStorage.getItem('nextTripDate');
+      const nextDest = localStorage.getItem('nextTripDest');
+      if (nextDate) {
+        const days = Math.ceil((new Date(nextDate)-new Date())/86400000);
+        if (days > 0) {
+          document.getElementById('hero-countdown').textContent = days;
+          if (nextDest) document.getElementById('hero-countdown-dest').textContent = `days to ${nextDest}`;
+          document.getElementById('countdown-widget').style.display = 'block';
+        }
+      }
+    }
+  });
+
+  // Currency converter
+  const RATES = {USD:1,EUR:0.93,GBP:0.79,JPY:151.2,AUD:1.53,CAD:1.36};
+  const SYMS  = {USD:'$',EUR:'€',GBP:'£',JPY:'¥',AUD:'A$',CAD:'C$'};
+  function convertCurrency() {
+    const amt = parseFloat(document.getElementById('curr-amount').value)||0;
+    const from = document.getElementById('curr-from').value;
+    const to   = document.getElementById('curr-to').value;
+    const res  = (amt/RATES[from])*RATES[to];
+    document.getElementById('curr-result').textContent = SYMS[to]+res.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+  ['curr-amount','curr-from','curr-to'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', convertCurrency);
+    document.getElementById(id)?.addEventListener('change', convertCurrency);
+  });
+  convertCurrency();
+
+  // Scroll fade-in
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; obs.unobserve(e.target); }
+    });
+  }, {threshold:0.1});
+  document.querySelectorAll('.testimonial-card,.faq-item,.destination-card').forEach(el => {
+    el.style.cssText += 'opacity:0;transform:translateY(24px);transition:opacity 0.5s ease,transform 0.5s ease;';
+    obs.observe(el);
   });
 </script>
-<script src="leaflet.js"></script>
-<script src="script.js"></script>
+<script src="script.js?v=20251219"></script>
 </body>
 </html>
