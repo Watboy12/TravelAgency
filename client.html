@@ -1,156 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
-    <title>Client Area - ExploreWorld</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://www.google.com; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com https://*.tile.openstreetmap.org https://www.clipartmax.com https://www.pngkey.com https://ui-avatars.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
+  <title>My Dashboard — ExploreWorld</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles-enhanced.css">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <style>
+    /* Dashboard layout enhancements */
+    .dashboard-top { display: grid; grid-template-columns: 1fr 340px; gap: 24px; max-width: 1200px; margin: 0 auto 32px; align-items: start; }
+    .dashboard-left { display: flex; flex-direction: column; gap: 24px; }
+    .profile-glass { background: var(--panel); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 28px 32px; }
+    .profile-glass h3 { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+    .profile-field label { display: block; font-size: 0.65rem; font-family: 'Space Mono', monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .profile-field span { font-size: 0.88rem; color: var(--text); }
+    .balance-side { display: flex; flex-direction: column; gap: 16px; }
+    .balance-main-card { background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(0,229,204,0.05)); border: 1px solid rgba(201,168,76,0.25); border-radius: var(--radius); padding: 28px 28px 24px; }
+    .balance-big { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 300; color: var(--gold-light); line-height: 1; }
+    .balance-currency { font-size: 1.4rem; color: var(--gold); vertical-align: top; margin-top: 6px; display: inline-block; }
+    .balance-sub-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 20px; }
+    .balance-sub-item { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 12px; text-align: center; }
+    .balance-sub-item .sub-val { font-size: 1.1rem; font-family: 'Cormorant Garamond', serif; color: var(--text); }
+    .balance-sub-item .sub-key { font-size: 0.6rem; font-family: 'Space Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+    .quick-icons { display: flex; gap: 12px; }
+    .quick-icon-card { flex: 1; background: var(--panel); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative; transition: border-color 0.2s; }
+    .quick-icon-card:hover { border-color: var(--gold); }
+    .quick-icon-card .badge { position: static; background: var(--rose); color: #fff; border-radius: 100px; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; }
+    .quick-icon-card .label { font-size: 0.78rem; color: var(--text); }
+    .dropdown-content { display: none; position: absolute; top: calc(100% + 8px); left: 0; min-width: 240px; background: var(--panel); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 16px; z-index: 200; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .quick-icon-card.open .dropdown-content { display: block; }
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto 32px; }
+    .dash-card { background: var(--panel); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 24px; }
+    .dash-card h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; color: var(--text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .dash-card h2::after { content: '⌃'; font-size: 0.8rem; color: var(--muted); transition: transform 0.2s; }
+    .dash-card.collapsed h2::after { transform: rotate(180deg); }
+    .dash-card-body { overflow: hidden; }
+    .dash-card.collapsed .dash-card-body { display: none; }
+    @media (max-width: 900px) {
+      .dashboard-top { grid-template-columns: 1fr; }
+      .balance-side { order: -1; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body class="dashboard">
-    <nav>
-        <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
-        <div class="nav-container">
-            <ul class="nav-links"></ul>
-            <div class="hamburger" aria-label="Toggle navigation">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-        <div class="header-search">
-    <img src="https://www.clipartmax.com/png/middle/477-4779460_search-magnifier-tool-vector-transparent-background-magnifying-glass-icon.png" 
+
+<nav id="main-nav">
+  <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld" class="header-logo"></a></div>
+  <div class="nav-container">
+    <ul class="nav-links"></ul>
+    <div class="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></div>
+  </div>
+  <div class="header-search">
+    <img src="https://www.clipartmax.com/png/middle/477-4779460_search-magnifier-tool-vector-transparent-background-magnifying-glass-icon.png"
          alt="Search" id="open-search-modal" class="search-icon">
-</div>
-    </nav>
+  </div>
+</nav>
 
-    <div class="top-dashboard-icons">
-    <div class="icon-summary notifications-summary">
-        <img src="https://www.pngkey.com/png/detail/112-1120149_svg-png-transparent-background-notification-icon.png" alt="Notifications" class="dashboard-icon">
+<section class="client-area" style="padding-top:calc(var(--nav-h) + 40px);">
+  <div style="max-width:1200px;margin:0 auto 32px;padding:0 24px;">
+    <span style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);">Client Area</span>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,2.8rem);font-weight:300;color:var(--text);margin:6px 0 24px;">
+      Welcome back, <em><span id="user-name">Traveler</span></em>
+    </h1>
+
+    <!-- Quick action icons row -->
+    <div class="quick-icons" style="margin-bottom:32px;">
+      <div class="quick-icon-card top-dashboard-icons notifications-summary" style="position:relative;">
+        <img src="https://www.pngkey.com/png/detail/112-1120149_svg-png-transparent-background-notification-icon.png" alt="Notifications" class="dashboard-icon" style="width:28px;height:28px;object-fit:contain;">
+        <span class="label">Alerts</span>
         <span id="notification-count" class="badge">0</span>
-        <div class="dropdown-content hidden">
-            <h3>Notifications & Promos</h3>
-            <ul id="user-notifications"><li>No new notifications.</li></ul>
+        <div class="dropdown-content">
+          <h3 style="font-size:0.9rem;margin-bottom:12px;">Notifications</h3>
+          <ul id="user-notifications" style="list-style:none;padding:0;margin:0;font-size:0.82rem;color:var(--muted);"><li>No new notifications.</li></ul>
         </div>
-    </div>
-
-    <div class="icon-summary upcoming-summary">
-        <img src="https://www.clipartmax.com/png/middle/253-2530688_airplane-take-off-comments-airplane-icon-png-free.png" alt="Upcoming Vacations" class="dashboard-icon">
+      </div>
+      <div class="quick-icon-card top-dashboard-icons upcoming-summary" style="position:relative;">
+        <img src="https://www.clipartmax.com/png/middle/253-2530688_airplane-take-off-comments-airplane-icon-png-free.png" alt="Upcoming" class="dashboard-icon" style="width:28px;height:28px;object-fit:contain;">
+        <span class="label">Upcoming</span>
         <span id="upcoming-count" class="badge">0</span>
-        <div class="dropdown-content hidden">
-            <h3>Upcoming Vacations</h3>
-            <ul id="upcoming-vacations"><li>No upcoming vacations yet.</li></ul>
+        <div class="dropdown-content">
+          <h3 style="font-size:0.9rem;margin-bottom:12px;">Upcoming Trips</h3>
+          <ul id="upcoming-vacations-dropdown" style="list-style:none;padding:0;margin:0;font-size:0.82rem;color:var(--muted);"><li>No upcoming vacations yet.</li></ul>
         </div>
-    </div>
-</div>
-
-    <section class="client-area">
-        <h1 data-i18n="welcomeMessage">Welcome, <span id="user-name">User</span></h1>      
-       <div class="profile-section">
-    <p><strong>Email:</strong> <span id="user-email">Not set</span></p>
-    <p><strong>Phone:</strong> <span id="user-phone">Not set</span></p>
-    <p><strong>Address:</strong> <span id="user-address">Not set</span></p>
-    <p><strong>Verified:</strong> <span id="user-verified">Not set</span></p>
-    <p><strong>Member Since:</strong> <span id="member-since">Not set</span></p>
-    <p><strong>Total Spent on Vacations:</strong> $<span id="total-spent">0.00</span></p>
-</div>
-        <div class="account-balance-container">
-            <div class="account-balance-card">
-                <div class="balance-header">
-                    <h2 data-i18n="accountBalance">
-                    <a href="deposit.html" class="btn btn-primary">Deposit Funds</a>
-                </div>
-                <div class="balance-details">
-                    <div class="balance-main">
-                        <span class="balance-label">Available Balance:</span>
-                        <span id="user-balance" class="balance-amount">$0.00</span>
-                    </div>
-                    <div class="balance-sub">
-                        <p><span class="sub-label">Bonus:</span> $<span id="user-bonus">0.00</span></p>
-                        <p><span class="sub-label">Total Deposits:</span> $<span id="user-deposits">0.00</span></p>
-                        <p><span class="sub-label">Pending Deposits:</span> $<span id="pending-deposits">0.00</span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="dashboard-grid">
-            <!-- Other collapsible cards here -->
-        </div>
-    </section>
-            
-              <div class="dashboard-card collapsible" data-section="pending-vacations">
-    <h2 class="collapsible-header">Pending Vacations</h2>
-    <ul id="pending-vacations" class="vacation-list collapsible-content"></ul>
-</div>
-            <div class="dashboard-card collapsible" data-section="notifications">
-    <h2 class="collapsible-header">Notifications & Promos</h2>
-    <ul id="user-notifications" class="vacation-list collapsible-content">
-        <li>No new notifications.</li>
-    </ul>
-</div>
-            <div class="dashboard-card collapsible" data-section="upcoming-vacations">
-                <h2 class="collapsible-header">Upcoming Vacations</h2>
-                <ul id="upcoming-vacations" class="vacation-list collapsible-content"></ul>
-            </div>
-            <div class="dashboard-card collapsible" data-section="transaction-history">
-                <h2 class="collapsible-header">Transaction History</h2>
-                <ul id="transaction-history" class="vacation-list collapsible-content"></ul>
-            </div>
-        </div>
-    </section>
-
-    <section id="hot-destinations" class="hot-destinations">
-        <h2>Hot Destinations</h2>
-        <p class="hot-destinations-subtitle">Exclusive Travel Packages Currently in High Demand</p>
-        <div class="hot-destinations-slideshow"></div>
-    </section>
-
-    <section class="past-vacations collapsible" data-section="past-vacations">
-        <div class="past-vacations-header collapsible-header">
-            <h2>Relive Your Epic Journeys</h2>
-            <button id="rate-trip-btn" class="btn btn-primary">Rate Your Trip</button>
-        </div>
-        <div class="destination-grid collapsible-content" id="past-vacations-grid"></div>
-    </section>
-
-    <div id="verification-modal" class="deposit-success-modal hidden">
-        <div class="modal-content">
-            <span id="verification-modal-close" class="modal-close">×</span>
-            <h2>Verification Status</h2>
-            <p id="verification-message"></p>
-            <button id="verification-modal-ok" class="btn btn-success">OK</button>
-        </div>
+      </div>
+      <a href="deposit.html" class="quick-icon-card" style="text-decoration:none;flex:2;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M12 2v20M17 7H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="label" style="color:var(--gold);font-weight:500;">+ Deposit Funds</span>
+      </a>
     </div>
 
-    <div id="search-modal" class="modal hidden">
-    <div class="modal-content search-modal-content">
-        <span class="modal-close" id="close-search-modal">×</span>
-        <h2>Search Destinations</h2>
-        <input type="text" id="global-search-input" placeholder="Type destination name (e.g., Paris, Bali)...">
-        <div id="search-results" class="search-results-grid"></div>
+    <!-- Top area: Profile + Balance -->
+    <div class="dashboard-top">
+      <div class="dashboard-left">
+        <!-- Profile info -->
+        <div class="profile-glass">
+          <h3>Account Details</h3>
+          <div class="profile-grid">
+            <div class="profile-field"><label>Email</label><span id="user-email">—</span></div>
+            <div class="profile-field"><label>Phone</label><span id="user-phone">—</span></div>
+            <div class="profile-field"><label>Address</label><span id="user-address">—</span></div>
+            <div class="profile-field"><label>Status</label><span id="user-verified">—</span></div>
+            <div class="profile-field"><label>Member Since</label><span id="member-since">—</span></div>
+            <div class="profile-field"><label>Total Spent</label><span>$<span id="total-spent">0.00</span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance card -->
+      <div class="balance-side">
+        <div class="balance-main-card">
+          <div style="font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">Account Balance</div>
+          <div>
+            <span class="balance-currency">$</span>
+            <span id="user-balance" class="balance-big">0.00</span>
+          </div>
+          <div class="balance-sub-row">
+            <div class="balance-sub-item">
+              <div class="sub-val">$<span id="user-bonus">0.00</span></div>
+              <div class="sub-key">Bonus</div>
+            </div>
+            <div class="balance-sub-item">
+              <div class="sub-val">$<span id="user-deposits">0.00</span></div>
+              <div class="sub-key">Deposited</div>
+            </div>
+            <div class="balance-sub-item">
+              <div class="sub-val" style="color:var(--gold);">$<span id="pending-deposits">0.00</span></div>
+              <div class="sub-key">Pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Dashboard cards grid -->
+    <div class="cards-grid">
+      <div class="dash-card collapsible open" data-section="pending-vacations">
+        <h2 class="collapsible-header">Pending Bookings</h2>
+        <div class="dash-card-body collapsible-content">
+          <ul id="pending-vacations" class="vacation-list"></ul>
+        </div>
+      </div>
+
+      <div class="dash-card collapsible" data-section="upcoming-vacations">
+        <h2 class="collapsible-header">Upcoming Vacations</h2>
+        <div class="dash-card-body collapsible-content">
+          <ul id="upcoming-vacations" class="vacation-list"></ul>
+        </div>
+      </div>
+
+      <div class="dash-card collapsible" data-section="transaction-history">
+        <h2 class="collapsible-header">Transaction History</h2>
+        <div class="dash-card-body collapsible-content">
+          <ul id="transaction-history" class="vacation-list"></ul>
+        </div>
+      </div>
+
+      <div class="dash-card collapsible" data-section="notifications">
+        <h2 class="collapsible-header">Notifications &amp; Promos</h2>
+        <div class="dash-card-body collapsible-content">
+          <ul id="user-notifications" class="vacation-list"><li>No new notifications.</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Hot destinations -->
+<section id="hot-destinations" class="hot-destinations" style="margin-top:20px;">
+  <div class="hot-destinations-label"><span class="demand-pulse-dot"></span>🔥 EXCLUSIVE OFFERS</div>
+  <h2>Hot Destinations</h2>
+  <p class="hot-destinations-subtitle">Exclusive Travel Packages Currently in High Demand</p>
+  <div class="hot-destinations-slideshow"></div>
+</section>
+
+<!-- Past Vacations -->
+<section class="past-vacations collapsible" data-section="past-vacations" style="padding:60px 32px;">
+  <div class="past-vacations-header collapsible-header">
+    <h2>Relive Your Epic Journeys</h2>
+    <button id="rate-trip-btn" class="btn btn-ghost" style="min-width:auto;">Rate a Trip</button>
+  </div>
+  <div class="destination-grid collapsible-content" id="past-vacations-grid" style="margin-top:24px;"></div>
+</section>
+
+<!-- Verification Modal -->
+<div id="verification-modal" class="deposit-success-modal hidden">
+  <div class="modal-content">
+    <span id="verification-modal-close" class="modal-close">×</span>
+    <h2>Verification Status</h2>
+    <p id="verification-message" style="color:var(--muted);"></p>
+    <button id="verification-modal-ok" class="btn btn-primary" style="margin-top:16px;">OK</button>
+  </div>
 </div>
 
-    <div id="destination-modal" class="modal hidden">
-        <div class="modal-content">
-            <span id="modal-close" class="modal-close">×</span>
-            <div class="modal-inner">
-                <div class="modal-info">
-                    <h2 id="modal-title"></h2>
-                    <p id="modal-description"></p>
-                    <div id="modal-package"></div>
-                </div>
-                <div class="modal-action">
-                    <button id="modal-action-btn" class="btn btn-success"></button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Search Modal -->
+<div id="search-modal" class="modal hidden">
+  <div class="modal-content search-modal-content">
+    <span class="modal-close" id="close-search-modal">×</span>
+    <h2>Search Destinations</h2>
+    <input type="text" id="global-search-input" placeholder="Type a destination — Paris, Bali, Tokyo…">
+    <div id="search-results" class="search-results-grid"></div>
+  </div>
+</div>
 
-    <div id="notifications"></div>
-   <script src="script.js?v=20251219"></script>
+<!-- Destination Modal -->
+<div id="destination-modal" class="modal hidden">
+  <div class="modal-content">
+    <span id="modal-close" class="modal-close">×</span>
+    <div class="modal-inner">
+      <div class="modal-info">
+        <h2 id="modal-title"></h2>
+        <p id="modal-description"></p>
+        <div id="modal-package"></div>
+      </div>
+      <div class="modal-action">
+        <button id="modal-action-btn" class="btn btn-primary"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notifications"></div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40);
+  });
+  document.addEventListener('DOMContentLoaded', () => {
+    // Collapsible cards
+    document.querySelectorAll('.collapsible-header').forEach(h => {
+      h.addEventListener('click', () => h.closest('.collapsible')?.classList.toggle('open'));
+    });
+    // Quick icon dropdowns
+    document.querySelectorAll('.quick-icon-card.notifications-summary, .quick-icon-card.upcoming-summary').forEach(card => {
+      card.addEventListener('click', e => {
+        e.stopPropagation();
+        card.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.quick-icon-card.open').forEach(c => c.classList.remove('open'));
+    });
+  });
+</script>
+<script src="script.js?v=20251219"></script>
 </body>
 </html>

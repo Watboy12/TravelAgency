@@ -1,56 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://via.placeholder.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://jsonplaceholder.typicode.com;">
-    <title>Our Partners - ExploreWorld</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Partners — ExploreWorld</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles-enhanced.css">
 </head>
 <body>
- 
-        <nav>
-            <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld Logo" class="header-logo"></a></div>
-            <div class="nav-container">
-                <ul class="nav-links"></ul>
-                <div class="hamburger" aria-label="Toggle navigation">                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </div>
-        </nav>
 
-    <section class="partners-page">
-        <h1>Our Partners</h1>
-        <div class="partners-content">
-            <p>At ExploreWorld, we believe that exceptional travel experiences are built on strong partnerships. Over the past 20 years, we’ve cultivated relationships with industry leaders across the globe to ensure your journeys are seamless, luxurious, and unforgettable. Our network spans airlines, financial institutions, cruise lines, hotels, and more, allowing us to offer you unparalleled access to the world’s best travel options.</p>
-            
-            <p>We collaborate with top-tier flight providers to secure exclusive deals and priority bookings, ensuring you reach your destination comfortably and on time. Our partnerships with leading banks and payment platforms enable secure, flexible deposit options—whether you prefer traditional bank transfers or cutting-edge cryptocurrency transactions like Bitcoin. On the open seas, we work with premier cruise lines to bring you world-class voyages, from exotic island hops to transatlantic adventures. And when it comes to accommodations, our alliances with renowned hotel chains and boutique properties guarantee a stay that matches your style and budget.</p>
-            
-            <p>These partnerships are the backbone of ExploreWorld, reflecting our commitment to quality, reliability, and innovation. By working with the best in travel and hospitality, we craft personalized itineraries that turn your vacation dreams into reality—every step of the way.</p>
-        </div>
-        
-        <div id="partner-list" class="partner-grid">
-            <!-- Partner items will be dynamically added here -->
-        </div>
-    </section>
+<div id="page-loader">
+  <div class="loader-logo">ExploreWorld</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="social-icons">
-                <a href="#" id="facebook-link"><img src="images/default-facebook.png" alt="Facebook" id="facebook-logo-img"></a>
-                <a href="#" id="instagram-link"><img src="images/default-instagram.png" alt="Instagram" id="instagram-logo-img"></a>
-            </div>
-            <div class="newsletter">
-                <input type="email" placeholder="Your Email">
-                <button class="btn btn-primary">Subscribe</button>
-            </div>
-        </div>
-    </footer>
+<nav id="main-nav">
+  <div class="logo"><a href="index.html"><img src="images/logo.png" alt="ExploreWorld" class="header-logo"></a></div>
+  <div class="nav-container">
+    <ul class="nav-links"></ul>
+    <div class="hamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></div>
+  </div>
+</nav>
 
-    <div id="notifications"></div>
-    <script src="/script.js"></script>
+<section class="partners-page">
+  <span style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);display:block;text-align:center;margin-bottom:16px;">Trusted Network</span>
+  <h1>Our Partners</h1>
+
+  <div class="partners-content">
+    <p>At ExploreWorld, we believe that exceptional travel experiences are built on strong partnerships. Over the past 20 years, we've cultivated relationships with industry leaders across the globe to ensure your journeys are seamless, luxurious, and unforgettable.</p>
+    <p>Our network spans airlines, financial institutions, cruise lines, hotels, and more, allowing us to offer you unparalleled access to the world's best travel options. We collaborate with top-tier flight providers to secure exclusive deals and priority bookings, ensuring you reach your destination comfortably and on time.</p>
+    <p>These partnerships are the backbone of ExploreWorld, reflecting our commitment to quality, reliability, and innovation. By working with the best in travel and hospitality, we craft personalized itineraries that turn your vacation dreams into reality — every step of the way.</p>
+  </div>
+
+  <div id="partner-list" class="partner-grid">
+    <div class="partner-item">
+      <img src="images/travel-association-logo.png" alt="Travel Association" class="partner-logo" onerror="this.style.display='none'">
+      <h3>Travel Association Certified</h3>
+      <p>Recognized by leading international travel associations for consistent excellence and ethical practices in global tourism.</p>
+    </div>
+    <div class="partner-item">
+      <img src="images/partner2-logo.png" alt="Airline Partner" class="partner-logo" onerror="this.style.display='none'">
+      <h3>Premier Airline Alliance</h3>
+      <p>Priority access to exclusive fares and upgrades across major international and regional carriers worldwide.</p>
+    </div>
+    <div class="partner-item">
+      <img src="images/partner3-logo.png" alt="Hotel Partner" class="partner-logo" onerror="this.style.display='none'">
+      <h3>Luxury Hotel Collection</h3>
+      <p>Preferred rates and exclusive amenities at over 2,000 five-star properties across 80+ countries.</p>
+    </div>
+    <div class="partner-item">
+      <h3>Cruise Line Partners</h3>
+      <p>World-class sea voyages from exotic island hops to grand transatlantic crossings — curated for discerning travelers.</p>
+    </div>
+    <div class="partner-item">
+      <h3>Financial Partners</h3>
+      <p>Secure, flexible payment solutions including bank transfers and cryptocurrency, backed by trusted banking institutions.</p>
+    </div>
+    <div class="partner-item">
+      <h3>Local Experience Guides</h3>
+      <p>On-ground experts in 80+ destinations who provide authentic, insider access to culture, cuisine, and hidden gems.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div class="contact-info">
+      <p>Executive Services</p>
+      <p>ExploreWorld, Inc</p>
+      <p>+1 (718) 635-2839</p>
+      <p>info@exploreworld.com</p>
+    </div>
+    <div class="social-icons">
+      <a href="#" id="facebook-link"><img src="images/default-facebook.png" alt="Facebook" id="facebook-logo-img"></a>
+      <a href="#" id="instagram-link"><img src="images/default-instagram.png" alt="Instagram" id="instagram-logo-img"></a>
+    </div>
+    <div class="newsletter">
+      <input type="email" placeholder="Your email address">
+      <button class="btn btn-primary">Subscribe</button>
+    </div>
+    <div class="footer-links">
+      <div class="footer-row">
+        <a href="partners.html" class="footer-btn">Partners</a>
+        <a href="terms.html" class="footer-btn">Terms</a>
+        <a href="privacy-policy.html" class="footer-btn">Privacy</a>
+        <a href="about.html" class="footer-btn">About</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div id="notifications"></div>
+<script>
+  window.addEventListener('load', () => { setTimeout(() => document.getElementById('page-loader')?.classList.add('hidden'), 1800); });
+  window.addEventListener('scroll', () => { document.getElementById('main-nav')?.classList.toggle('scrolled', window.scrollY > 40); });
+</script>
+<script src="script.js"></script>
 </body>
 </html>
